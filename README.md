@@ -77,6 +77,32 @@ The repeated-image dataset and caption provenance are described by
 See [DESIGN.md](docs/DESIGN.md) for the full protocol and interpretation
 guardrails.
 
+## Layer performance summary
+
+| Prompt | Layer | Raw mean | J / control mean | J−raw | Raw peak† | J / control peak† | BH q |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Visualize | 8 | 0.008331 | 0.007353 | −0.000977 | 0.061874 | 0.056413 | 0.20625 |
+| Visualize | 16 | 0.004153 | 0.003904 | −0.000250 | 0.033036 | 0.029829 | 0.49219 |
+| Visualize | 23 | 0.022280 | 0.023541 | +0.001261 | 0.198909 | 0.205118 | **0.01875** |
+| Visualize | 30 | 0.021411 | 0.023056 | +0.001645 | 0.178131 | 0.194584 | **0.01875** |
+| Visualize | Final control | — | 0.022931 | — | — | 0.192661 | — |
+| Caption-only (`plain`) | 8 | 0.003301 | 0.002679 | −0.000622 | 0.032830 | 0.030033 | 0.20625 |
+| Caption-only (`plain`) | 16 | 0.002862 | 0.003254 | +0.000393 | 0.029869 | 0.033456 | 0.20625 |
+| Caption-only (`plain`) | 23 | 0.003621 | 0.004128 | +0.000506 | 0.038274 | 0.042349 | 0.19922 |
+| Caption-only (`plain`) | 30 | 0.005362 | 0.005689 | +0.000326 | 0.052007 | 0.056541 | 0.23214 |
+| Caption-only (`plain`) | Final control | — | 0.005865 | — | — | 0.058739 | — |
+
+`Mean` is the group mean of subject whole-searchlight summaries; `peak` is the
+mean across subjects of each subject's maximum after its eight native sample
+maps are averaged centrewise over authoritative valid searchlight centres.
+**† Descriptive peaks only: these are peak SEARCHLIGHT-CENTRE RSA correlations,
+not single-voxel correlations; they are noise-sensitive and have no attached
+p/q inference.** BH q applies only to the paired J−raw whole-searchlight means.
+
+[Full CSV with 95% subject t CIs and observed peak ranges](docs/layer_performance_summary.csv)
+· [Performance figure](docs/assets/layer_performance_summary.png)
+· [Methods and interpretation](docs/LAYER_PERFORMANCE_SUMMARY.md)
+
 ![Three NSD stimuli, their human captions, and visualize layer-23 J-space vocabulary readouts](docs/assets/visualize_layer23_jspace_readouts.png)
 
 *Figure 3. Illustrative Qwen3.5-4B vocabulary readouts from
