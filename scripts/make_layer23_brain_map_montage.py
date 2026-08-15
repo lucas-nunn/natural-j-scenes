@@ -4,6 +4,7 @@
 This script does not recompute RSA, projection, thresholds, or color scales. It
 only resizes and places the already-rendered per-subject maps. Each source panel
 retains its independently symmetric color limit and title from the analysis.
+The ordered subject selection defaults to 1,2,3,4 and can be set explicitly.
 """
 
 from __future__ import annotations
@@ -11,21 +12,44 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-SUBJECTS = tuple(range(1, 9))
+AVAILABLE_SUBJECTS = tuple(range(1, 9))
+DEFAULT_SUBJECTS = (1, 2, 3, 4)
 KINDS = ("raw", "j")
 SOURCE_SIZE = (3315, 1440)
-OUTPUT_SIZE = (2240, 4036)
 HEADER_HEIGHT = 92
 ROW_STRIDE = 493
 PANEL_SIZE = (1120, 487)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_subjects(value: str) -> tuple[int, ...]:
+    """Parse a comma-separated, ordered subject selection."""
+    try:
+        subjects = tuple(int(part) for part in value.split(","))
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "subjects must be comma-separated integers"
+        ) from exc
+    if not subjects or any(subject not in AVAILABLE_SUBJECTS for subject in subjects):
+        raise argparse.ArgumentTypeError("subjects must be selected from 1..8")
+    if len(subjects) != len(set(subjects)):
+        raise argparse.ArgumentTypeError("subjects must be unique")
+    return subjects
+
+
+def output_size(subjects: Sequence[int]) -> tuple[int, int]:
+    """Return montage dimensions for the requested subject rows."""
+    if not subjects:
+        raise ValueError("at least one subject is required")
+    return (len(KINDS) * PANEL_SIZE[0], HEADER_HEIGHT + len(subjects) * ROW_STRIDE)
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--figure-root",
@@ -39,8 +63,15 @@ def parse_args() -> argparse.Namespace:
         default="plain",
         help="Exact manifest prompt kind to compose (default: %(default)s)",
     )
+    parser.add_argument(
+        "--subjects",
+        type=parse_subjects,
+        default=DEFAULT_SUBJECTS,
+        metavar="ID,ID,...",
+        help="Ordered subject IDs to compose (default: 1,2,3,4)",
+    )
     parser.add_argument("--output", type=Path, required=True)
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def sha256_file(path: Path) -> str:
@@ -67,9 +98,11 @@ def centered_text(
 
 
 def compose(args: argparse.Namespace) -> dict[str, Any]:
+    subjects = tuple(args.subjects)
+    dimensions = output_size(subjects)
     sources: dict[tuple[str, int], Image.Image] = {}
     source_audit: list[dict[str, Any]] = []
-    for subject in SUBJECTS:
+    for subject in subjects:
         for kind in KINDS:
             path = source_path(args.figure_root, args.prompt_kind, kind, subject)
             if not path.is_file():
@@ -92,7 +125,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
                 }
             )
 
-    canvas = Image.new("RGB", OUTPUT_SIZE, "white")
+    canvas = Image.new("RGB", dimensions, "white")
     draw = ImageDraw.Draw(canvas)
     heading = ImageFont.truetype(
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size=38
@@ -106,7 +139,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         heading,
     )
 
-    for row, subject in enumerate(SUBJECTS):
+    for row, subject in enumerate(subjects):
         y = HEADER_HEIGHT + row * ROW_STRIDE
         for column, kind in enumerate(KINDS):
             resized = sources[(kind, subject)].resize(
@@ -120,10 +153,10 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
             f"{args.prompt_kind}__l23__raw",
             f"{args.prompt_kind}__l23__j",
         ],
-        "subjects": list(SUBJECTS),
+        "subjects": list(subjects),
         "column_order": ["raw", "j"],
         "source_dimensions": list(SOURCE_SIZE),
-        "output_dimensions": list(OUTPUT_SIZE),
+        "output_dimensions": list(dimensions),
         "operation": "composition only; no RSA, projection, or map recomputation",
         "scaling": (
             "source plots retained unchanged except LANCZOS resize; each panel keeps "
@@ -146,7 +179,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
 
     with Image.open(args.output) as rendered:
         rendered.load()
-        if rendered.size != OUTPUT_SIZE or rendered.mode != "RGB":
+        if rendered.size != dimensions or rendered.mode != "RGB":
             raise ValueError("rendered montage failed size/mode validation")
         stored_audit = json.loads(rendered.getexif()[270])
         if stored_audit != audit:

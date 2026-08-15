@@ -21,27 +21,29 @@ raw control; it does not imply that J-space is *better*. A claim of better
 alignment requires a defined comparison metric and subject-level inference,
 not visual inspection alone.
 
-![Raw and Jacobian-transported layer-23 NSD searchlight maps](docs/assets/visualize_layer23_raw_then_j_all_subjects.jpg)
+![Raw and Jacobian-transported layer-23 NSD searchlight maps for subjects 1–4](docs/assets/visualize_layer23_raw_then_j_subjects1-4.jpg)
 
-*Figure 1. J-space versus raw LLM brain alignment at Qwen3.5-4B layer 23 under
-the `visualize` prompt condition. Each row is one subject (1–8): the left column
-shows the Jacobian-transported residual and the right column shows its matched
-raw residual. Each cortical map is the subject-level mean over eight matched
-100-stimulus samples, projected to `fsaverage`, with stream-ROI contours
-overlaid. Color encodes searchlight RSA correlation (Pearson r between the brain
-and model correlation-distance RDMs). Panels use independent symmetric color
-limits, reported by the maximum absolute value in each title. These maps are
-descriptive and do not by themselves test whether either representation is
-better.*
+*Figure 1. Raw versus J-space brain alignment at Qwen3.5-4B layer 23 under the
+`visualize` prompt condition. For concision, the montage shows subjects 1–4:
+each row is one subject, with the raw residual on the left and its matched
+Jacobian-transported residual on the right. All numerical and statistical
+analyses and tables use all eight subjects (1–8). Each cortical map is the
+subject-level mean over eight matched 100-stimulus samples, projected to
+`fsaverage`, with stream-ROI contours overlaid. Color encodes searchlight RSA
+correlation (Pearson r between the brain and model correlation-distance RDMs).
+Panels use independent symmetric color limits, reported by the maximum absolute
+value in each title. These maps are descriptive and do not by themselves test
+whether either representation is better.*
 
-![Caption-only raw and Jacobian-transported layer-23 NSD searchlight maps](docs/assets/plain_layer23_raw_then_j_all_subjects.jpg)
+![Caption-only raw and Jacobian-transported layer-23 NSD searchlight maps for subjects 1–4](docs/assets/plain_layer23_raw_then_j_subjects1-4.jpg)
 
-*Figure 2. Matched caption-only (`plain`) layer-23 maps. Each row is one subject
-(1–8); raw `plain__l23__raw` is left and J-space `plain__l23__j` is right. The
-montage composes the existing completed maps without recomputing RSA or surface
-projection. It retains each source panel's independent symmetric color scale,
-shown in that panel's title, and otherwise follows Figure 1's layout and
-descriptive interpretation.*
+*Figure 2. Matched caption-only (`plain`) layer-23 maps. For concision, the
+montage shows subjects 1–4, with raw `plain__l23__raw` on the left and J-space
+`plain__l23__j` on the right; all numerical and statistical analyses and tables
+use all eight subjects (1–8). The montage composes the existing completed maps
+without recomputing RSA or surface projection. It retains each source panel's
+independent symmetric color scale, shown in that panel's title, and otherwise
+follows Figure 1's layout and descriptive interpretation.*
 
 ## Methodology
 
