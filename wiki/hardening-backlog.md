@@ -5,6 +5,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Per-subject consistency.** Effect is distributed (7/8 signs, LOO survives every drop), and
+      per-subject variance tracks lens conditioning at Spearman +1.000 — early-layer nulls are partly
+      a precision problem. See [[subject-consistency]].
 - [x] **Do the lens directions matter, or only conditioning?** Both: rotation contributes nothing
       (all warp is anisotropy), but the directions are data-aligned — the real lens warps 46.6
       control-SDs more than a spectrum-matched random map. Still does not rescue the mechanism.
@@ -57,5 +60,3 @@ Each item records why it matters, so a later iteration does not re-derive it.
 - [ ] **Pooling variants.** Mean is one choice; last-k mean, or attention-mask-weighted variants,
       are one-line changes and would show whether the gain is about pooling per se or about
       averaging away endpoint noise.
-- [ ] **Per-subject consistency.** The exact test only uses sign agreement. Report per-subject
-      deltas so a single dominant subject cannot masquerade as a population effect.
