@@ -75,6 +75,35 @@ def _session_betas(folder: Path, session: int) -> np.ndarray:
     return values
 
 
+def condition_column_index(
+    conditions_to_average: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Map NSD condition IDs to averaged-beta columns in **sorted ID order**.
+
+    This is the alignment contract between the brain and model sides, and it is
+    load-bearing. Model RDMs are built from ``subj*_condition_ids.npy``, which
+    ``prepare_conditions`` stores sorted and unique and ``_subject_condition_ids``
+    re-checks on load. The averaged betas must use that same order, because the
+    locked sampling file indexes both with one shared ``choices`` array.
+
+    Ordering by first appearance instead would permute one side against the
+    other. Nothing would raise: RSA would simply correlate mismatched conditions
+    and report a weak, plausible-looking effect. Returning sorted order is
+    therefore a contract, not an implementation detail.
+
+    Returns the sorted unique IDs and a dense ``id -> column`` table whose
+    entries are ``-1`` for IDs that are not present.
+    """
+    lookup = np.unique(np.asarray(conditions_to_average, dtype=np.int64))
+    if lookup.size == 0:
+        raise ValueError("no conditions to average")
+    if lookup[0] < 1:
+        raise ValueError("NSD condition IDs are 1-based")
+    id_to_column = np.full(int(lookup.max()) + 1, -1, dtype=np.int64)
+    id_to_column[lookup] = np.arange(len(lookup))
+    return lookup, id_to_column
+
+
 def _compute_betas_average(
     output: Path,
     nsd_dir: Path,
@@ -100,9 +129,7 @@ def _compute_betas_average(
     if not sessions:
         raise FileNotFoundError(f"no session beta files found in {folder}")
 
-    lookup = np.unique(np.asarray(conditions_to_average, dtype=np.int64))
-    id_to_column = np.full(int(lookup.max()) + 1, -1, dtype=np.int64)
-    id_to_column[lookup] = np.arange(len(lookup))
+    lookup, id_to_column = condition_column_index(conditions_to_average)
     output.parent.mkdir(parents=True, exist_ok=True)
     partial = output.with_name(f".{output.name}.partial.npy")
     counts_path = output.with_name(f".{output.name}.counts.npy")

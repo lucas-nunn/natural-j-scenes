@@ -7,6 +7,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 - [x] **Measure the metric-warp axiom.** Result inverts the naive prediction — see
       [[lens-geometry]]. `scripts/analyze_lens_geometry.py`, `docs/lens_geometry.json`.
+- [x] **Condition ordering between brain and model RDMs.** Verified sound; the guarantee rested on
+      an implicit `np.unique` sort, now extracted to `condition_column_index()` and pinned by
+      `tests/test_condition_alignment.py`. See [[condition-alignment]].
 
 ## Open — assumptions and axioms
 
@@ -17,9 +20,6 @@ Each item records why it matters, so a later iteration does not re-derive it.
 - [ ] **Is the sampling really disjoint *and* exhaustive?** `sampling_is_disjoint` is checked, but
       8x100 = 800 of 835 conditions per subject. Confirm which 35 are dropped and whether the drop
       is systematic (e.g. always the same NSD ids across subjects).
-- [ ] **Does condition ordering matter?** RDMs assume a fixed condition order. Verify the model RDM
-      and brain RDM index the same conditions in the same order — a silent permutation would look
-      like a null result, not an error.
 - [ ] **MPNet reference is treated as a fixed anchor.** It matched to 4 decimals across two runs,
       which is strong. Confirm it is genuinely recomputed rather than copied from the MPNet tree.
 
