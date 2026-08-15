@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jacobian-lens-nsd"
+version = "0.1.0"
+description = "Jacobian Lens representational-similarity experiments on NSD"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Lucas Nunn"}]
+dependencies = [
+    "numpy>=1.26,<3",
+    "scipy>=1.11,<2",
+]
+
+[project.optional-dependencies]
+model = [
+    "huggingface-hub>=0.34",
+    "jlens @ git+https://github.com/anthropics/jacobian-lens.git@581d398613e5602a5af361e1c34d3a92ea82ba8e",
+    "torch>=2.6",
+    "transformers>=5.5",
+]
+nsd-upstream = [
+    "nsd-visuo-semantics @ git+https://github.com/adriendoerig/visuo_llm.git@a60e0eafb8d02841159e344adb732062734bc302 ; python_version < '3.12'",
+]
+nsd-runtime = [
+    "matplotlib>=3.9",
+    "nibabel>=5.3",
+    "nsdcode @ git+https://github.com/cvnlab/nsdcode.git@bfd36a503cc90a3eb3ebfd69b269403f7e186924",
+    "pandas>=2.2",
+    "pillow>=10",
+    "pycortex>=1.3",
+    "tensorflow>=2.15,<2.22",
+]
+dev = [
+    "build>=1.2",
+    "pytest>=8.3",
+    "ruff>=0.12",
+]
+
+[project.scripts]
+jlens-nsd = "jlens_nsd.cli:main"
+jlens-nsd-orchestrate = "jlens_nsd.orchestrate:main"
+
+[project.urls]
+"NSD upstream (legacy URL)" = "https://github.com/KietzmannLab/nsd_visuo_semantics"
+"NSD upstream (current URL)" = "https://github.com/adriendoerig/visuo_llm"
+"Jacobian Lens" = "https://github.com/anthropics/jacobian-lens"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

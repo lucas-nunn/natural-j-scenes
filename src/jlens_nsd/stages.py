@@ -1,0 +1,362 @@
+"""Searchlight, projection, plotting, and quantitative summary stages."""
+
+from __future__ import annotations
+
+import csv
+import html
+import itertools
+import json
+import math
+import pickle
+from collections.abc import Sequence
+from datetime import datetime, timezone
+from pathlib import Path
+
+import numpy as np
+
+from .config import N_SAMPLES, N_SESSIONS, N_SUBJECTS, ExperimentPaths, group_name
+from .io_utils import atomic_json, atomic_npy
+
+
+def _group_manifest(paths: ExperimentPaths, profile: str) -> dict:
+    path = (
+        paths.searchlight_base
+        / "serialised_models_correlation"
+        / group_name(profile)
+        / "group_manifest.json"
+    )
+    if not path.exists():
+        raise FileNotFoundError(f"group manifest not found: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def run_searchlight_subject(
+    paths: ExperimentPaths,
+    profile: str,
+    subject: int,
+    *,
+    allow_cpu: bool = False,
+    max_samples: int | None = None,
+) -> None:
+    """Correlate all model RDMs while computing each brain RDM once."""
+    if not 1 <= subject <= N_SUBJECTS:
+        raise ValueError(f"subject must be in 1..{N_SUBJECTS}")
+    from .nsd_adapter import run_searchlight
+
+    run_searchlight(
+        paths,
+        _group_manifest(paths, profile)["group_name"],
+        subject,
+        allow_cpu=allow_cpu,
+        max_samples=max_samples,
+    )
+
+
+def project_subjects(
+    paths: ExperimentPaths,
+    profile: str,
+    subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+) -> None:
+    from .nsd_adapter import project_to_fsaverage
+
+    project_to_fsaverage(paths, _group_manifest(paths, profile)["group_name"], subjects)
+
+
+def _surface_path(
+    paths: ExperimentPaths,
+    group: str,
+    subject: int,
+    model_index: int,
+    hemisphere: str,
+) -> Path:
+    subj = f"subj{subject:02d}"
+    return (
+        paths.searchlight_base
+        / "searchlight_respectedsampling_correlation"
+        / subj
+        / group
+        / f"{group}_correlation_fsaverage"
+        / f"{hemisphere}.{subj}-model-{model_index}-surf.npy"
+    )
+
+
+def plot_individual_maps(
+    paths: ExperimentPaths,
+    profile: str,
+    *,
+    subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+    feature_names: Sequence[str] | None = None,
+    roi_overlay: str | None = "streams",
+) -> list[str]:
+    """Plot projected surfaces using the manifest's model-index mapping."""
+    manifest = _group_manifest(paths, profile)
+    group = manifest["group_name"]
+    selected = set(feature_names) if feature_names is not None else None
+    output_dir = paths.reports / "figures" / profile
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    from .nsd_adapter import plot_brain
+
+    outputs = []
+    for model in manifest["model_order"]:
+        feature = model["feature"]
+        if selected is not None and feature not in selected:
+            continue
+        model_index = int(model["model_index"])
+        for subject in subjects:
+            surfaces = [
+                np.load(
+                    _surface_path(paths, group, subject, model_index, hemisphere),
+                    allow_pickle=False,
+                )
+                for hemisphere in ("lh", "rh")
+            ]
+            values = np.concatenate(surfaces).astype(np.float32, copy=False)
+            name = f"{feature}_subj{subject:02d}"
+            output_path = output_dir / f"{name}.png"
+            if output_path.exists() and output_path.stat().st_size > 0:
+                outputs.append(str(output_path.resolve()))
+                continue
+            plot_brain(
+                values,
+                name,
+                output_dir,
+                roi_overlay=roi_overlay,
+                nsd_dir=paths.nsd_dir,
+            )
+            outputs.append(str(output_path.resolve()))
+    return outputs
+
+
+def _searchlight_centers(paths: ExperimentPaths, subject: int) -> np.ndarray:
+    subj = f"subj{subject:02d}"
+    path = (
+        paths.mpnet_precomputed
+        / subj
+        / f"{subj}-func1pt8mm-6rad-searchlight_centers.npy"
+    )
+    with path.open("rb") as handle:
+        centers = np.asarray(pickle.load(handle), dtype=np.int64).ravel()
+    if centers.ndim != 1 or len(centers) == 0:
+        raise ValueError(f"invalid searchlight centers: {path}")
+    return centers
+
+
+def _sample_files(paths: ExperimentPaths, group: str, subject: int) -> list[Path]:
+    subj = f"subj{subject:02d}"
+    directory = (
+        paths.searchlight_base
+        / "searchlight_respectedsampling_correlation"
+        / subj
+        / group
+        / "corr_vols_correlation"
+    )
+    files = sorted(directory.glob("*sample-*.npy"))
+    if len(files) != N_SAMPLES:
+        raise ValueError(
+            f"expected {N_SAMPLES} searchlight samples in {directory}, "
+            f"found {len(files)}"
+        )
+    return files
+
+
+def _exact_sign_flip_p(differences: np.ndarray) -> float:
+    differences = np.asarray(differences, dtype=np.float64)
+    observed = abs(float(differences.mean()))
+    null = []
+    for signs in itertools.product((-1.0, 1.0), repeat=len(differences)):
+        null.append(abs(float(np.mean(differences * np.asarray(signs)))))
+    return float(np.mean(np.asarray(null) >= observed - 1e-15))
+
+
+def _mean_ci(values: np.ndarray) -> tuple[float, float, float]:
+    from scipy.stats import t
+
+    values = np.asarray(values, dtype=np.float64)
+    mean = float(values.mean())
+    if len(values) < 2:
+        return mean, math.nan, math.nan
+    sem = float(values.std(ddof=1) / math.sqrt(len(values)))
+    half = float(t.ppf(0.975, len(values) - 1) * sem)
+    return mean, mean - half, mean + half
+
+
+def _bh_adjust(p_values: Sequence[float]) -> list[float]:
+    values = np.asarray(p_values, dtype=np.float64)
+    order = np.argsort(values)
+    ranked = values[order]
+    adjusted = ranked * len(values) / np.arange(1, len(values) + 1)
+    adjusted = np.minimum.accumulate(adjusted[::-1])[::-1]
+    result = np.empty_like(adjusted)
+    result[order] = np.minimum(adjusted, 1.0)
+    return result.tolist()
+
+
+def _write_csv(path: Path, rows: list[dict]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    with temporary.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    temporary.replace(path)
+
+
+def _html_report(summary: dict) -> str:
+    def cells(values):
+        return "".join(f"<td>{html.escape(str(value))}</td>" for value in values)
+
+    score_rows = []
+    maxima = max(abs(row["mean_correlation"]) for row in summary["scores"])
+    maxima = maxima or 1.0
+    for row in summary["scores"]:
+        width = 100 * abs(row["mean_correlation"]) / maxima
+        score_rows.append(
+            "<tr>"
+            + cells(
+                [
+                    row["feature"],
+                    f"{row['mean_correlation']:.5f}",
+                    f"[{row['ci_low']:.5f}, {row['ci_high']:.5f}]",
+                ]
+            )
+            + f'<td><span class="bar" style="width:{width:.1f}%"></span></td>'
+            + "</tr>"
+        )
+    comparison_rows = []
+    for row in summary["comparisons"]:
+        comparison_rows.append(
+            "<tr>"
+            + cells(
+                [
+                    row["j_feature"],
+                    row["baseline"],
+                    f"{row['mean_delta']:.5f}",
+                    f"[{row['ci_low']:.5f}, {row['ci_high']:.5f}]",
+                    f"{row['exact_p']:.5f}",
+                    f"{row['fdr_q']:.5f}",
+                ]
+            )
+            + "</tr>"
+        )
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jacobian Lens × NSD summary</title>
+<style>
+body{{font:15px system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#17212b}}
+h1,h2{{line-height:1.2}} .meta{{color:#586674}} table{{border-collapse:collapse;width:100%;margin:1rem 0 2rem}}
+th,td{{padding:.5rem .65rem;border-bottom:1px solid #dce3e8;text-align:left}} th{{position:sticky;top:0;background:#f5f8fa}}
+.bar{{display:block;height:.8rem;min-width:2px;background:#356fc0;border-radius:3px}} code{{background:#edf2f5;padding:.12rem .25rem}}
+</style></head><body>
+<h1>Jacobian Lens × NSD</h1>
+<p class="meta">Profile <code>{html.escape(summary["profile"])}</code>; 8 subjects × 10 sessions × 8 matched 100-image samples. Generated {html.escape(summary["created_at"])}.</p>
+<p>Values are searchlight-center correlations averaged within sample, then within subject. Confidence intervals and exact sign-flip tests use subjects as the independent unit (n=8). This is an exploratory descriptive summary, not a held-out model-selection analysis.</p>
+<h2>Feature scores</h2>
+<table><thead><tr><th>Feature</th><th>Mean r</th><th>95% subject CI</th><th>Relative magnitude</th></tr></thead><tbody>{"".join(score_rows)}</tbody></table>
+<h2>Matched J-space comparisons</h2>
+<table><thead><tr><th>J feature</th><th>Baseline</th><th>Mean Δr</th><th>95% subject CI</th><th>Exact p</th><th>BH q</th></tr></thead><tbody>{"".join(comparison_rows)}</tbody></table>
+</body></html>"""
+
+
+def summarize(paths: ExperimentPaths, profile: str) -> dict:
+    """Aggregate samples within subjects and compare matched representations."""
+    manifest = _group_manifest(paths, profile)
+    group = manifest["group_name"]
+    model_order = manifest["model_order"]
+    feature_names = [item["feature"] for item in model_order]
+    n_models = len(feature_names)
+    subject_scores = np.empty((N_SUBJECTS, n_models), dtype=np.float64)
+    sample_scores = np.empty((N_SUBJECTS, N_SAMPLES, n_models), dtype=np.float64)
+
+    for subject in range(1, N_SUBJECTS + 1):
+        centers = _searchlight_centers(paths, subject)
+        for sample_index, path in enumerate(_sample_files(paths, group, subject)):
+            volumes = np.load(path, allow_pickle=False)
+            if volumes.shape[0] != n_models:
+                raise ValueError(
+                    f"{path} has {volumes.shape[0]} models, expected {n_models}"
+                )
+            flattened = volumes.reshape(n_models, -1)[:, centers]
+            finite_counts = np.isfinite(flattened).sum(axis=1)
+            if np.any(finite_counts == 0):
+                raise ValueError(f"a model has no finite center values in {path}")
+            sample_scores[subject - 1, sample_index] = np.nanmean(flattened, axis=1)
+        subject_scores[subject - 1] = sample_scores[subject - 1].mean(axis=0)
+
+    score_rows = []
+    for index, feature in enumerate(feature_names):
+        mean, low, high = _mean_ci(subject_scores[:, index])
+        score_rows.append(
+            {
+                "feature": feature,
+                "mean_correlation": mean,
+                "ci_low": low,
+                "ci_high": high,
+            }
+        )
+    score_rows.sort(key=lambda row: row["mean_correlation"], reverse=True)
+
+    index_by_feature = {feature: index for index, feature in enumerate(feature_names)}
+    comparisons = []
+    for feature in feature_names:
+        if not feature.endswith("__j"):
+            continue
+        prefix = feature[: -len("__j")]
+        prompt = feature.split("__", 1)[0]
+        baselines = [f"{prefix}__raw", f"{prompt}__final", "mpnet_reference"]
+        for baseline in baselines:
+            differences = (
+                subject_scores[:, index_by_feature[feature]]
+                - subject_scores[:, index_by_feature[baseline]]
+            )
+            mean, low, high = _mean_ci(differences)
+            comparisons.append(
+                {
+                    "j_feature": feature,
+                    "baseline": baseline,
+                    "mean_delta": mean,
+                    "ci_low": low,
+                    "ci_high": high,
+                    "exact_p": _exact_sign_flip_p(differences),
+                }
+            )
+    q_values = _bh_adjust([row["exact_p"] for row in comparisons])
+    for row, q_value in zip(comparisons, q_values, strict=True):
+        row["fdr_q"] = q_value
+
+    output_dir = paths.reports / profile
+    output_dir.mkdir(parents=True, exist_ok=True)
+    atomic_npy(output_dir / "subject_scores.npy", subject_scores)
+    atomic_npy(output_dir / "sample_scores.npy", sample_scores)
+    _write_csv(output_dir / "feature_scores.csv", score_rows)
+    _write_csv(output_dir / "comparisons.csv", comparisons)
+    summary = {
+        "schema_version": 1,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "profile": profile,
+        "group_name": group,
+        "independent_unit": "subject",
+        "n_subjects": N_SUBJECTS,
+        "n_sessions": N_SESSIONS,
+        "n_samples_per_subject": N_SAMPLES,
+        "scores": score_rows,
+        "comparisons": comparisons,
+        "artifacts": {
+            "subject_scores": str((output_dir / "subject_scores.npy").resolve()),
+            "sample_scores": str((output_dir / "sample_scores.npy").resolve()),
+            "feature_scores_csv": str((output_dir / "feature_scores.csv").resolve()),
+            "comparisons_csv": str((output_dir / "comparisons.csv").resolve()),
+        },
+    }
+    atomic_json(output_dir / "summary.json", summary)
+    report_path = output_dir / "report.html"
+    temporary = report_path.with_name(f".{report_path.name}.tmp")
+    temporary.write_text(_html_report(summary), encoding="utf-8")
+    temporary.replace(report_path)
+    summary["artifacts"]["html_report"] = str(report_path.resolve())
+    atomic_json(output_dir / "summary.json", summary)
+    return summary
