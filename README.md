@@ -34,6 +34,15 @@ limits, reported by the maximum absolute value in each title. These maps are
 descriptive and do not by themselves test whether either representation is
 better.*
 
+![Caption-only raw and Jacobian-transported layer-23 NSD searchlight maps](docs/assets/plain_layer23_raw_then_j_all_subjects.jpg)
+
+*Figure 2. Matched caption-only (`plain`) layer-23 maps. Each row is one subject
+(1–8); raw `plain__l23__raw` is left and J-space `plain__l23__j` is right. The
+montage composes the existing completed maps without recomputing RSA or surface
+projection. It retains each source panel's independent symmetric color scale,
+shown in that panel's title, and otherwise follows Figure 1's layout and
+descriptive interpretation.*
+
 ## Methodology
 
 - **Model and features.** The primary model is
@@ -68,9 +77,9 @@ The repeated-image dataset and caption provenance are described by
 See [DESIGN.md](docs/DESIGN.md) for the full protocol and interpretation
 guardrails.
 
-![Three NSD stimuli, their human captions, and layer-23 J-space vocabulary readouts](docs/assets/visualize_layer23_jspace_readouts.png)
+![Three NSD stimuli, their human captions, and visualize layer-23 J-space vocabulary readouts](docs/assets/visualize_layer23_jspace_readouts.png)
 
-*Figure 2. Illustrative Qwen3.5-4B vocabulary readouts from
+*Figure 3. Illustrative Qwen3.5-4B vocabulary readouts from
 `unembed(J_23 h_23)` under the `visualize` prompt for subject-1 conditions
 10,543, 34,275, and 60,417. Each row uses the same NSD condition for the image,
 captions, and stored transported vector. The five displayed tokens retain their
@@ -85,8 +94,21 @@ all three are licensed [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)
 NSD and COCO provenance is described by Allen et al. (2022) and Lin et al.
 (2014), cited above.*
 
-The audited generation and validation procedure is in
-[`scripts/make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py).
+![The same three NSD conditions with caption-only layer-23 J-space vocabulary readouts](docs/assets/plain_layer23_jspace_readouts.png)
+
+*Figure 4. The scientifically matched caption-only readout from the exact
+`plain__l23__j` feature for the same three conditions, licensing gate, and
+token filter as Figure 3. Raw vocabulary rank and logit are shown; task-like or
+otherwise surprising tokens are retained without semantic filtering.*
+
+Vocabulary unembedding is an interpretive diagnostic only, analogous to the
+readout role discussed by the [Tuned Lens](https://arxiv.org/abs/2303.08112).
+The brain RDMs do **not** use these displayed tokens or logits: they use the full
+2,560-dimensional vectors. Accordingly, this comparison is descriptive—top
+tokens that resemble task directions and representational geometry are not the
+same measurement. The audited generators are
+[`make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py) and
+[`make_layer23_brain_map_montage.py`](scripts/make_layer23_brain_map_montage.py).
 
 ## Installation
 

@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+"""Compose existing layer-23 subject maps into a matched raw-then-J montage.
+
+This script does not recompute RSA, projection, thresholds, or color scales. It
+only resizes and places the already-rendered per-subject maps. Each source panel
+retains its independently symmetric color limit and title from the analysis.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+from PIL import Image, ImageDraw, ImageFont
+
+SUBJECTS = tuple(range(1, 9))
+KINDS = ("raw", "j")
+SOURCE_SIZE = (3315, 1440)
+OUTPUT_SIZE = (2240, 4036)
+HEADER_HEIGHT = 92
+ROW_STRIDE = 493
+PANEL_SIZE = (1120, 487)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--figure-root",
+        type=Path,
+        required=True,
+        help="Directory containing the existing qwen4b per-subject PNG maps",
+    )
+    parser.add_argument(
+        "--prompt-kind",
+        choices=("plain", "visualize"),
+        default="plain",
+        help="Exact manifest prompt kind to compose (default: %(default)s)",
+    )
+    parser.add_argument("--output", type=Path, required=True)
+    return parser.parse_args()
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def source_path(root: Path, prompt_kind: str, kind: str, subject: int) -> Path:
+    return root / f"{prompt_kind}__l23__{kind}_subj{subject:02d}.png"
+
+
+def centered_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    center_x: int,
+    y: int,
+    selected_font: ImageFont.FreeTypeFont,
+) -> None:
+    width = draw.textlength(text, font=selected_font)
+    draw.text((center_x - width / 2, y), text, font=selected_font, fill="#111111")
+
+
+def compose(args: argparse.Namespace) -> dict[str, Any]:
+    sources: dict[tuple[str, int], Image.Image] = {}
+    source_audit: list[dict[str, Any]] = []
+    for subject in SUBJECTS:
+        for kind in KINDS:
+            path = source_path(args.figure_root, args.prompt_kind, kind, subject)
+            if not path.is_file():
+                raise FileNotFoundError(f"missing source map: {path}")
+            with Image.open(path) as opened:
+                opened.load()
+                if opened.size != SOURCE_SIZE:
+                    raise ValueError(
+                        f"unexpected map dimensions for {path}: {opened.size}"
+                    )
+                image = opened.convert("RGB")
+            sources[(kind, subject)] = image
+            source_audit.append(
+                {
+                    "feature": f"{args.prompt_kind}__l23__{kind}",
+                    "subject": subject,
+                    "filename": path.name,
+                    "sha256": sha256_file(path),
+                    "dimensions": list(SOURCE_SIZE),
+                }
+            )
+
+    canvas = Image.new("RGB", OUTPUT_SIZE, "white")
+    draw = ImageDraw.Draw(canvas)
+    heading = ImageFont.truetype(
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size=38
+    )
+    centered_text(draw, "Raw LLM (hₗ)", PANEL_SIZE[0] // 2, 25, heading)
+    centered_text(
+        draw,
+        "J-space (Jₗhₗ)",
+        PANEL_SIZE[0] + PANEL_SIZE[0] // 2,
+        25,
+        heading,
+    )
+
+    for row, subject in enumerate(SUBJECTS):
+        y = HEADER_HEIGHT + row * ROW_STRIDE
+        for column, kind in enumerate(KINDS):
+            resized = sources[(kind, subject)].resize(
+                PANEL_SIZE, Image.Resampling.LANCZOS
+            )
+            canvas.paste(resized, (column * PANEL_SIZE[0], y))
+
+    audit = {
+        "prompt_kind": args.prompt_kind,
+        "features": [
+            f"{args.prompt_kind}__l23__raw",
+            f"{args.prompt_kind}__l23__j",
+        ],
+        "subjects": list(SUBJECTS),
+        "column_order": ["raw", "j"],
+        "source_dimensions": list(SOURCE_SIZE),
+        "output_dimensions": list(OUTPUT_SIZE),
+        "operation": "composition only; no RSA, projection, or map recomputation",
+        "scaling": (
+            "source plots retained unchanged except LANCZOS resize; each panel keeps "
+            "its original independent symmetric color scale printed in its title"
+        ),
+        "sources": source_audit,
+    }
+    exif = Image.Exif()
+    exif[270] = json.dumps(audit, sort_keys=True, separators=(",", ":"))
+    exif[305] = "make_layer23_brain_map_montage.py"
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(
+        args.output,
+        format="JPEG",
+        quality=92,
+        optimize=True,
+        progressive=True,
+        exif=exif,
+    )
+
+    with Image.open(args.output) as rendered:
+        rendered.load()
+        if rendered.size != OUTPUT_SIZE or rendered.mode != "RGB":
+            raise ValueError("rendered montage failed size/mode validation")
+        stored_audit = json.loads(rendered.getexif()[270])
+        if stored_audit != audit:
+            raise ValueError("rendered montage audit metadata failed round-trip")
+    return audit
+
+
+def main() -> None:
+    args = parse_args()
+    audit = compose(args)
+    print(json.dumps(audit, indent=2, sort_keys=True))
+    print(f"figure_sha256={sha256_file(args.output)}")
+
+
+if __name__ == "__main__":
+    main()

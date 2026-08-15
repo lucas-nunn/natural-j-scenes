@@ -11,6 +11,7 @@ Example (from the repository root):
       --coco-annotations-dir /path/to/nsd/annotations \
       --captions /path/to/nsd_allWords_per_image.pkl \
       --model-dir /path/to/Qwen3.5-4B \
+      --feature visualize__l23__j \
       --output docs/assets/visualize_layer23_jspace_readouts.png
 
 The rows are selected without looking at their content. The subject-1 set is
@@ -41,7 +42,19 @@ from transformers import AutoTokenizer
 
 from jlens_nsd.prompts import captions_for_condition, load_caption_table
 
-FEATURE = "visualize__l23__j"
+DEFAULT_FEATURE = "visualize__l23__j"
+FEATURES = {
+    "visualize__l23__j": {
+        "prompt_kind": "visualize",
+        "column_title": "J-space top words",
+        "footer_label": "visualize prompt",
+    },
+    "plain__l23__j": {
+        "prompt_kind": "plain",
+        "column_title": "Caption-only top words",
+        "footer_label": "caption-only (plain) prompt",
+    },
+}
 MODEL_NAME = "Qwen/Qwen3.5-4B"
 HEAD_KEY = "model.language_model.embed_tokens.weight"
 NORM_KEY = "model.language_model.norm.weight"
@@ -63,6 +76,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--coco-annotations-dir", type=Path, required=True)
     parser.add_argument("--captions", type=Path, required=True)
     parser.add_argument("--model-dir", type=Path, required=True)
+    parser.add_argument(
+        "--feature",
+        choices=tuple(FEATURES),
+        default=DEFAULT_FEATURE,
+        help="Exact manifest feature to unembed (default: %(default)s)",
+    )
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 
@@ -84,7 +103,10 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def validate_manifests(
-    target_manifest: dict[str, Any], source_manifest: dict[str, Any], captions: Path
+    target_manifest: dict[str, Any],
+    source_manifest: dict[str, Any],
+    captions: Path,
+    feature: str,
 ) -> None:
     if not target_manifest.get("complete") or not source_manifest.get("complete"):
         raise ValueError("both extraction manifests must be complete")
@@ -113,10 +135,16 @@ def validate_manifests(
         raise ValueError(f"unexpected model configuration: {target}")
     if target["caption_sha256"] != sha256_file(captions):
         raise ValueError("caption file hash does not match extraction manifest")
-    if FEATURE not in {entry["name"] for entry in target_manifest["features"]}:
-        raise ValueError(f"{FEATURE} absent from target manifest")
-    if FEATURE not in {entry["name"] for entry in source_manifest["features"]}:
-        raise ValueError(f"{FEATURE} absent from source manifest")
+    if feature not in {entry["name"] for entry in target_manifest["features"]}:
+        raise ValueError(f"{feature} absent from target manifest")
+    if feature not in {entry["name"] for entry in source_manifest["features"]}:
+        raise ValueError(f"{feature} absent from source manifest")
+    prompt_kind = FEATURES[feature]["prompt_kind"]
+    if (
+        prompt_kind not in target["prompt_kinds"]
+        or prompt_kind not in source["prompt_kinds"]
+    ):
+        raise ValueError(f"prompt kind {prompt_kind} absent from extraction config")
 
 
 def select_conditions(
@@ -184,10 +212,15 @@ def load_vectors(
     embedding_root: Path,
     source_manifest: dict[str, Any],
     selected: list[int],
-) -> tuple[np.ndarray, dict[int, str]]:
+    feature: str,
+) -> tuple[np.ndarray, dict[int, str], dict[int, str]]:
     wanted = set(selected)
     found: dict[int, np.ndarray] = {}
     chunk_for: dict[int, str] = {}
+    counterpart_hash_for: dict[int, str] = {}
+    prompt_kind = FEATURES[feature]["prompt_kind"]
+    counterpart_kind = "plain" if prompt_kind == "visualize" else "visualize"
+    counterpart_feature = feature.replace(prompt_kind, counterpart_kind, 1)
     chunks_dir = embedding_root / "chunks"
     for chunk_name in source_manifest["completed_chunks"]:
         path = chunks_dir / chunk_name
@@ -195,23 +228,41 @@ def load_vectors(
             ids = chunk["condition_ids"]
             for row in np.flatnonzero(np.isin(ids, selected)):
                 condition_id = int(ids[row])
-                vector = chunk[FEATURE][row]
+                vector = chunk[feature][row]
                 if condition_id in found:
                     raise ValueError(f"duplicate vector for condition {condition_id}")
                 if vector.shape != (2560,) or vector.dtype != np.float32:
                     raise ValueError(
-                        f"invalid {FEATURE} vector for condition {condition_id}"
+                        f"invalid {feature} vector for condition {condition_id}"
                     )
                 if not np.isfinite(vector).all():
                     raise ValueError(f"non-finite vector for condition {condition_id}")
+                counterpart = chunk[counterpart_feature][row]
+                if (
+                    counterpart.shape != vector.shape
+                    or counterpart.dtype != vector.dtype
+                ):
+                    raise ValueError(
+                        f"invalid counterpart vector for condition {condition_id}"
+                    )
+                if np.array_equal(vector, counterpart):
+                    raise ValueError(
+                        f"{feature} aliases {counterpart_feature} for condition "
+                        f"{condition_id}"
+                    )
                 found[condition_id] = vector.copy()
                 chunk_for[condition_id] = chunk_name
+                counterpart_hash_for[condition_id] = sha256_array(counterpart)
         if set(found) == wanted:
             break
     missing = wanted - set(found)
     if missing:
         raise ValueError(f"conditions absent from completed chunks: {sorted(missing)}")
-    return np.stack([found[condition_id] for condition_id in selected]), chunk_for
+    return (
+        np.stack([found[condition_id] for condition_id in selected]),
+        chunk_for,
+        counterpart_hash_for,
+    )
 
 
 def tensor_location(index: dict[str, Any], key: str, model_dir: Path) -> Path:
@@ -398,6 +449,7 @@ def draw_figure(
     conditions: list[int],
     output: Path,
     metadata: dict[str, Any],
+    feature: str,
 ) -> None:
     width, height = 1800, 1080
     margin = 52
@@ -433,7 +485,7 @@ def draw_figure(
     headers = (
         ("NSD stimulus", x_image, image_w),
         ("Human captions", x_captions, captions_w),
-        ("J-space top words", x_words, words_w),
+        (FEATURES[feature]["column_title"], x_words, words_w),
     )
     for text, x, column_width in headers:
         text_width = draw.textlength(text, font=title_font)
@@ -546,8 +598,8 @@ def draw_figure(
 
     footer_y = header_h + 3 * row_h + 4
     footer = (
-        "visualize prompt  •  layer 23  •  Qwen3.5-4B vocabulary rank + logit  "
-        "•  deterministic artifact filtering"
+        f"{FEATURES[feature]['footer_label']}  •  layer 23  •  "
+        "Qwen3.5-4B vocabulary rank + logit  •  deterministic artifact filtering"
     )
     footer_w = draw.textlength(footer, font=footer_font)
     draw.text(
@@ -559,8 +611,12 @@ def draw_figure(
 
     output.parent.mkdir(parents=True, exist_ok=True)
     png_info = PngImagePlugin.PngInfo()
+    description = "NSD examples with audited layer-23 J-space readouts"
+    if feature != DEFAULT_FEATURE:
+        description = f"{description} ({feature})"
     png_info.add_text(
-        "Description", "NSD examples with audited layer-23 J-space readouts"
+        "Description",
+        description,
     )
     png_info.add_text(
         "Audit", json.dumps(metadata, sort_keys=True, separators=(",", ":"))
@@ -575,13 +631,15 @@ def main() -> None:
     source_manifest_path = args.embedding_root / "manifest.json"
     target_manifest = load_json(target_manifest_path)
     source_manifest = load_json(source_manifest_path)
-    validate_manifests(target_manifest, source_manifest, args.captions)
+    validate_manifests(target_manifest, source_manifest, args.captions, args.feature)
 
     condition_ids = np.load(condition_path, allow_pickle=False)
     selected, stimulus_metadata, n_license_eligible = select_conditions(
         condition_ids, args.stim_info, args.coco_annotations_dir
     )
-    vectors, chunk_for = load_vectors(args.embedding_root, source_manifest, selected)
+    vectors, chunk_for, counterpart_hash_for = load_vectors(
+        args.embedding_root, source_manifest, selected, args.feature
+    )
     logits, tokenizer, unembed_audit = exact_unembed(vectors, args.model_dir)
     decoded, filter_audit = top_words(logits, tokenizer)
 
@@ -598,19 +656,25 @@ def main() -> None:
     for cid, image_array, captions, vector, words in zip(
         selected, raw_images, row_captions, vectors, decoded, strict=True
     ):
-        rows.append(
-            {
-                "condition_id_1based": cid,
-                "caption_count": len(captions),
-                "image_sha256": sha256_array(image_array),
-                "vector_sha256": sha256_array(vector),
-                "source_chunk": chunk_for[cid],
-                "top_words": words,
-                **stimulus_metadata[cid],
-            }
-        )
+        row = {
+            "condition_id_1based": cid,
+            "caption_count": len(captions),
+            "image_sha256": sha256_array(image_array),
+            "vector_sha256": sha256_array(vector),
+            "source_chunk": chunk_for[cid],
+            "top_words": words,
+            **stimulus_metadata[cid],
+        }
+        if args.feature != DEFAULT_FEATURE:
+            row.update(
+                {
+                    "source_array": args.feature,
+                    "counterpart_vector_sha256": counterpart_hash_for[cid],
+                }
+            )
+        rows.append(row)
     metadata = {
-        "feature": FEATURE,
+        "feature": args.feature,
         "selection": (
             "sorted subject-1 CC BY 2.0 subset indices "
             "[floor(n/6), floor(n/2), floor(5n/6)]"
@@ -620,7 +684,39 @@ def main() -> None:
         "unembedding": unembed_audit,
         "filter": filter_audit,
     }
-    draw_figure(images, row_captions, decoded, selected, args.output, metadata)
+    if args.feature != DEFAULT_FEATURE:
+        metadata.update(
+            {
+                "prompt_kind": FEATURES[args.feature]["prompt_kind"],
+                "counterpart_feature": DEFAULT_FEATURE,
+                "provenance": {
+                    "captions_sha256": sha256_file(args.captions),
+                    "source_manifest_sha256": sha256_file(source_manifest_path),
+                    "target_manifest_sha256": sha256_file(target_manifest_path),
+                    "source_condition_ids_hash": source_manifest["config"][
+                        "condition_ids_hash"
+                    ],
+                    "target_condition_ids_hash": target_manifest["config"][
+                        "condition_ids_hash"
+                    ],
+                    "source_prompt_sha256": source_manifest["config"][
+                        "prompt_source_sha256"
+                    ],
+                    "target_prompt_sha256": target_manifest["config"][
+                        "prompt_source_sha256"
+                    ],
+                },
+            }
+        )
+    draw_figure(
+        images,
+        row_captions,
+        decoded,
+        selected,
+        args.output,
+        metadata,
+        args.feature,
+    )
 
     with Image.open(args.output) as rendered:
         if rendered.size != (1800, 1080) or rendered.mode != "RGB":
