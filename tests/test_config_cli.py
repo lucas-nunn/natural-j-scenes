@@ -5,8 +5,15 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from jlens_nsd.cli import smoke
-from jlens_nsd.config import ExperimentPaths, model_spec, run_name, validate_subjects
+from jlens_nsd.cli import build_parser, smoke
+from jlens_nsd.config import (
+    ExperimentPaths,
+    group_name,
+    model_spec,
+    run_name,
+    validate_readout_mode,
+    validate_subjects,
+)
 
 
 class ConfigAndSmokeTests(unittest.TestCase):
@@ -51,3 +58,27 @@ class ConfigAndSmokeTests(unittest.TestCase):
         self.assertEqual(
             run_name("qwen4b", "matched_readout"), "qwen4b__matched_readout"
         )
+
+    def test_all_token_mean_has_isolated_namespace_and_plain_only_smoke(self) -> None:
+        self.assertEqual(
+            run_name("qwen4b", readout_mode="all_token_mean"),
+            "qwen4b__plain_mean_pool",
+        )
+        self.assertEqual(
+            group_name("qwen4b", readout_mode="all_token_mean"),
+            "jlens_qwen4b__plain_mean_pool_group",
+        )
+        with patch.dict(os.environ, {}, clear=True):
+            paths = ExperimentPaths.from_values(results=Path("synthetic-results"))
+        result = smoke(paths, readout_mode="all_token_mean")
+        self.assertEqual(set(result["prompt_lengths_chars"]), {"plain"})
+
+    def test_readout_cli_and_config_are_isolated_from_historical_defaults(self) -> None:
+        parser = build_parser()
+        historical = parser.parse_args(["extract"])
+        pooled = parser.parse_args(["extract", "--readout-mode", "all_token_mean"])
+        self.assertEqual(historical.readout_mode, "final_token")
+        self.assertEqual(pooled.readout_mode, "all_token_mean")
+        self.assertEqual(run_name("qwen4b"), "qwen4b")
+        with self.assertRaisesRegex(ValueError, "historical plain"):
+            validate_readout_mode("all_token_mean", "matched_readout")

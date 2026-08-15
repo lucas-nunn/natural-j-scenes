@@ -142,6 +142,9 @@ N_SAMPLES = 8
 SAMPLE_SIZE = 100
 DEFAULT_PROMPT_SET = "historical"
 PROMPT_KINDS = PROMPT_SETS[DEFAULT_PROMPT_SET].kinds
+DEFAULT_READOUT_MODE = "final_token"
+ALL_TOKEN_MEAN = "all_token_mean"
+READOUT_MODES = (DEFAULT_READOUT_MODE, ALL_TOKEN_MEAN)
 
 
 def validate_subjects(subjects: Iterable[int]) -> tuple[int, ...]:
@@ -156,15 +159,40 @@ def validate_subjects(subjects: Iterable[int]) -> tuple[int, ...]:
     return selected
 
 
-def run_name(profile: str, prompt_set_key: str = DEFAULT_PROMPT_SET) -> str:
+def validate_readout_mode(
+    readout_mode: str,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
+) -> str:
+    """Validate the orthogonal prompt/readout contract."""
+    if readout_mode not in READOUT_MODES:
+        raise ValueError(f"unknown readout mode: {readout_mode}")
+    if readout_mode == ALL_TOKEN_MEAN and prompt_set_key != DEFAULT_PROMPT_SET:
+        raise ValueError(
+            "all_token_mean is defined only for the unchanged historical plain prompt"
+        )
+    return readout_mode
+
+
+def run_name(
+    profile: str,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
+) -> str:
     """Namespace non-historical experiments without renaming legacy outputs."""
     if prompt_set_key not in PROMPT_SETS:
         raise ValueError(f"unknown prompt set: {prompt_set_key}")
+    validate_readout_mode(readout_mode, prompt_set_key)
+    if readout_mode == ALL_TOKEN_MEAN:
+        return f"{profile}__plain_mean_pool"
     if prompt_set_key == DEFAULT_PROMPT_SET:
         return profile
     return f"{profile}__{prompt_set_key}"
 
 
-def group_name(profile: str, prompt_set_key: str = DEFAULT_PROMPT_SET) -> str:
+def group_name(
+    profile: str,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
+) -> str:
     """Return a filesystem-safe grouped model name for one experiment run."""
-    return f"jlens_{run_name(profile, prompt_set_key).replace('.', '_')}_group"
+    return f"jlens_{run_name(profile, prompt_set_key, readout_mode).replace('.', '_')}_group"

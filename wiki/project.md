@@ -3,9 +3,9 @@
 ## Repository state
 
 - Standalone root: `/home/chuddy/dev/research/jlens-nsd`.
-- Active concise-montage worktree:
-  `/home/chuddy/dev/research/jlens-nsd-four-subject-maps` on branch
-  `concise-four-subject-maps`.
+- Active worktree for the current scoped control:
+  `/home/chuddy/dev/research/jlens-nsd-whole-prompt` on branch
+  `whole-prompt-pooling`. The older concise-montage worktree remains separate.
 - Extracted from `neuroconnectionism/lucas_exploration/jlens_experiment` without
   changing the source checkout.
 - Generated results, logs, arrays, maps, notebooks, model weights, and caches
@@ -41,6 +41,17 @@ The matched-readout subject-1 validation and eight-subject run completed on
 2026-08-15. Exact run provenance and results are in
 `wiki/matched-readout-control.md`; human-facing results and compact artifacts
 are in `docs/MATCHED_READOUT_RESULTS.md`.
+
+## Whole-prompt pooling extension
+
+Lucas's all-token control is isolated as the orthogonal readout mode
+`all_token_mean`. It reuses the unchanged historical `plain` prompt but writes
+only `plain_mean_pool` features under `qwen4b__plain_mean_pool`. Valid
+causal-decoder token residuals are mean-pooled with the attention mask; each
+fitted J is applied tokenwise before pooling and checked numerically against J
+after pooling. The final decoder-block residual is pooled with the same mask and
+remains raw-only. Full contract and run memory:
+`docs/WHOLE_PROMPT_POOLING.md` and `wiki/whole-prompt-pooling.md`.
 
 ## Dependency audit
 

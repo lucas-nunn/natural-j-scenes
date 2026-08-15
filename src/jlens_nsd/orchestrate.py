@@ -9,7 +9,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .config import DEFAULT_PROMPT_SET, MODEL_SPECS, ExperimentPaths, validate_subjects
+from .config import (
+    DEFAULT_PROMPT_SET,
+    DEFAULT_READOUT_MODE,
+    MODEL_SPECS,
+    READOUT_MODES,
+    ExperimentPaths,
+    validate_readout_mode,
+    validate_subjects,
+)
 from .io_utils import atomic_json
 from .prompts import PROMPT_SETS
 
@@ -32,6 +40,7 @@ class Orchestrator:
             "selected_profile": None,
             "subject_numbers": list(args.subjects),
             "prompt_set": args.prompt_set,
+            "readout_mode": args.readout_mode,
             "stages": [],
         }
         paths.logs.mkdir(parents=True, exist_ok=True)
@@ -96,6 +105,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
     )
     parser.add_argument(
+        "--readout-mode", choices=READOUT_MODES, default=DEFAULT_READOUT_MODE
+    )
+    parser.add_argument(
         "--fallback-profile", choices=sorted(MODEL_SPECS), default="qwen1.7b"
     )
     parser.add_argument("--results-dir", type=Path)
@@ -103,6 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--captions", type=Path)
     parser.add_argument("--mpnet-base", type=Path)
     parser.add_argument("--jlens-checkout", type=Path)
+    parser.add_argument("--historical-results-root", type=Path)
     parser.add_argument("--lens-root", type=Path)
     parser.add_argument("--qwen4b-model", type=Path)
     parser.add_argument("--qwen1-7b-model", type=Path)
@@ -123,6 +136,14 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
     try:
+        validate_readout_mode(args.readout_mode, args.prompt_set)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
+    if args.readout_mode != DEFAULT_READOUT_MODE and not args.historical_results_root:
+        raise SystemExit(
+            "--historical-results-root is required for all_token_mean reporting"
+        )
+    try:
         args.subjects = validate_subjects(
             int(item.strip()) for item in args.subjects.split(",") if item.strip()
         )
@@ -138,7 +159,12 @@ def main(argv: list[str] | None = None) -> None:
     runner = Orchestrator(paths, args)
     try:
         subjects_csv = ",".join(str(subject) for subject in args.subjects)
-        prompt_args = ["--prompt-set", args.prompt_set]
+        scope_args = [
+            "--prompt-set",
+            args.prompt_set,
+            "--readout-mode",
+            args.readout_mode,
+        ]
         runner.run("prepare", ["prepare", "--subjects", subjects_csv])
         candidates = []
         for profile in (args.profile, args.fallback_profile):
@@ -169,7 +195,7 @@ def main(argv: list[str] | None = None) -> None:
                 "cuda",
                 "--max-length",
                 str(args.max_length),
-                *prompt_args,
+                *scope_args,
                 *artifact_args,
             ]
             if runner.run(f"preflight_{profile}", preflight_args, check=False):
@@ -200,7 +226,7 @@ def main(argv: list[str] | None = None) -> None:
                 str(args.chunk_size),
                 "--max-length",
                 str(args.max_length),
-                *prompt_args,
+                *scope_args,
                 *(["--lens-root", str(args.lens_root)] if args.lens_root else []),
                 *(
                     ["--model-path", str(selected_model_path)]
@@ -215,7 +241,7 @@ def main(argv: list[str] | None = None) -> None:
                 "rdms",
                 "--profile",
                 selected,
-                *prompt_args,
+                *scope_args,
                 "--subjects",
                 subjects_csv,
             ],
@@ -227,7 +253,7 @@ def main(argv: list[str] | None = None) -> None:
                 selected,
                 "--subject",
                 str(subject),
-                *prompt_args,
+                *scope_args,
             ]
             if args.allow_cpu_searchlight:
                 searchlight_args.append("--allow-cpu")
@@ -238,7 +264,7 @@ def main(argv: list[str] | None = None) -> None:
                 "project",
                 "--profile",
                 selected,
-                *prompt_args,
+                *scope_args,
                 "--subjects",
                 subjects_csv,
             ],
@@ -250,7 +276,7 @@ def main(argv: list[str] | None = None) -> None:
                     "plot",
                     "--profile",
                     selected,
-                    *prompt_args,
+                    *scope_args,
                     "--subjects",
                     subjects_csv,
                 ],
@@ -261,9 +287,14 @@ def main(argv: list[str] | None = None) -> None:
                 "summarize",
                 "--profile",
                 selected,
-                *prompt_args,
+                *scope_args,
                 "--subjects",
                 subjects_csv,
+                *(
+                    ["--historical-results-root", str(args.historical_results_root)]
+                    if args.historical_results_root
+                    else []
+                ),
             ],
         )
         runner.finish("complete")

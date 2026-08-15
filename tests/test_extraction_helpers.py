@@ -13,7 +13,11 @@ except ImportError:  # lightweight core test environment
 from jlens_nsd.extract import (
     _chunk_is_valid,
     _gather_last,
+    _masked_mean,
+    _readout,
+    _transport_tokens_then_mean,
     _validate_hook_semantics,
+    audit_all_token_mask,
     audit_matched_prompt_endpoints,
     feature_registry,
     resolve_source_layers,
@@ -23,6 +27,38 @@ from jlens_nsd.prompts import prompts_for_condition
 
 
 class ExtractionHelperTests(unittest.TestCase):
+    def test_all_token_audit_includes_only_historical_encoded_special_tokens(
+        self,
+    ) -> None:
+        class AuditTokenizer:
+            padding_side = "right"
+            pad_token_id = 0
+
+            def __call__(
+                self,
+                text,
+                *,
+                add_special_tokens,
+                truncation,
+                return_attention_mask,
+                return_special_tokens_mask,
+            ):
+                self.last_text = text
+                self.last_options = (add_special_tokens, truncation)
+                return {
+                    "input_ids": [101, 7, 8],
+                    "attention_mask": [1, 1, 1],
+                    "special_tokens_mask": [1, 0, 0],
+                }
+
+        tokenizer = AuditTokenizer()
+        audit = audit_all_token_mask(tokenizer, [42], ["unchanged plain prompt."])
+        self.assertEqual(tokenizer.last_text, "unchanged plain prompt.")
+        self.assertEqual(tokenizer.last_options, (True, False))
+        self.assertEqual(audit["n_conditions"], 1)
+        self.assertEqual(audit["records"][0]["valid_positions_0based"], [0, 1, 2])
+        self.assertEqual(audit["records"][0]["included_special_token_ids"], [101])
+
     def test_model_free_endpoint_audit_covers_every_condition(self) -> None:
         class CharacterTokenizer:
             def __call__(
@@ -73,6 +109,15 @@ class ExtractionHelperTests(unittest.TestCase):
         )
         self.assertEqual(matched[0]["name"], "integrate_readout__l08__raw")
         self.assertEqual(matched[-1]["name"], "minimal_readout__final")
+        pooled = feature_registry(
+            [8, 16, 23, 30],
+            ("plain",),
+            feature_namespace="plain_mean_pool",
+        )
+        self.assertEqual(len(pooled), 9)
+        self.assertEqual(pooled[0]["name"], "plain_mean_pool__l08__raw")
+        self.assertEqual(pooled[-1]["name"], "plain_mean_pool__final")
+        self.assertTrue(all(item["prompt"] == "plain" for item in pooled))
 
     @unittest.skipUnless(torch is not None, "requires the optional model extra")
     def test_last_nonpadding_gather(self) -> None:
@@ -81,6 +126,43 @@ class ExtractionHelperTests(unittest.TestCase):
         gathered = _gather_last(hidden, mask)
         torch.testing.assert_close(gathered[0], hidden[0, 1])
         torch.testing.assert_close(gathered[1], hidden[1, 2])
+
+    @unittest.skipUnless(torch is not None, "requires the optional model extra")
+    def test_attention_mask_mean_pooling_and_padding_invariance(self) -> None:
+        hidden = torch.tensor(
+            [
+                [[1.0, 3.0], [3.0, 5.0], [999.0, -999.0]],
+                [[2.0, 4.0], [4.0, 6.0], [6.0, 8.0]],
+            ]
+        )
+        mask = torch.tensor([[1, 1, 0], [1, 1, 1]])
+        pooled = _masked_mean(hidden, mask)
+        torch.testing.assert_close(pooled, torch.tensor([[2.0, 4.0], [4.0, 6.0]]))
+        hidden[0, 2] = torch.tensor([-1e9, 1e9])
+        torch.testing.assert_close(_masked_mean(hidden, mask), pooled)
+
+    @unittest.skipUnless(torch is not None, "requires the optional model extra")
+    def test_tokenwise_j_application_and_pool_linearity(self) -> None:
+        hidden = torch.tensor(
+            [[[1.0, 2.0], [3.0, 4.0], [500.0, 600.0]]], dtype=torch.float32
+        )
+        mask = torch.tensor([[1, 1, 0]])
+        matrix = torch.tensor([[2.0, 1.0], [-1.0, 3.0]], dtype=torch.float32)
+        raw, transported, check = _transport_tokens_then_mean(hidden, mask, matrix)
+        expected_tokens = hidden[0, :2] @ matrix.T
+        torch.testing.assert_close(raw, torch.tensor([[2.0, 3.0]]))
+        torch.testing.assert_close(transported, expected_tokens.mean(dim=0)[None])
+        torch.testing.assert_close(transported, raw @ matrix.T)
+        self.assertLessEqual(check["max_abs_error"], check["tolerance"])
+        self.assertEqual(check["n_valid_tokens"], 2)
+
+    @unittest.skipUnless(torch is not None, "requires the optional model extra")
+    def test_historical_readout_regression_is_still_last_nonpadding(self) -> None:
+        hidden = torch.arange(2 * 4 * 3).reshape(2, 4, 3)
+        mask = torch.tensor([[1, 1, 0, 0], [1, 1, 1, 0]])
+        torch.testing.assert_close(
+            _readout(hidden, mask, "final_token"), _gather_last(hidden, mask)
+        )
 
     @unittest.skipUnless(torch is not None, "requires the optional model extra")
     def test_hook_matches_hf_embedding_offset_semantics(self) -> None:

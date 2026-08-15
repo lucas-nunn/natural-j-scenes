@@ -13,6 +13,7 @@ from scipy.spatial.distance import pdist
 from .conditions import load_union_ids
 from .config import (
     DEFAULT_PROMPT_SET,
+    DEFAULT_READOUT_MODE,
     N_SUBJECTS,
     ExperimentPaths,
     group_name,
@@ -26,8 +27,9 @@ def _embedding_manifest(
     paths: ExperimentPaths,
     profile: str,
     prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
 ) -> tuple[Path, dict]:
-    directory = paths.embeddings / run_name(profile, prompt_set_key)
+    directory = paths.embeddings / run_name(profile, prompt_set_key, readout_mode)
     manifest_path = directory / "manifest.json"
     if not manifest_path.exists():
         raise FileNotFoundError(f"embedding manifest not found: {manifest_path}")
@@ -132,15 +134,23 @@ def prepare_grouped_rdms(
     subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
     *,
     prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
 ) -> dict:
     """Create selected-subject RDMs without ever allocating a 73K matrix."""
     paths.require("mpnet_base")
     assert paths.mpnet_base is not None
     subjects = validate_subjects(subjects)
-    directory, embedding_manifest = _embedding_manifest(paths, profile, prompt_set_key)
+    directory, embedding_manifest = _embedding_manifest(
+        paths, profile, prompt_set_key, readout_mode
+    )
     if embedding_manifest["config"].get("prompt_set", "historical") != prompt_set_key:
         raise RuntimeError("embedding manifest prompt set does not match RDM request")
-    group = group_name(profile, prompt_set_key)
+    manifest_readout = embedding_manifest["config"].get(
+        "readout_mode", DEFAULT_READOUT_MODE
+    )
+    if manifest_readout != readout_mode:
+        raise RuntimeError("embedding manifest readout mode does not match RDM request")
+    group = group_name(profile, prompt_set_key, readout_mode)
     union_ids = load_union_ids(paths)
     expected_hash = embedding_manifest["config"]["condition_ids_hash"]
     from .io_utils import stable_hash
@@ -262,5 +272,7 @@ def prepare_grouped_rdms(
         "subjects": subject_records,
         "matched_sampling": sampling,
     }
+    if readout_mode != DEFAULT_READOUT_MODE:
+        manifest["readout_mode"] = readout_mode
     atomic_json(output_dir / "group_manifest.json", manifest)
     return manifest
