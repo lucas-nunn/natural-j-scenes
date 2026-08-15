@@ -1,0 +1,74 @@
+{
+  "generator": "scripts/make_layer_performance_summary.py",
+  "generator_sha256": "5290812c0de791f81f676540a2a3d46e80c68fb1dda707d0d4d9152731e6412e",
+  "methods": {
+    "bh_q": "Benjamini-Hochberg adjustment over the source report's 24 J-versus-raw/final/MPNet comparisons",
+    "confidence_interval": "two-sided 95% Student t interval over 8 subject scores (df=7)",
+    "delta": "paired within-subject J-space minus raw score, then group mean",
+    "exact_p": "two-sided exhaustive sign-flip test of the mean paired subject delta over all 2^8 sign assignments",
+    "mean_correlation": "searchlight-center RSA correlations averaged within each sample, then 8 sample means averaged within subject, then 8 subject scores averaged"
+  },
+  "outputs": {
+    "figure": {
+      "dpi": 300,
+      "height_px": 2040,
+      "name": "layer_performance_summary.png",
+      "sha256": "e4823d1a16ac601c4e3f39def58baf7cc6ca54dc6281348293b39e8f6cc7489b",
+      "width_px": 3000
+    },
+    "table": {
+      "name": "layer_performance_summary.csv",
+      "sha256": "6ff448538c5f7aa352ef27b7fe276862b1cde6fe2f8b25663a5c4174adaaf2ff"
+    }
+  },
+  "runtime": {
+    "matplotlib": "3.10.9",
+    "numpy": "2.4.6",
+    "python": "3.12.3",
+    "scipy": "1.17.1"
+  },
+  "schema_version": 1,
+  "source_files_sha256": {
+    "comparisons.csv": "b0a8db25b5af49b50098619288067f8e40531fe427b699ca78135f9c5f7d62ca",
+    "feature_scores.csv": "f31750a0b048bd7b09bf38ee52e8bf4d8f765ed278423ad16cf390d88da62b8f",
+    "sample_scores.npy": "037c73b193af299ca76e63eb0dc48db4e3bf935af8342446f0d38da4cfee20fc",
+    "subject_scores.npy": "9aaa3507bf16b00a3deb79ea8680eb95d781ad7e747405dc5e80a8f125d72d93",
+    "summary.json": "d3baf8ddfa81069d42dd3b8cde3a58f48a9fe8ea33bcf816b02394b00e1b1787"
+  },
+  "source_report_name": "qwen4b",
+  "source_summary_created_at": "2026-08-14T22:51:29.160370+00:00",
+  "validated_contract": {
+    "checks": [
+      "JSON rows exactly equal source CSV rows",
+      "subject_scores exactly equal sample_scores mean over samples",
+      "CSV/JSON means, t CIs, deltas, exact p-values, and BH q-values reproduce from NPY arrays",
+      "all arrays are finite float64 with expected shapes"
+    ],
+    "expected_feature_ids_in_npy_column_order": [
+      "mpnet_reference",
+      "plain__final",
+      "plain__l08__j",
+      "plain__l08__raw",
+      "plain__l16__j",
+      "plain__l16__raw",
+      "plain__l23__j",
+      "plain__l23__raw",
+      "plain__l30__j",
+      "plain__l30__raw",
+      "visualize__final",
+      "visualize__l08__j",
+      "visualize__l08__raw",
+      "visualize__l16__j",
+      "visualize__l16__raw",
+      "visualize__l23__j",
+      "visualize__l23__raw",
+      "visualize__l30__j",
+      "visualize__l30__raw"
+    ],
+    "independent_unit": "subject",
+    "n_comparisons_in_bh_family": 24,
+    "n_samples_per_subject": 8,
+    "n_sessions": 10,
+    "n_subjects": 8
+  }
+}
