@@ -52,9 +52,39 @@ Extracted to `nsd_adapter.condition_column_index()` with the contract stated in 
 pinned by five tests including one that explicitly asserts sorted order beats first-appearance
 order for a case where the two differ.
 
-## Not yet checked
+## MPNet reference — VERIFIED 2026-08-16
 
-The MPNet reference RDM is **copied** from the external MPNet tree rather than recomputed, so its
-condition order is inherited, not verified here. It agrees numerically with the historical run to
-four decimals, which is strong indirect evidence, but the ordering itself is unverified. See
-[[hardening-backlog]].
+The MPNet reference is the anchor used to argue two runs sit on the same footing, but it is
+**copied** from the external MPNet tree rather than recomputed, so its ordering was inherited and
+unverified.
+
+Recomputed from raw sentence embeddings
+(`saved_embeddings/nsd_all-mpnet-base-v2_mean_embeddings.pkl`) indexed by each subject's sorted
+condition IDs, and compared against the stored file. **All eight subjects reproduce exactly:**
+
+```
+subj01..subj08   r = 1.0000000000   max|diff| = 5.96e-08   (float32 rounding)
+```
+
+So the reference shares the sorted-ID ordering contract. Re-runnable via
+`scripts/verify_mpnet_reference.py`.
+
+Two things this pinned down that were previously guesswork:
+
+- **The correct source table is `*_mean_embeddings.pkl`, not `*_ALLWORDS_embeddings.pkl`.** The
+  ALLWORDS table only reaches `r = 0.52` against the stored RDM, so it is a different object.
+  Anyone regenerating the reference must use the mean table.
+- **The index convention is `id - 1`.** Using the 1-based ID directly gives `r = 0.003`, i.e. the
+  off-by-one collapses the correlation to noise rather than degrading it subtly. That failure mode
+  is loud, which is reassuring: a silent off-by-one is not possible here.
+
+## Sampling coverage — checked, no bias
+
+8 x 100 = 800 of 835 conditions are used per subject, leaving 35 unused. Checked whether the drop
+is systematic:
+
+- The unused set **differs per subject**; the intersection across all eight is empty.
+- Pooled unused positions are uniform over the index range (KS = 0.045, p = 0.62).
+
+So the 35 are simply the remainder of drawing eight disjoint 100-condition samples, not a
+structured exclusion. No action needed.

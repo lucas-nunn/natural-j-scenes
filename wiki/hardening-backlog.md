@@ -7,6 +7,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 - [x] **Measure the metric-warp axiom.** Result inverts the naive prediction — see
       [[lens-geometry]]. `scripts/analyze_lens_geometry.py`, `docs/lens_geometry.json`.
+- [x] **MPNet reference ordering.** Recomputed from raw embeddings; all 8 subjects reproduce the
+      stored RDM exactly. Source table and index convention pinned. `scripts/verify_mpnet_reference.py`.
+- [x] **Sampling coverage.** The 35 unused conditions per subject are the remainder of 8x100 of 835,
+      differ per subject, and are uniformly positioned. No systematic exclusion.
 - [x] **Condition ordering between brain and model RDMs.** Verified sound; the guarantee rested on
       an implicit `np.unique` sort, now extracted to `condition_column_index()` and pinned by
       `tests/test_condition_alignment.py`. See [[condition-alignment]].
@@ -17,11 +21,6 @@ Each item records why it matters, so a later iteration does not re-derive it.
       the top-k right singular directions of `J_l` (k = that layer's effective rank) and re-run RSA.
       If it reproduces the J result, the effect is about conditioning, not about the lens direction.
       Would settle whether the layer profile means anything. See [[lens-geometry]].
-- [ ] **Is the sampling really disjoint *and* exhaustive?** `sampling_is_disjoint` is checked, but
-      8x100 = 800 of 835 conditions per subject. Confirm which 35 are dropped and whether the drop
-      is systematic (e.g. always the same NSD ids across subjects).
-- [ ] **MPNet reference is treated as a fixed anchor.** It matched to 4 decimals across two runs,
-      which is strong. Confirm it is genuinely recomputed rather than copied from the MPNet tree.
 
 ## Open — correctness and simplification
 
