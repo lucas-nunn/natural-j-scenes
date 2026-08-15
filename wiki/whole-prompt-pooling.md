@@ -144,19 +144,6 @@ Observed token facts for the `plain` prompt: `Qwen2Tokenizer`, right padding, pa
 52 valid tokens on condition 104, and **zero** tokenizer-added special tokens included — the
 special-token audit machinery is exercised but finds none for this prompt set.
 
-## Power ceiling of the exact sign-flip test — read before interpreting nulls
-
-With 8 subjects the exact `2^8` sign-flip test has a **floor of p = 1/256 = 0.0039**.
-After BH within each predeclared family the smallest attainable q is:
-
-- `plain_mean_pool_j_vs_raw_4` (4 tests): **q = 0.0156** — comfortable headroom.
-- `plain_mean_pool_vs_final_token_9` (9 tests): **q = 0.0352** — significance requires a
-  *perfect* 8/8 sign agreement **and** the largest effect in the family.
-
-So a non-significant secondary family is weak evidence, not evidence of absence. This is a
-property of n=8, not a defect in the implementation. Reporting effect sizes and sign counts
-alongside q-values is therefore necessary rather than optional.
-
 ## BUG FOUND AND FIXED: historical comparator guard rejected the real comparator
 
 `_load_historical_final_token_scores` (new on this branch) read the comparator's subject list
@@ -231,3 +218,72 @@ was verified. Extraction is GPU and negligible (19 s for 835 conditions).
 - [ ] `project` / `plot` stages never exercised on this branch.
 - [ ] Confirm `searchlight_indices` + `betas_average` exist for subj02-08, or budget for
       recomputation.
+
+## CORRECTION to earlier notes on the sign-flip power ceiling
+
+Two claims recorded earlier in this file were **wrong** and have been deleted. Both understated
+the design's power; the eight-subject run falsified them directly.
+
+1. **The exact sign-flip floor is `p = 2/256 = 0.0078`, not `1/256 = 0.0039`.** Two sign
+   configurations (all-same and all-flipped) satisfy `|mean| >= |observed|`, so the two-sided
+   test can never return 1/256. The repository's own test asserts this:
+   `test_exact_sign_flip_uses_subjects_as_units` expects `2/256`.
+
+2. **"Smallest attainable q = p_min x m" is only true for a *lone* significant test.** BH is a
+   step-up procedure with a monotone cumulative-minimum pass, so when several tests in a family
+   share the floor p, every q collapses to p itself. Predicting `q >= 0.0352` for the 9-test
+   family was therefore wrong: all nine came back at **q = 0.0078**.
+
+Lesson: do not reason about BH ceilings from the rank-1 formula alone. Compute the adjustment
+over the realistic vector of p-values.
+
+## EIGHT-SUBJECT RESULT (2026-08-15) — the real inference
+
+Root `results/whole_prompt_full_20260815` (ignored). Wall clock **61 min** total: prepare 3 s,
+extract 2m13s (6,148 conditions, GPU), rdms 20 s, eight CPU searchlights at **~7m32s each**
+(page cache warm; the cold first subject cost ~18.5 min), summarize 5 s.
+
+Invariants reconfirmed at full scope: 835 conditions x 8 subjects, **6,148-ID union**, every
+subject's sampling `(8,100)` and disjoint.
+
+### Primary family `plain_mean_pool_j_vs_raw_4` — J beats raw, but only late
+
+| layer | mean Δ (J − raw) | 95% CI | p | q | |
+|---|---|---|---|---|---|
+| 8  | −0.0005 | [−0.0026, 0.0017] | 0.6406 | 0.6406 | ns |
+| 16 | +0.0004 | [−0.0014, 0.0022] | 0.6406 | 0.6406 | ns |
+| 23 | **+0.0016** | [0.0006, 0.0027] | 0.0156 | **0.0469** | * |
+| 30 | **+0.0015** | [0.0005, 0.0024] | 0.0234 | **0.0469** | * |
+
+Two of four survive BH. The effect is **depth-dependent**: absent at 8/16, present at 23/30.
+It is also **small** — +0.0016 against a pooled base of ~0.03, i.e. roughly a 5% relative gain —
+and both q-values sit just under the 0.05 line. Treat as a real but modest late-layer effect,
+not a headline.
+
+### Secondary family `plain_mean_pool_vs_final_token_9` — unambiguous
+
+All nine comparisons significant at **q = 0.0078**, the floor, with every subject agreeing in
+sign (8/8). Mean deltas +0.0226 to +0.0273, every CI far from zero.
+
+| readout | mean r range |
+|---|---|
+| pooled `plain_mean_pool__*` | 0.0254 – 0.0315 |
+| historical final-token | 0.0027 – 0.0059 |
+| `mpnet_reference` | 0.0267 |
+
+Pooling raises caption-derived features by roughly **5-9x** and lifts most of them **above the
+MPNet semantic reference** (only layer 8 stays below it). The subject-1 descriptive impression
+holds at population scale.
+
+**Best single feature: `plain_mean_pool__l23__j` at r = 0.0315** — the same layer 23 the project's
+existing figures center on, and the layer where the J-vs-raw contrast is strongest.
+
+### Interpretation guardrails
+
+- This tests **readout position**, not the workspace hypothesis. The pooled-vs-final-token result
+  says the historical single-endpoint readout was a weak estimator, not that J-space is special.
+- The J-vs-raw result is the one that speaks to the project's actual question, and it is small,
+  late-layer only, and marginal after correction.
+- `mpnet_reference` again matched the historical run's own value (0.0267 group mean), so the two
+  pipelines remain calibrated identically.
+- No projection or plotting was run; `project`/`plot` remain unexercised on this branch.

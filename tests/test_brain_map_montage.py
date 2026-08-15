@@ -46,6 +46,32 @@ class BrainMapMontageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least one"):
             montage.output_size(())
 
+    def test_compose_rejects_panels_of_differing_size(self) -> None:
+        """The invariant is that all panels agree, not one hardcoded size."""
+        subjects = (1,)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            figure_root = root / "sources"
+            figure_root.mkdir()
+            sizes = {"raw": (16, 8), "j": (18, 8)}
+            for kind in montage.KINDS:
+                path = montage.source_path(figure_root, "plain", kind, 1)
+                Image.new("RGB", sizes[kind], (10, 10, 10)).save(path)
+            args = argparse.Namespace(
+                figure_root=figure_root,
+                prompt_kind="plain",
+                subjects=subjects,
+                output=root / "montage.jpg",
+            )
+            with (
+                patch.object(montage, "PANEL_SIZE", (10, 6)),
+                patch.object(montage, "HEADER_HEIGHT", 4),
+                patch.object(montage, "ROW_STRIDE", 8),
+                patch.object(montage, "centered_text"),
+            ):
+                with self.assertRaises(ValueError):
+                    montage.compose(args)
+
     def test_compose_preserves_source_order_hashes_and_exif_audit(self) -> None:
         subjects = (1, 2, 3, 4)
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -78,7 +104,6 @@ class BrainMapMontageTests(unittest.TestCase):
                 output=output,
             )
             with (
-                patch.object(montage, "SOURCE_SIZE", (16, 8)),
                 patch.object(montage, "PANEL_SIZE", (10, 6)),
                 patch.object(montage, "HEADER_HEIGHT", 4),
                 patch.object(montage, "ROW_STRIDE", 8),

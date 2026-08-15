@@ -15,14 +15,25 @@
 
 ### Image-level position
 
-1. Mean-pool every prompt token. This mixes instructions and lexical caption
-   tokens, making a word-restatement explanation especially plausible.
+1. A single prompt position. One state is a fragile summary of a caption block:
+   its local token identity and position dominate, and for caption text the
+   endpoint is often punctuation. Measured whole-searchlight alignment under this
+   readout was near zero across all layers.
 2. Generate a scene description and pool its states. This introduces sampling,
    variable output lengths, and a second text-generation confound.
-3. **Chosen: final non-padding prompt position.** A prompt ending in
-   `Integrated visual scene:` makes that state the causal decoder's immediate
-   scene-continuation state. This matches the J-lens source-position semantics
-   and stays deterministic.
+3. **Chosen: all-token mean pooling over the caption prompt.** Exactly the
+   positions where the attention mask is 1 are averaged, so the representation
+   uses evidence distributed across the prompt rather than one endpoint. It stays
+   deterministic, adds no new text, and keeps the J-lens source-position semantics
+   per token because J is applied tokenwise before pooling.
+
+   **Stated limitation, carried forward from the rejected alternative.** Pooling
+   mixes instruction and lexical caption tokens, which makes a word-restatement
+   explanation more plausible than a single-position readout would. It also
+   weights tokenizer tokens equally, so words split into more subwords, and
+   punctuation, remain part of the declared estimand. Mean pooling does not make
+   early token states aware of later tokens, and does not correct the released
+   lens's WikiText-to-NSD domain shift.
 
 ### Prompt
 

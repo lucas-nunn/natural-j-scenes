@@ -21,7 +21,10 @@ from PIL import Image, ImageDraw, ImageFont
 AVAILABLE_SUBJECTS = tuple(range(1, 9))
 DEFAULT_SUBJECTS = (1, 2, 3, 4)
 KINDS = ("raw", "j")
-SOURCE_SIZE = (3315, 1440)
+# Source panels must all share one size so placement is exact. The specific
+# size is a property of the render, not a constant: readout modes and pycortex
+# versions produce different canvases. The invariant is agreement, so it is
+# derived from the first panel and enforced across the rest.
 HEADER_HEIGHT = 92
 ROW_STRIDE = 493
 PANEL_SIZE = (1120, 487)
@@ -59,7 +62,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--prompt-kind",
-        choices=("plain", "visualize"),
+        choices=("plain", "visualize", "plain_mean_pool"),
         default="plain",
         help="Exact manifest prompt kind to compose (default: %(default)s)",
     )
@@ -102,6 +105,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
     dimensions = output_size(subjects)
     sources: dict[tuple[str, int], Image.Image] = {}
     source_audit: list[dict[str, Any]] = []
+    source_size: tuple[int, int] | None = None
     for subject in subjects:
         for kind in KINDS:
             path = source_path(args.figure_root, args.prompt_kind, kind, subject)
@@ -109,9 +113,12 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
                 raise FileNotFoundError(f"missing source map: {path}")
             with Image.open(path) as opened:
                 opened.load()
-                if opened.size != SOURCE_SIZE:
+                if source_size is None:
+                    source_size = opened.size
+                elif opened.size != source_size:
                     raise ValueError(
-                        f"unexpected map dimensions for {path}: {opened.size}"
+                        f"map dimensions differ for {path}: {opened.size} "
+                        f"!= {source_size}"
                     )
                 image = opened.convert("RGB")
             sources[(kind, subject)] = image
@@ -121,7 +128,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
                     "subject": subject,
                     "filename": path.name,
                     "sha256": sha256_file(path),
-                    "dimensions": list(SOURCE_SIZE),
+                    "dimensions": list(source_size),
                 }
             )
 
@@ -155,7 +162,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         ],
         "subjects": list(subjects),
         "column_order": ["raw", "j"],
-        "source_dimensions": list(SOURCE_SIZE),
+        "source_dimensions": list(source_size),
         "output_dimensions": list(dimensions),
         "operation": "composition only; no RSA, projection, or map recomputation",
         "scaling": (

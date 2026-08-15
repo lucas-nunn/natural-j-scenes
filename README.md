@@ -7,10 +7,10 @@ Qwen3.5-4B align with human brain responses to natural scenes differently from
 matched raw residual representations. Caption-derived text—not images—is passed
 through the language model, and representational similarity analysis (RSA)
 compares the resulting features with Natural Scenes Dataset (NSD) fMRI
-responses. The comparison holds model, prompt, layer, token position, stimuli,
-and brain-analysis pipeline fixed. The accompanying layer-23 maps are
-descriptive: raw and J-space topographies appear broadly similar, with modest
-local differences, but the figure alone does not establish superior alignment.
+responses. Each prompt is read out as the **mean over all valid non-padding
+tokens**, so a representation summarises the whole caption rather than one
+position. The comparison holds model, prompt, layer, readout, stimuli, and
+brain-analysis pipeline fixed.
 
 ## Research question
 
@@ -21,29 +21,20 @@ raw control; it does not imply that J-space is *better*. A claim of better
 alignment requires a defined comparison metric and subject-level inference,
 not visual inspection alone.
 
-![Raw and Jacobian-transported layer-23 NSD searchlight maps for subjects 1–4](docs/assets/visualize_layer23_raw_then_j_subjects1-4.jpg)
+![Raw and Jacobian-transported layer-23 NSD searchlight maps for subjects 1–4](docs/assets/pooled_layer23_raw_then_j_subjects1-4.jpg)
 
-*Figure 1. Raw versus J-space brain alignment at Qwen3.5-4B layer 23 under the
-`visualize` prompt condition. For concision, the montage shows subjects 1–4:
-each row is one subject, with the raw residual on the left and its matched
-Jacobian-transported residual on the right. All numerical and statistical
-analyses and tables use all eight subjects (1–8). Each cortical map is the
-subject-level mean over eight matched 100-stimulus samples, projected to
-`fsaverage`, with stream-ROI contours overlaid. Color encodes searchlight RSA
-correlation (Pearson r between the brain and model correlation-distance RDMs).
-Panels use independent symmetric color limits, reported by the maximum absolute
-value in each title. These maps are descriptive and do not by themselves test
-whether either representation is better.*
-
-![Caption-only raw and Jacobian-transported layer-23 NSD searchlight maps for subjects 1–4](docs/assets/plain_layer23_raw_then_j_subjects1-4.jpg)
-
-*Figure 2. Matched caption-only (`plain`) layer-23 maps. For concision, the
-montage shows subjects 1–4, with raw `plain__l23__raw` on the left and J-space
-`plain__l23__j` on the right; all numerical and statistical analyses and tables
-use all eight subjects (1–8). The montage composes the existing completed maps
-without recomputing RSA or surface projection. It retains each source panel's
-independent symmetric color scale, shown in that panel's title, and otherwise
-follows Figure 1's layout and descriptive interpretation.*
+*Figure 1. Raw versus J-space brain alignment at Qwen3.5-4B layer 23. For
+concision the montage shows subjects 1–4: each row is one subject, with raw
+`plain_mean_pool__l23__raw` on the left and its matched
+`plain_mean_pool__l23__j` on the right. All numerical and statistical analyses
+and tables use all eight subjects (1–8). Each cortical map is the subject-level
+mean over eight matched 100-stimulus samples, projected to `fsaverage`, with
+stream-ROI contours overlaid. Color encodes searchlight RSA correlation (Pearson
+r between the brain and model correlation-distance RDMs). Panels use independent
+symmetric color limits, reported by the maximum absolute value in each title.
+The montage composes completed maps without recomputing RSA or surface
+projection. These maps are descriptive and do not by themselves test whether
+either representation is better.*
 
 ## Methodology
 
@@ -55,11 +46,20 @@ follows Figure 1's layout and descriptive interpretation.*
   estimated from 1,000 WikiText examples, following the
   [Jacobian Lens](https://transformer-circuits.pub/2026/workspace/index.html)
   formulation (Gurnee et al., 2026).
-- **Text inputs.** Each NSD stimulus is represented by its COCO captions. The
-  `plain` pipeline supplies the reconstructed captions directly; `visualize`
-  asks Qwen to integrate those captions into a coherent scene. Both pipelines
-  are deterministic, use no image pixels, chat template, text generation, or
-  truncation, and read out the final non-padding prompt token.
+- **Text inputs.** Each NSD stimulus is represented by its COCO captions,
+  supplied to the model directly. The pipeline is deterministic and uses no
+  image pixels, chat template, text generation, or truncation.
+- **Readout.** Features are **all-token mean-pooled causal decoder residuals**.
+  For each prompt, exactly the positions where the attention mask is 1 are
+  included and padding positions are excluded; any tokenizer-added special token
+  is included if and only if it is present in that encoding. Decoder causal
+  masking means position *t* sees its prefix through *t*, so this is not
+  bidirectional whole-caption contextualization. J is applied to every valid
+  token *before* pooling; because `J_l` is linear, each extraction batch also
+  computes J after pooling and requires agreement within
+  `1e-5 + 1e-5 × max_abs`, recording the worst per-layer error in the manifest.
+  A generated `token_mask_audit.json` records every condition's input token IDs,
+  attention mask, valid positions, and included special tokens.
 - **Representational comparison.** For every subject and feature, pairwise
   correlation-distance RDMs are computed without feature normalization.
   Matched NSD searchlights compare these model RDMs with local fMRI-pattern
@@ -81,62 +81,30 @@ guardrails.
 
 ## Layer performance summary
 
-| Prompt | Layer | Raw mean | J / control mean | J−raw | Raw peak† | J / control peak† | BH q |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Visualize | 8 | 0.008331 | 0.007353 | −0.000977 | 0.061874 | 0.056413 | 0.20625 |
-| Visualize | 16 | 0.004153 | 0.003904 | −0.000250 | 0.033036 | 0.029829 | 0.49219 |
-| Visualize | 23 | 0.022280 | 0.023541 | +0.001261 | 0.198909 | 0.205118 | **0.01875** |
-| Visualize | 30 | 0.021411 | 0.023056 | +0.001645 | 0.178131 | 0.194584 | **0.01875** |
-| Visualize | Final control | — | 0.022931 | — | — | 0.192661 | — |
-| Caption-only (`plain`) | 8 | 0.003301 | 0.002679 | −0.000622 | 0.032830 | 0.030033 | 0.20625 |
-| Caption-only (`plain`) | 16 | 0.002862 | 0.003254 | +0.000393 | 0.029869 | 0.033456 | 0.20625 |
-| Caption-only (`plain`) | 23 | 0.003621 | 0.004128 | +0.000506 | 0.038274 | 0.042349 | 0.19922 |
-| Caption-only (`plain`) | 30 | 0.005362 | 0.005689 | +0.000326 | 0.052007 | 0.056541 | 0.23214 |
-| Caption-only (`plain`) | Final control | — | 0.005865 | — | — | 0.058739 | — |
+Group means of subject whole-searchlight summaries over all eight subjects.
+Subjects are the independent unit. Significance is a two-sided exact sign-flip
+test enumerating all `2^8` sign assignments of the paired subject differences,
+Benjamini–Hochberg corrected within the four-test `plain_mean_pool_j_vs_raw_4`
+family alone.
 
-`Mean` is the group mean of subject whole-searchlight summaries; `peak` is the
-mean across subjects of each subject's maximum after its eight native sample
-maps are averaged centrewise over authoritative valid searchlight centres.
-**† Descriptive peaks only: these are peak SEARCHLIGHT-CENTRE RSA correlations,
-not single-voxel correlations; they are noise-sensitive and have no attached
-p/q inference.** BH q applies only to the paired J−raw whole-searchlight means.
+| Layer | Raw mean | J mean | J−raw | 95% CI on J−raw | BH q |
+|---|---:|---:|---:|---:|---:|
+| 8 | 0.025914 | 0.025438 | -0.000476 | [-0.002614, +0.001662] | 0.64062 |
+| 16 | 0.029382 | 0.029738 | +0.000356 | [-0.001442, +0.002155] | 0.64062 |
+| 23 | 0.029810 | 0.031460 | +0.001649 | [+0.000617, +0.002682] | **0.04688** |
+| 30 | 0.028265 | 0.029724 | +0.001459 | [+0.000514, +0.002405] | **0.04688** |
+| Final-block control | — | 0.029597 | — | — | — |
+| MPNet reference | — | 0.026736 | — | — | — |
 
-[Full CSV with 95% subject t CIs and observed peak ranges](docs/layer_performance_summary.csv)
-· [Performance figure](docs/assets/layer_performance_summary.png)
-· [Methods and interpretation](docs/LAYER_PERFORMANCE_SUMMARY.md)
+The J-space advantage is **depth-dependent**: absent at layers 8 and 16, present
+at layers 23 and 30. It is also small — roughly `+0.0016` against a base near
+`0.03`, about a 5% relative gain — and both surviving q-values sit just under
+0.05. Treat it as a real but modest late-layer effect, not a headline. Layer 23
+carries both the strongest single feature (`plain_mean_pool__l23__j`) and the
+largest J−raw contrast.
 
-![Three NSD stimuli, their human captions, and visualize layer-23 J-space vocabulary readouts](docs/assets/visualize_layer23_jspace_readouts.png)
-
-*Figure 3. Illustrative Qwen3.5-4B vocabulary readouts from
-`unembed(J_23 h_23)` under the `visualize` prompt for subject-1 conditions
-10,543, 34,275, and 60,417. Each row uses the same NSD condition for the image,
-captions, and stored transported vector. The five displayed tokens retain their
-raw vocabulary ranks (`#`) and logits after a deterministic formatting-only and
-duplicate-token filter; no semantic terms were selected or removed. The brain
-RSA itself uses the full 2,560-dimensional transported vectors before
-unembedding. Stimulus sources (NSD crop / COCO ID) are
-10,543 / 23,163: [“Chair as Frame” by zeevveez](https://www.flickr.com/photos/zeevveez/7990954613/),
-34,275 / 104,825: [“Coca-Cola cake” by TheSeafarer](https://www.flickr.com/photos/sheilascarborough/9270434659/),
-and 60,417 / 207,117: [“zebra crossing!” by krugergirl26](https://www.flickr.com/photos/71888644@N00/6114561350/);
-all three are licensed [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
-NSD and COCO provenance is described by Allen et al. (2022) and Lin et al.
-(2014), cited above.*
-
-![The same three NSD conditions with caption-only layer-23 J-space vocabulary readouts](docs/assets/plain_layer23_jspace_readouts.png)
-
-*Figure 4. The scientifically matched caption-only readout from the exact
-`plain__l23__j` feature for the same three conditions, licensing gate, and
-token filter as Figure 3. Raw vocabulary rank and logit are shown; task-like or
-otherwise surprising tokens are retained without semantic filtering.*
-
-Vocabulary unembedding is an interpretive diagnostic only, analogous to the
-readout role discussed by the [Tuned Lens](https://arxiv.org/abs/2303.08112).
-The brain RDMs do **not** use these displayed tokens or logits: they use the full
-2,560-dimensional vectors. Accordingly, this comparison is descriptive—top
-tokens that resemble task directions and representational geometry are not the
-same measurement. The audited generators are
-[`make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py) and
-[`make_layer23_brain_map_montage.py`](scripts/make_layer23_brain_map_montage.py).
+See [WHOLE_PROMPT_POOLING.md](docs/WHOLE_PROMPT_POOLING.md) for the exact
+estimand, the mask contract, and the predeclared inference families.
 
 ## Image-only WikiText transfer pilot
 
@@ -148,7 +116,7 @@ description, semantic instruction, chat template, or image–caption fusion is
 present. See the [audited pilot report](docs/IMAGE_ONLY_WIKITEXT_PILOT.md).
 ![Descriptive image-only pilot scores](docs/assets/image_only_wikitext_pilot_scores.png)
 
-*Figure 5. Whole-searchlight mean RSA correlations for subject 1 and one
+*Figure 2. Whole-searchlight mean RSA correlations for subject 1 and one
 deterministic 100-image sample. Raw and J scores remain paired and separate at
 layers 8, 16, 23, and 30; block 31 is a separate final-residual raw control.
 These values are descriptive and do not support population inference.*
@@ -240,6 +208,7 @@ jlens-nsd-orchestrate \
   --captions /path/to/nsd_allWords_per_image.pkl \
   --mpnet-base /path/to/mpnet_10_sessions \
   --profile qwen4b --fallback-profile qwen1.7b \
+  --readout-mode all_token_mean \
   --subjects 1,2,3,4,5,6,7,8
 ```
 
