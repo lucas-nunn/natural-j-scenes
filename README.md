@@ -23,16 +23,16 @@ not visual inspection alone.
 
 ![Raw and Jacobian-transported layer-23 NSD searchlight maps](docs/assets/visualize_layer23_raw_then_j_all_subjects.jpg)
 
-*Figure 1. Raw versus J-space brain alignment at Qwen3.5-4B layer 23 under the
-`visualize` prompt condition. The upper four rows show raw (non-J-space)
-residuals and the lower four rows show Jacobian-transported residuals; within
-each block, subjects 1–8 are ordered row-wise from left to right. Each cortical
-map is the subject-level mean over eight matched 100-stimulus samples, projected
-to `fsaverage`, with stream-ROI contours overlaid. Color encodes searchlight RSA
-correlation (Pearson r between the brain and model correlation-distance RDMs).
-Panels use independent symmetric color limits, reported by the maximum absolute
-value in each title. These maps are descriptive and do not by themselves test
-whether either representation is better.*
+*Figure 1. J-space versus raw LLM brain alignment at Qwen3.5-4B layer 23 under
+the `visualize` prompt condition. Each row is one subject (1–8): the left column
+shows the Jacobian-transported residual and the right column shows its matched
+raw residual. Each cortical map is the subject-level mean over eight matched
+100-stimulus samples, projected to `fsaverage`, with stream-ROI contours
+overlaid. Color encodes searchlight RSA correlation (Pearson r between the brain
+and model correlation-distance RDMs). Panels use independent symmetric color
+limits, reported by the maximum absolute value in each title. These maps are
+descriptive and do not by themselves test whether either representation is
+better.*
 
 ## Methodology
 
