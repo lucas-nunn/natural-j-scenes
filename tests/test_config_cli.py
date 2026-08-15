@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from jlens_nsd.cli import smoke
-from jlens_nsd.config import ExperimentPaths, model_spec, validate_subjects
+from jlens_nsd.config import ExperimentPaths, model_spec, run_name, validate_subjects
 
 
 class ConfigAndSmokeTests(unittest.TestCase):
@@ -45,3 +45,9 @@ class ConfigAndSmokeTests(unittest.TestCase):
             validate_subjects([1, 1])
         with self.assertRaisesRegex(ValueError, "1..8"):
             validate_subjects([9])
+
+    def test_matched_prompt_set_has_an_isolated_namespace(self) -> None:
+        self.assertEqual(run_name("qwen4b"), "qwen4b")
+        self.assertEqual(
+            run_name("qwen4b", "matched_readout"), "qwen4b__matched_readout"
+        )

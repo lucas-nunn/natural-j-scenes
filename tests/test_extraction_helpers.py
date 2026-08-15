@@ -14,13 +14,40 @@ from jlens_nsd.extract import (
     _chunk_is_valid,
     _gather_last,
     _validate_hook_semantics,
+    audit_matched_prompt_endpoints,
     feature_registry,
     resolve_source_layers,
 )
 from jlens_nsd.io_utils import atomic_npz
+from jlens_nsd.prompts import prompts_for_condition
 
 
 class ExtractionHelperTests(unittest.TestCase):
+    def test_model_free_endpoint_audit_covers_every_condition(self) -> None:
+        class CharacterTokenizer:
+            def __call__(
+                self,
+                text,
+                *,
+                add_special_tokens,
+                truncation,
+                return_attention_mask,
+            ):
+                del truncation, return_attention_mask
+                ids = [ord(character) for character in text]
+                return {"input_ids": ([1] + ids) if add_special_tokens else ids}
+
+        tables = [
+            [["A", "dog", "runs", "."]],
+            [["Two", "birds", "fly", "!", "A", "tree", "."]],
+        ]
+        rows = [prompts_for_condition(table, 1, "matched_readout") for table in tables]
+        audit = audit_matched_prompt_endpoints(CharacterTokenizer(), rows)
+        self.assertEqual(audit["n_conditions"], 2)
+        self.assertTrue(audit["all_pair_final_token_ids_match"])
+        self.assertTrue(audit["all_prompts_end_with_declared_suffix_tokens"])
+        self.assertEqual(audit["final_readout_token_id"], ord(":"))
+
     def test_relative_layer_selection_uses_fitted_layers(self) -> None:
         self.assertEqual(resolve_source_layers(range(12), 12), [3, 6, 8, 10])
         self.assertEqual(resolve_source_layers([0, 4, 8, 11], 12), [0, 4, 8, 11])
@@ -41,6 +68,11 @@ class ExtractionHelperTests(unittest.TestCase):
         )
         self.assertEqual(features[8]["name"], "visualize__final")
         self.assertEqual(features[-1]["name"], "plain__final")
+        matched = feature_registry(
+            [8, 16, 23, 30], ("integrate_readout", "minimal_readout")
+        )
+        self.assertEqual(matched[0]["name"], "integrate_readout__l08__raw")
+        self.assertEqual(matched[-1]["name"], "minimal_readout__final")
 
     @unittest.skipUnless(torch is not None, "requires the optional model extra")
     def test_last_nonpadding_gather(self) -> None:

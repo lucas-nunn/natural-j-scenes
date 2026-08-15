@@ -54,11 +54,24 @@ finite raw/J/final shapes, both prompt variants, and the recorder relationship
 `block l == hidden_states[l+1]` for non-final blocks. Do not continue on a
 failure; try the matched fallback profile only.
 
+For Lucas's matched-readout control, select the scoped prompt set explicitly:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 jlens-nsd preflight \
+  --profile qwen4b --prompt-set matched_readout \
+  --device cuda --max-length 256
+```
+
+This additionally audits the common suffix tokens and identical final token ID
+for every condition in the selected union. Outputs use the isolated namespace
+`qwen4b__matched_readout`; historical `visualize/plain` outputs are unchanged.
+
 ## 4. Resume-safe orchestration
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 jlens-nsd-orchestrate \
+  --prompt-set matched_readout \
   --profile qwen4b --fallback-profile qwen1.7b \
   --batch-size 8 --chunk-size 64 --max-length 256
 ```

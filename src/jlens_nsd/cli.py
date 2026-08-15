@@ -10,14 +10,21 @@ import numpy as np
 from scipy.spatial.distance import pdist
 
 from .conditions import load_union_ids, prepare_conditions
-from .config import MODEL_SPECS, ExperimentPaths, model_spec, validate_subjects
+from .config import (
+    DEFAULT_PROMPT_SET,
+    MODEL_SPECS,
+    ExperimentPaths,
+    model_spec,
+    run_name,
+    validate_subjects,
+)
 from .extract import (
     extract_embeddings,
     prefetch_artifacts,
     preflight,
 )
 from .io_utils import atomic_json
-from .prompts import load_caption_table, prompts_for_condition
+from .prompts import PROMPT_SETS, load_caption_table, prompts_for_condition
 from .rdms import prepare_grouped_rdms
 from .stages import (
     plot_individual_maps,
@@ -71,10 +78,11 @@ def smoke(
     *,
     with_data: bool = False,
     subjects: list[int] | None = None,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> dict:
     """Fast model/GPU-free validation, optionally including configured data."""
     table = [["A", "dog", "runs", ".", "The", "dog", "crosses", "grass", "."]]
-    prompts = [prompts_for_condition(table, 1)]
+    prompts = [prompts_for_condition(table, 1, prompt_set_key)]
     rng = np.random.default_rng(0)
     toy = rng.normal(size=(5, 16)).astype(np.float32)
     rdm = pdist(toy, metric="correlation").astype(np.float32)
@@ -84,8 +92,10 @@ def smoke(
     result = {
         "ok": True,
         "prompt_lengths_chars": {
-            kind: [len(row[kind]) for row in prompts] for kind in ("visualize", "plain")
+            kind: [len(row[kind]) for row in prompts]
+            for kind in PROMPT_SETS[prompt_set_key].kinds
         },
+        "prompt_set": prompt_set_key,
         "toy_rdm_length": len(rdm),
         "results_dir": str(paths.results),
     }
@@ -95,7 +105,7 @@ def smoke(
         assert paths.captions is not None
         union_ids = load_union_ids(paths)
         captions = load_caption_table(paths.captions)
-        prompts_for_condition(captions, int(union_ids[0]))
+        prompts_for_condition(captions, int(union_ids[0]), prompt_set_key)
         for subject in selected_subjects:
             ids = np.load(
                 paths.conditions / f"subj{subject:02d}_condition_ids.npy",
@@ -133,12 +143,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     smoke_parser.add_argument("--with-data", action="store_true")
     smoke_parser.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
+    smoke_parser.add_argument(
+        "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
 
     for command in ("prefetch", "preflight", "extract", "rdms"):
         subparser = subparsers.add_parser(command)
         subparser.add_argument(
             "--profile", choices=sorted(MODEL_SPECS), default="qwen4b"
         )
+        if command != "prefetch":
+            subparser.add_argument(
+                "--prompt-set",
+                choices=sorted(PROMPT_SETS),
+                default=DEFAULT_PROMPT_SET,
+            )
         if command in {"prefetch", "preflight", "extract"}:
             subparser.add_argument("--model-path", type=Path)
             subparser.add_argument("--lens-root", type=Path)
@@ -159,16 +178,25 @@ def build_parser() -> argparse.ArgumentParser:
 
     searchlight = subparsers.add_parser("searchlight")
     searchlight.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
+    searchlight.add_argument(
+        "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
     searchlight.add_argument("--subject", type=int, required=True)
     searchlight.add_argument("--allow-cpu", action="store_true")
     searchlight.add_argument("--max-samples", type=int)
 
     project = subparsers.add_parser("project")
     project.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
+    project.add_argument(
+        "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
     project.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
 
     plot = subparsers.add_parser("plot")
     plot.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
+    plot.add_argument(
+        "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
     plot.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
     plot.add_argument(
         "--features",
@@ -178,6 +206,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     summary = subparsers.add_parser("summarize")
     summary.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
+    summary.add_argument(
+        "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
     summary.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
     return parser
 
@@ -193,6 +224,7 @@ def main(argv: list[str] | None = None) -> None:
                 paths,
                 with_data=args.with_data,
                 subjects=_subjects(args.subjects),
+                prompt_set_key=args.prompt_set,
             )
         )
     elif args.command == "prefetch":
@@ -205,8 +237,13 @@ def main(argv: list[str] | None = None) -> None:
             allow_download=args.allow_download,
             lens_path=args.lens_path,
             max_length=args.max_length,
+            prompt_set_key=args.prompt_set,
         )
-        destination = paths.results / "preflight" / f"{args.profile}.json"
+        destination = (
+            paths.results
+            / "preflight"
+            / f"{run_name(args.profile, args.prompt_set)}.json"
+        )
         atomic_json(destination, result)
         _json(result)
     elif args.command == "extract":
@@ -224,10 +261,18 @@ def main(argv: list[str] | None = None) -> None:
                 seed=args.seed,
                 max_conditions=args.max_conditions,
                 output_name=args.output_name,
+                prompt_set_key=args.prompt_set,
             )
         )
     elif args.command == "rdms":
-        _json(prepare_grouped_rdms(paths, args.profile, _subjects(args.subjects)))
+        _json(
+            prepare_grouped_rdms(
+                paths,
+                args.profile,
+                _subjects(args.subjects),
+                prompt_set_key=args.prompt_set,
+            )
+        )
     elif args.command == "searchlight":
         run_searchlight_subject(
             paths,
@@ -235,9 +280,15 @@ def main(argv: list[str] | None = None) -> None:
             args.subject,
             allow_cpu=args.allow_cpu,
             max_samples=args.max_samples,
+            prompt_set_key=args.prompt_set,
         )
     elif args.command == "project":
-        project_subjects(paths, args.profile, _subjects(args.subjects))
+        project_subjects(
+            paths,
+            args.profile,
+            _subjects(args.subjects),
+            prompt_set_key=args.prompt_set,
+        )
     elif args.command == "plot":
         features = args.features.split(",") if args.features else None
         _json(
@@ -249,10 +300,18 @@ def main(argv: list[str] | None = None) -> None:
                 roi_overlay=(
                     None if args.roi_overlay.lower() == "none" else args.roi_overlay
                 ),
+                prompt_set_key=args.prompt_set,
             )
         )
     elif args.command == "summarize":
-        _json(summarize(paths, args.profile, _subjects(args.subjects)))
+        _json(
+            summarize(
+                paths,
+                args.profile,
+                _subjects(args.subjects),
+                prompt_set_key=args.prompt_set,
+            )
+        )
     else:  # pragma: no cover - argparse enforces the command set
         raise AssertionError(args.command)
 

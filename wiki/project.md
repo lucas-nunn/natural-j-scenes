@@ -26,6 +26,19 @@
 - Group manifest is the only mapping between lexical filenames, one-based
   model indices, projection surfaces, plots, and report features.
 
+## Matched-readout extension
+
+Lucas's new control does not supersede the historical prompt pair. It is an
+isolated `matched_readout` prompt set and filesystem namespace. Detailed hard
+gates, statistics, and live run provenance are cached in
+`wiki/matched-readout-control.md` and documented for review in
+`docs/MATCHED_READOUT_CONTROL.md`.
+
+The matched-readout subject-1 validation and eight-subject run completed on
+2026-08-15. Exact run provenance and results are in
+`wiki/matched-readout-control.md`; human-facing results and compact artifacts
+are in `docs/MATCHED_READOUT_RESULTS.md`.
+
 ## Dependency audit
 
 - Audited upstream/merge-base commit:

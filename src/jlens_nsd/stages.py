@@ -15,21 +15,27 @@ from pathlib import Path
 import numpy as np
 
 from .config import (
+    DEFAULT_PROMPT_SET,
     N_SAMPLES,
     N_SESSIONS,
     N_SUBJECTS,
     ExperimentPaths,
     group_name,
+    run_name,
     validate_subjects,
 )
 from .io_utils import atomic_json, atomic_npy
 
 
-def _group_manifest(paths: ExperimentPaths, profile: str) -> dict:
+def _group_manifest(
+    paths: ExperimentPaths,
+    profile: str,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
+) -> dict:
     path = (
         paths.searchlight_base
         / "serialised_models_correlation"
-        / group_name(profile)
+        / group_name(profile, prompt_set_key)
         / "group_manifest.json"
     )
     if not path.exists():
@@ -44,6 +50,7 @@ def run_searchlight_subject(
     *,
     allow_cpu: bool = False,
     max_samples: int | None = None,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> None:
     """Correlate all model RDMs while computing each brain RDM once."""
     if not 1 <= subject <= N_SUBJECTS:
@@ -52,7 +59,7 @@ def run_searchlight_subject(
 
     run_searchlight(
         paths,
-        _group_manifest(paths, profile)["group_name"],
+        _group_manifest(paths, profile, prompt_set_key)["group_name"],
         subject,
         allow_cpu=allow_cpu,
         max_samples=max_samples,
@@ -63,10 +70,16 @@ def project_subjects(
     paths: ExperimentPaths,
     profile: str,
     subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+    *,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> None:
     from .nsd_adapter import project_to_fsaverage
 
-    project_to_fsaverage(paths, _group_manifest(paths, profile)["group_name"], subjects)
+    project_to_fsaverage(
+        paths,
+        _group_manifest(paths, profile, prompt_set_key)["group_name"],
+        subjects,
+    )
 
 
 def _surface_path(
@@ -94,12 +107,13 @@ def plot_individual_maps(
     subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
     feature_names: Sequence[str] | None = None,
     roi_overlay: str | None = "streams",
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> list[str]:
     """Plot projected surfaces using the manifest's model-index mapping."""
-    manifest = _group_manifest(paths, profile)
+    manifest = _group_manifest(paths, profile, prompt_set_key)
     group = manifest["group_name"]
     selected = set(feature_names) if feature_names is not None else None
-    output_dir = paths.reports / "figures" / profile
+    output_dir = paths.reports / "figures" / run_name(profile, prompt_set_key)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     import matplotlib
@@ -202,11 +216,139 @@ def _bh_adjust(p_values: Sequence[float]) -> list[float]:
     return result.tolist()
 
 
+def _comparison_rows(
+    subject_scores: np.ndarray,
+    feature_names: Sequence[str],
+    prompt_set_key: str,
+) -> list[dict]:
+    """Build contrasts and adjust each predeclared BH family independently."""
+    index_by_feature = {feature: index for index, feature in enumerate(feature_names)}
+    specifications = []
+    if prompt_set_key == "matched_readout":
+        for prompt in ("integrate_readout", "minimal_readout"):
+            for layer in (8, 16, 23, 30):
+                specifications.append(
+                    {
+                        "comparison_type": "j_vs_raw",
+                        "bh_family": "matched_readout_j_vs_raw_8",
+                        "feature": f"{prompt}__l{layer:02d}__j",
+                        "baseline": f"{prompt}__l{layer:02d}__raw",
+                        "representation_kind": "j_minus_raw",
+                        "layer": layer,
+                    }
+                )
+        for kind in ("raw", "j"):
+            for layer in (8, 16, 23, 30):
+                specifications.append(
+                    {
+                        "comparison_type": "integrate_vs_minimal",
+                        "bh_family": "matched_readout_prompt_pair_9",
+                        "feature": f"integrate_readout__l{layer:02d}__{kind}",
+                        "baseline": f"minimal_readout__l{layer:02d}__{kind}",
+                        "representation_kind": kind,
+                        "layer": layer,
+                    }
+                )
+        specifications.append(
+            {
+                "comparison_type": "integrate_vs_minimal",
+                "bh_family": "matched_readout_prompt_pair_9",
+                "feature": "integrate_readout__final",
+                "baseline": "minimal_readout__final",
+                "representation_kind": "final",
+                "layer": None,
+            }
+        )
+    else:
+        for feature in feature_names:
+            if not feature.endswith("__j"):
+                continue
+            prefix = feature[: -len("__j")]
+            prompt = feature.split("__", 1)[0]
+            for baseline in (
+                f"{prefix}__raw",
+                f"{prompt}__final",
+                "mpnet_reference",
+            ):
+                specifications.append(
+                    {
+                        "comparison_type": "historical_j_vs_baseline",
+                        "bh_family": "historical_j_vs_baselines",
+                        "feature": feature,
+                        "baseline": baseline,
+                        "representation_kind": "j",
+                        "layer": int(prefix.rsplit("l", 1)[1]),
+                    }
+                )
+
+    rows = []
+    for specification in specifications:
+        feature = specification["feature"]
+        baseline = specification["baseline"]
+        if feature not in index_by_feature or baseline not in index_by_feature:
+            raise ValueError(f"missing comparison feature: {feature} or {baseline}")
+        differences = (
+            subject_scores[:, index_by_feature[feature]]
+            - subject_scores[:, index_by_feature[baseline]]
+        )
+        mean, low, high = _mean_ci(differences)
+        rows.append(
+            {
+                **specification,
+                "mean_delta": mean,
+                "ci_low": low,
+                "ci_high": high,
+                "exact_p": _exact_sign_flip_p(differences),
+                "fdr_q": math.nan,
+            }
+        )
+    families = sorted({row["bh_family"] for row in rows})
+    for family in families:
+        indices = [
+            index for index, row in enumerate(rows) if row["bh_family"] == family
+        ]
+        adjusted = _bh_adjust([rows[index]["exact_p"] for index in indices])
+        for index, q_value in zip(indices, adjusted, strict=True):
+            rows[index]["fdr_q"] = q_value
+    return rows
+
+
+def _performance_table_rows(
+    score_rows: Sequence[dict], comparison_rows: Sequence[dict]
+) -> list[dict]:
+    """Join exact group scores to every inferential contrast for review."""
+    scores = {row["feature"]: row for row in score_rows}
+    output = []
+    for comparison in comparison_rows:
+        feature = scores[comparison["feature"]]
+        baseline = scores[comparison["baseline"]]
+        output.append(
+            {
+                "bh_family": comparison["bh_family"],
+                "comparison_type": comparison["comparison_type"],
+                "feature": comparison["feature"],
+                "feature_group_mean": feature["mean_correlation"],
+                "feature_ci_low": feature["ci_low"],
+                "feature_ci_high": feature["ci_high"],
+                "baseline": comparison["baseline"],
+                "baseline_group_mean": baseline["mean_correlation"],
+                "baseline_ci_low": baseline["ci_low"],
+                "baseline_ci_high": baseline["ci_high"],
+                "mean_delta": comparison["mean_delta"],
+                "delta_ci_low": comparison["ci_low"],
+                "delta_ci_high": comparison["ci_high"],
+                "exact_p_two_sided": comparison["exact_p"],
+                "bh_q_within_declared_family": comparison["fdr_q"],
+            }
+        )
+    return output
+
+
 def _write_csv(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.tmp")
     with temporary.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     temporary.replace(path)
@@ -239,7 +381,9 @@ def _html_report(summary: dict) -> str:
             "<tr>"
             + cells(
                 [
-                    row["j_feature"],
+                    row["comparison_type"],
+                    row["bh_family"],
+                    row["feature"],
                     row["baseline"],
                     f"{row['mean_delta']:.5f}",
                     f"[{row['ci_low']:.5f}, {row['ci_high']:.5f}]",
@@ -249,6 +393,15 @@ def _html_report(summary: dict) -> str:
             )
             + "</tr>"
         )
+    if summary.get("prompt_set") == "matched_readout":
+        comparison_heading = "Predeclared matched-readout comparisons"
+        family_note = (
+            "BH q-values are adjusted separately within the eight J-vs-raw "
+            "tests and the nine integrate-vs-minimal tests."
+        )
+    else:
+        comparison_heading = "Matched J-space comparisons"
+        family_note = "BH q-values use the historical comparison family."
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -264,19 +417,65 @@ th,td{{padding:.5rem .65rem;border-bottom:1px solid #dce3e8;text-align:left}} th
 <p>Values are searchlight-center correlations averaged within sample, then within subject. Confidence intervals and exact sign-flip tests use subjects as the independent unit (n={summary["n_subjects"]}). Runs with one subject are descriptive validations, not population inference. This is an exploratory summary, not a held-out model-selection analysis.</p>
 <h2>Feature scores</h2>
 <table><thead><tr><th>Feature</th><th>Mean r</th><th>95% subject CI</th><th>Relative magnitude</th></tr></thead><tbody>{"".join(score_rows)}</tbody></table>
-<h2>Matched J-space comparisons</h2>
-<table><thead><tr><th>J feature</th><th>Baseline</th><th>Mean Δr</th><th>95% subject CI</th><th>Exact p</th><th>BH q</th></tr></thead><tbody>{"".join(comparison_rows)}</tbody></table>
+<h2>{html.escape(comparison_heading)}</h2>
+<p>{html.escape(family_note)}</p>
+<table><thead><tr><th>Contrast</th><th>BH family</th><th>Feature</th><th>Baseline</th><th>Mean Δr</th><th>95% subject CI</th><th>Exact p</th><th>BH q</th></tr></thead><tbody>{"".join(comparison_rows)}</tbody></table>
 </body></html>"""
+
+
+def _plot_matched_layer_summary(summary: dict, path: Path) -> None:
+    """Render the compact, review-oriented layer performance figure."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    scores = {row["feature"]: row for row in summary["scores"]}
+    layers = np.asarray([8, 16, 23, 30])
+    colors = {"raw": "#7A8797", "j": "#2457C5"}
+    figure, axes = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True)
+    for axis, prompt in zip(
+        axes, ("minimal_readout", "integrate_readout"), strict=True
+    ):
+        for kind in ("raw", "j"):
+            rows = [scores[f"{prompt}__l{layer:02d}__{kind}"] for layer in layers]
+            means = np.asarray([row["mean_correlation"] for row in rows])
+            lower = means - np.asarray([row["ci_low"] for row in rows])
+            upper = np.asarray([row["ci_high"] for row in rows]) - means
+            axis.errorbar(
+                layers,
+                means,
+                yerr=np.vstack([lower, upper]),
+                marker="o",
+                linewidth=2,
+                capsize=4,
+                color=colors[kind],
+                label=kind.upper(),
+            )
+        axis.axhline(0, color="#C7CDD5", linewidth=1)
+        axis.set_title(prompt.replace("_", " "))
+        axis.set_xlabel("Qwen block")
+        axis.set_xticks(layers)
+        axis.grid(axis="y", color="#E4E8ED", linewidth=0.8)
+    axes[0].set_ylabel("Mean searchlight correlation (subject-level 95% CI)")
+    axes[1].legend(frameon=False)
+    figure.suptitle("Matched-readout prompt control", fontsize=15, fontweight="bold")
+    figure.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180, bbox_inches="tight")
+    plt.close(figure)
 
 
 def summarize(
     paths: ExperimentPaths,
     profile: str,
     subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+    *,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> dict:
     """Aggregate samples within subjects and compare matched representations."""
     subjects = validate_subjects(subjects)
-    manifest = _group_manifest(paths, profile)
+    manifest = _group_manifest(paths, profile, prompt_set_key)
     group = manifest["group_name"]
     model_order = manifest["model_order"]
     feature_names = [item["feature"] for item in model_order]
@@ -312,44 +511,21 @@ def summarize(
         )
     score_rows.sort(key=lambda row: row["mean_correlation"], reverse=True)
 
-    index_by_feature = {feature: index for index, feature in enumerate(feature_names)}
-    comparisons = []
-    for feature in feature_names:
-        if not feature.endswith("__j"):
-            continue
-        prefix = feature[: -len("__j")]
-        prompt = feature.split("__", 1)[0]
-        baselines = [f"{prefix}__raw", f"{prompt}__final", "mpnet_reference"]
-        for baseline in baselines:
-            differences = (
-                subject_scores[:, index_by_feature[feature]]
-                - subject_scores[:, index_by_feature[baseline]]
-            )
-            mean, low, high = _mean_ci(differences)
-            comparisons.append(
-                {
-                    "j_feature": feature,
-                    "baseline": baseline,
-                    "mean_delta": mean,
-                    "ci_low": low,
-                    "ci_high": high,
-                    "exact_p": _exact_sign_flip_p(differences),
-                }
-            )
-    q_values = _bh_adjust([row["exact_p"] for row in comparisons])
-    for row, q_value in zip(comparisons, q_values, strict=True):
-        row["fdr_q"] = q_value
+    comparisons = _comparison_rows(subject_scores, feature_names, prompt_set_key)
+    performance_rows = _performance_table_rows(score_rows, comparisons)
 
-    output_dir = paths.reports / profile
+    output_dir = paths.reports / run_name(profile, prompt_set_key)
     output_dir.mkdir(parents=True, exist_ok=True)
     atomic_npy(output_dir / "subject_scores.npy", subject_scores)
     atomic_npy(output_dir / "sample_scores.npy", sample_scores)
     _write_csv(output_dir / "feature_scores.csv", score_rows)
     _write_csv(output_dir / "comparisons.csv", comparisons)
+    _write_csv(output_dir / "performance_table.csv", performance_rows)
     summary = {
         "schema_version": 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "profile": profile,
+        "prompt_set": prompt_set_key,
         "group_name": group,
         "independent_unit": "subject",
         "n_subjects": len(subjects),
@@ -363,6 +539,9 @@ def summarize(
             "sample_scores": str((output_dir / "sample_scores.npy").resolve()),
             "feature_scores_csv": str((output_dir / "feature_scores.csv").resolve()),
             "comparisons_csv": str((output_dir / "comparisons.csv").resolve()),
+            "performance_table_csv": str(
+                (output_dir / "performance_table.csv").resolve()
+            ),
         },
     }
     atomic_json(output_dir / "summary.json", summary)
@@ -371,5 +550,9 @@ def summarize(
     temporary.write_text(_html_report(summary), encoding="utf-8")
     temporary.replace(report_path)
     summary["artifacts"]["html_report"] = str(report_path.resolve())
+    if prompt_set_key == "matched_readout":
+        figure_path = output_dir / "matched_readout_layer_summary.png"
+        _plot_matched_layer_summary(summary, figure_path)
+        summary["artifacts"]["layer_summary_figure"] = str(figure_path.resolve())
     atomic_json(output_dir / "summary.json", summary)
     return summary

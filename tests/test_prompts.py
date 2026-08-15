@@ -3,9 +3,13 @@ from __future__ import annotations
 import unittest
 
 from jlens_nsd.prompts import (
+    INTEGRATION_INSTRUCTION,
+    MATCHED_READOUT_SUFFIX,
     build_prompt,
     captions_for_condition,
     detokenize,
+    matched_prompt_contract,
+    prompts_for_condition,
     split_caption_tokens,
 )
 
@@ -56,3 +60,22 @@ class PromptTests(unittest.TestCase):
         self.assertIn("merely restating", visual)
         self.assertEqual(plain, "- A dog runs.\n- The dog crosses grass.")
         self.assertNotIn("Construct", plain)
+
+    def test_matched_readout_pair_differs_only_by_instruction_prefix(self) -> None:
+        table = [["A", "dog", "runs", ".", "It", "crosses", "grass", "."]]
+        prompts = prompts_for_condition(table, 1, "matched_readout")
+        minimal = (
+            "Source captions:\n- A dog runs.\n- It crosses grass."
+            "\n\nScene representation:"
+        )
+        self.assertEqual(prompts["minimal_readout"], minimal)
+        self.assertEqual(
+            prompts["integrate_readout"],
+            f"{INTEGRATION_INSTRUCTION}\n\n{minimal}",
+        )
+        self.assertEqual(
+            prompts["minimal_readout"][-len(MATCHED_READOUT_SUFFIX) :],
+            prompts["integrate_readout"][-len(MATCHED_READOUT_SUFFIX) :],
+        )
+        contract = matched_prompt_contract(prompts)
+        self.assertTrue(contract["only_instruction_prefix_differs"])
