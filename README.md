@@ -88,6 +88,22 @@ NSD and COCO provenance is described by Allen et al. (2022) and Lin et al.
 The audited generation and validation procedure is in
 [`scripts/make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py).
 
+## Image-only WikiText transfer pilot
+
+The isolated pilot is an **image-only, decoder-residual, out-of-distribution
+transfer** of the released WikiText lens. It is not a vision-tower Jacobian
+Lens: pixels pass through Qwen's vision stack, and the released matrices act
+only on projected 2,560-dimensional decoder residuals. No caption, generated
+description, semantic instruction, chat template, or image–caption fusion is
+present. See the [audited pilot report](docs/IMAGE_ONLY_WIKITEXT_PILOT.md).
+
+![Descriptive image-only pilot scores](docs/assets/image_only_wikitext_pilot_scores.png)
+
+*Figure 3. Whole-searchlight mean RSA correlations for subject 1 and one
+deterministic 100-image sample. Raw and J scores remain paired and separate at
+layers 8, 16, 23, and 30; block 31 is a separate final-residual raw control.
+These values are descriptive and do not support population inference.*
+
 ## Installation
 
 Lightweight development and model-free tests do not install model weights,
