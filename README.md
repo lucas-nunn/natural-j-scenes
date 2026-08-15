@@ -162,10 +162,9 @@ For subset validation, `--subjects 1` scopes condition preparation, RDMs,
 searchlight, projection, plots, and the descriptive report to subject 1. The
 available stages are `prepare`, `prefetch`, `preflight`, `extract`, `rdms`,
 `searchlight`, `project`, `plot`, and `summarize`. See the
-[runbook](docs/RUNBOOK.md) for stage-specific commands and resume behavior, the
-[migration guide](docs/MIGRATION.md) for existing artifact paths, and the
-[upstream compatibility note](docs/UPSTREAM_COMPATIBILITY.md) for the precise
-dependency boundary.
+[runbook](docs/RUNBOOK.md) for stage-specific commands and resume behavior and
+the [upstream compatibility note](docs/UPSTREAM_COMPATIBILITY.md) for the
+precise dependency boundary.
 
 Generated results, external datasets, and model weights remain outside Git and
 are excluded by `.gitignore`; only compact documentation assets such as Figure
