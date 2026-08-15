@@ -62,3 +62,12 @@ be referenced without copying.
 - Full GPU/model/NSD validation remains external: the repository contains no
   weights, NSD beta data, prior MPNet artifacts, searchlight geometry, or
   pycortex/fsaverage assets.
+
+## Subject-subset execution
+
+- The CLI and durable orchestrator accept an explicit subject subset. It scopes
+  condition preparation/union, extraction, grouped RDMs, searchlights,
+  projection, plots, and summary artifacts while preserving the eight-subject
+  default.
+- A one-subject report is explicitly descriptive; its `n=1` confidence limits
+  are undefined and must not be interpreted as population inference.

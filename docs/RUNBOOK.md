@@ -58,7 +58,18 @@ failure; try the matched fallback profile only.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-  jlens-nsd-orchestrate \
+jlens-nsd-orchestrate \
+  --profile qwen4b --fallback-profile qwen1.7b \
+  --batch-size 8 --chunk-size 64 --max-length 256
+```
+
+To validate only a selected subject, pass the same explicit subset through the
+orchestrator. Condition union, extraction, RDMs, searchlight, projection, plots,
+and the descriptive report are then all scoped to that subset:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  jlens-nsd-orchestrate --subjects 1 \
   --profile qwen4b --fallback-profile qwen1.7b \
   --batch-size 8 --chunk-size 64 --max-length 256
 ```

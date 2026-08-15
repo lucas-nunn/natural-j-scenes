@@ -9,7 +9,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .config import MODEL_SPECS, N_SUBJECTS, ExperimentPaths
+from .config import MODEL_SPECS, ExperimentPaths, validate_subjects
 from .io_utils import atomic_json
 
 MODULE = "jlens_nsd.cli"
@@ -29,6 +29,7 @@ class Orchestrator:
             "started_at": _now(),
             "status": "running",
             "selected_profile": None,
+            "subject_numbers": list(args.subjects),
             "stages": [],
         }
         paths.logs.mkdir(parents=True, exist_ok=True)
@@ -106,11 +107,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-length", type=int, default=256)
     parser.add_argument("--skip-plots", action="store_true")
     parser.add_argument("--allow-cpu-searchlight", action="store_true")
+    parser.add_argument(
+        "--subjects",
+        default="1,2,3,4,5,6,7,8",
+        help="comma-separated subject numbers; default: all",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
+    try:
+        args.subjects = validate_subjects(
+            int(item.strip()) for item in args.subjects.split(",") if item.strip()
+        )
+    except ValueError as error:
+        raise SystemExit(f"invalid --subjects: {error}") from error
     paths = ExperimentPaths.from_values(
         results=args.results_dir,
         nsd_dir=args.nsd_dir,
@@ -120,7 +132,8 @@ def main(argv: list[str] | None = None) -> None:
     )
     runner = Orchestrator(paths, args)
     try:
-        runner.run("prepare", ["prepare"])
+        subjects_csv = ",".join(str(subject) for subject in args.subjects)
+        runner.run("prepare", ["prepare", "--subjects", subjects_csv])
         candidates = []
         for profile in (args.profile, args.fallback_profile):
             if profile not in candidates:
@@ -188,8 +201,11 @@ def main(argv: list[str] | None = None) -> None:
                 ),
             ],
         )
-        runner.run(f"rdms_{selected}", ["rdms", "--profile", selected])
-        for subject in range(1, N_SUBJECTS + 1):
+        runner.run(
+            f"rdms_{selected}",
+            ["rdms", "--profile", selected, "--subjects", subjects_csv],
+        )
+        for subject in args.subjects:
             searchlight_args = [
                 "searchlight",
                 "--profile",
@@ -200,10 +216,19 @@ def main(argv: list[str] | None = None) -> None:
             if args.allow_cpu_searchlight:
                 searchlight_args.append("--allow-cpu")
             runner.run(f"searchlight_subj{subject:02d}", searchlight_args)
-        runner.run(f"project_{selected}", ["project", "--profile", selected])
+        runner.run(
+            f"project_{selected}",
+            ["project", "--profile", selected, "--subjects", subjects_csv],
+        )
         if not args.skip_plots:
-            runner.run(f"plot_{selected}", ["plot", "--profile", selected])
-        runner.run(f"summarize_{selected}", ["summarize", "--profile", selected])
+            runner.run(
+                f"plot_{selected}",
+                ["plot", "--profile", selected, "--subjects", subjects_csv],
+            )
+        runner.run(
+            f"summarize_{selected}",
+            ["summarize", "--profile", selected, "--subjects", subjects_csv],
+        )
         runner.finish("complete")
         print(f"overnight pipeline complete for {selected}", flush=True)
     except Exception as error:

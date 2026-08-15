@@ -14,7 +14,14 @@ from pathlib import Path
 
 import numpy as np
 
-from .config import N_SAMPLES, N_SESSIONS, N_SUBJECTS, ExperimentPaths, group_name
+from .config import (
+    N_SAMPLES,
+    N_SESSIONS,
+    N_SUBJECTS,
+    ExperimentPaths,
+    group_name,
+    validate_subjects,
+)
 from .io_utils import atomic_json, atomic_npy
 
 
@@ -253,8 +260,8 @@ th,td{{padding:.5rem .65rem;border-bottom:1px solid #dce3e8;text-align:left}} th
 .bar{{display:block;height:.8rem;min-width:2px;background:#356fc0;border-radius:3px}} code{{background:#edf2f5;padding:.12rem .25rem}}
 </style></head><body>
 <h1>Jacobian Lens × NSD</h1>
-<p class="meta">Profile <code>{html.escape(summary["profile"])}</code>; 8 subjects × 10 sessions × 8 matched 100-image samples. Generated {html.escape(summary["created_at"])}.</p>
-<p>Values are searchlight-center correlations averaged within sample, then within subject. Confidence intervals and exact sign-flip tests use subjects as the independent unit (n=8). This is an exploratory descriptive summary, not a held-out model-selection analysis.</p>
+<p class="meta">Profile <code>{html.escape(summary["profile"])}</code>; {summary["n_subjects"]} subject(s) × {summary["n_sessions"]} sessions × {summary["n_samples_per_subject"]} matched 100-image samples. Generated {html.escape(summary["created_at"])}.</p>
+<p>Values are searchlight-center correlations averaged within sample, then within subject. Confidence intervals and exact sign-flip tests use subjects as the independent unit (n={summary["n_subjects"]}). Runs with one subject are descriptive validations, not population inference. This is an exploratory summary, not a held-out model-selection analysis.</p>
 <h2>Feature scores</h2>
 <table><thead><tr><th>Feature</th><th>Mean r</th><th>95% subject CI</th><th>Relative magnitude</th></tr></thead><tbody>{"".join(score_rows)}</tbody></table>
 <h2>Matched J-space comparisons</h2>
@@ -262,17 +269,22 @@ th,td{{padding:.5rem .65rem;border-bottom:1px solid #dce3e8;text-align:left}} th
 </body></html>"""
 
 
-def summarize(paths: ExperimentPaths, profile: str) -> dict:
+def summarize(
+    paths: ExperimentPaths,
+    profile: str,
+    subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+) -> dict:
     """Aggregate samples within subjects and compare matched representations."""
+    subjects = validate_subjects(subjects)
     manifest = _group_manifest(paths, profile)
     group = manifest["group_name"]
     model_order = manifest["model_order"]
     feature_names = [item["feature"] for item in model_order]
     n_models = len(feature_names)
-    subject_scores = np.empty((N_SUBJECTS, n_models), dtype=np.float64)
-    sample_scores = np.empty((N_SUBJECTS, N_SAMPLES, n_models), dtype=np.float64)
+    subject_scores = np.empty((len(subjects), n_models), dtype=np.float64)
+    sample_scores = np.empty((len(subjects), N_SAMPLES, n_models), dtype=np.float64)
 
-    for subject in range(1, N_SUBJECTS + 1):
+    for subject_index, subject in enumerate(subjects):
         centers = _searchlight_centers(paths, subject)
         for sample_index, path in enumerate(_sample_files(paths, group, subject)):
             volumes = np.load(path, allow_pickle=False)
@@ -284,8 +296,8 @@ def summarize(paths: ExperimentPaths, profile: str) -> dict:
             finite_counts = np.isfinite(flattened).sum(axis=1)
             if np.any(finite_counts == 0):
                 raise ValueError(f"a model has no finite center values in {path}")
-            sample_scores[subject - 1, sample_index] = np.nanmean(flattened, axis=1)
-        subject_scores[subject - 1] = sample_scores[subject - 1].mean(axis=0)
+            sample_scores[subject_index, sample_index] = np.nanmean(flattened, axis=1)
+        subject_scores[subject_index] = sample_scores[subject_index].mean(axis=0)
 
     score_rows = []
     for index, feature in enumerate(feature_names):
@@ -340,7 +352,8 @@ def summarize(paths: ExperimentPaths, profile: str) -> dict:
         "profile": profile,
         "group_name": group,
         "independent_unit": "subject",
-        "n_subjects": N_SUBJECTS,
+        "n_subjects": len(subjects),
+        "subject_numbers": list(subjects),
         "n_sessions": N_SESSIONS,
         "n_samples_per_subject": N_SAMPLES,
         "scores": score_rows,

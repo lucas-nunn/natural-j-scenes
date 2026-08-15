@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from .config import (
     N_SUBJECTS,
     SAMPLE_SIZE,
     ExperimentPaths,
+    validate_subjects,
 )
 from .io_utils import atomic_copy, atomic_json, atomic_npy, sha256_file, stable_hash
 
@@ -44,7 +46,10 @@ def validate_sampling(choices: np.ndarray, n_conditions: int, subject: str) -> N
         raise ValueError(f"{subject} samples are not mutually disjoint")
 
 
-def prepare_conditions(paths: ExperimentPaths) -> dict:
+def prepare_conditions(
+    paths: ExperimentPaths,
+    subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+) -> dict:
     """Write auditable IDs and copies of the existing matched samples."""
     paths.require("nsd_dir", "mpnet_base")
     assert paths.nsd_dir is not None
@@ -52,12 +57,13 @@ def prepare_conditions(paths: ExperimentPaths) -> dict:
         get_subject_conditions,
     )
 
+    subjects = validate_subjects(subjects)
     subject_records = []
     subject_ids: list[np.ndarray] = []
     sampling_dir = paths.conditions / "saved_sampling"
     paths.conditions.mkdir(parents=True, exist_ok=True)
 
-    for subject in range(1, N_SUBJECTS + 1):
+    for subject in subjects:
         subj = f"subj{subject:02d}"
         _, _, conditions = get_subject_conditions(
             str(paths.nsd_dir), subj, N_SESSIONS, keep_only_3repeats=True
@@ -105,7 +111,8 @@ def prepare_conditions(paths: ExperimentPaths) -> dict:
         "created_at": datetime.now(timezone.utc).isoformat(),
         "nsd_id_base": 1,
         "caption_row_expression": "condition_id - 1",
-        "n_subjects": N_SUBJECTS,
+        "n_subjects": len(subjects),
+        "subject_numbers": list(subjects),
         "n_sessions": N_SESSIONS,
         "keep_only_3repeats": True,
         "n_union_conditions": len(union_ids),

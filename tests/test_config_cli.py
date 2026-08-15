@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from jlens_nsd.cli import smoke
-from jlens_nsd.config import ExperimentPaths, model_spec
+from jlens_nsd.config import ExperimentPaths, model_spec, validate_subjects
 
 
 class ConfigAndSmokeTests(unittest.TestCase):
@@ -38,3 +38,10 @@ class ConfigAndSmokeTests(unittest.TestCase):
         paths = ExperimentPaths.from_values(results=Path("out"))
         with self.assertRaisesRegex(ValueError, "--nsd-dir"):
             paths.require("nsd_dir")
+
+    def test_subject_subset_is_validated_and_stable(self) -> None:
+        self.assertEqual(validate_subjects([1, 3]), (1, 3))
+        with self.assertRaisesRegex(ValueError, "unique"):
+            validate_subjects([1, 1])
+        with self.assertRaisesRegex(ValueError, "1..8"):
+            validate_subjects([9])

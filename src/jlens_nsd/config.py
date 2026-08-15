@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterable
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -138,6 +139,18 @@ N_SESSIONS = 10
 N_SAMPLES = 8
 SAMPLE_SIZE = 100
 PROMPT_KINDS = ("visualize", "plain")
+
+
+def validate_subjects(subjects: Iterable[int]) -> tuple[int, ...]:
+    """Return a stable, unique subject subset within the NSD contract."""
+    selected = tuple(subjects)
+    if not selected:
+        raise ValueError("at least one subject is required")
+    if len(set(selected)) != len(selected):
+        raise ValueError("subjects must be unique")
+    if any(subject < 1 or subject > N_SUBJECTS for subject in selected):
+        raise ValueError(f"subjects must be in 1..{N_SUBJECTS}")
+    return selected
 
 
 def group_name(profile: str) -> str:

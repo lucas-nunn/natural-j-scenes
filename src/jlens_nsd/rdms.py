@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -11,7 +11,7 @@ import numpy as np
 from scipy.spatial.distance import pdist
 
 from .conditions import load_union_ids
-from .config import N_SUBJECTS, ExperimentPaths, group_name
+from .config import N_SUBJECTS, ExperimentPaths, group_name, validate_subjects
 from .io_utils import atomic_copy, atomic_json, atomic_npy, sha256_file
 
 
@@ -115,10 +115,15 @@ def _copy_sampling(paths: ExperimentPaths, subject: int) -> dict:
     }
 
 
-def prepare_grouped_rdms(paths: ExperimentPaths, profile: str) -> dict:
-    """Create all subject RDMs without ever allocating a 73K matrix."""
+def prepare_grouped_rdms(
+    paths: ExperimentPaths,
+    profile: str,
+    subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+) -> dict:
+    """Create selected-subject RDMs without ever allocating a 73K matrix."""
     paths.require("mpnet_base")
     assert paths.mpnet_base is not None
+    subjects = validate_subjects(subjects)
     directory, embedding_manifest = _embedding_manifest(paths, profile)
     group = group_name(profile)
     union_ids = load_union_ids(paths)
@@ -134,11 +139,10 @@ def prepare_grouped_rdms(paths: ExperimentPaths, profile: str) -> dict:
     features = [item["name"] for item in embedding_manifest["features"]]
     output_dir = paths.searchlight_base / "serialised_models_correlation" / group
     output_dir.mkdir(parents=True, exist_ok=True)
-    subject_records = {f"subj{s:02d}": [] for s in range(1, N_SUBJECTS + 1)}
+    subject_records = {f"subj{s:02d}": [] for s in subjects}
 
     subject_ids = {
-        subject: _subject_condition_ids(paths, subject)
-        for subject in range(1, N_SUBJECTS + 1)
+        subject: _subject_condition_ids(paths, subject) for subject in subjects
     }
     subject_positions = {}
     for subject, ids in subject_ids.items():
@@ -155,7 +159,7 @@ def prepare_grouped_rdms(paths: ExperimentPaths, profile: str) -> dict:
         )
         _validate_correlation_rows(matrix, feature_name)
         model_name = _feature_model_name(group, feature_name)
-        for subject in range(1, N_SUBJECTS + 1):
+        for subject in subjects:
             subj = f"subj{subject:02d}"
             subject_matrix = matrix[subject_positions[subject]]
             rdm = pdist(subject_matrix, metric="correlation").astype(np.float32)
@@ -175,7 +179,7 @@ def prepare_grouped_rdms(paths: ExperimentPaths, profile: str) -> dict:
             )
         del matrix
 
-    for subject in range(1, N_SUBJECTS + 1):
+    for subject in subjects:
         subj = f"subj{subject:02d}"
         source = (
             paths.mpnet_base
@@ -202,13 +206,12 @@ def prepare_grouped_rdms(paths: ExperimentPaths, profile: str) -> dict:
         )
 
     sampling = {
-        f"subj{subject:02d}": _copy_sampling(paths, subject)
-        for subject in range(1, N_SUBJECTS + 1)
+        f"subj{subject:02d}": _copy_sampling(paths, subject) for subject in subjects
     }
     # get_model_rdms sorts filenames. Record that exact order and a stable
     # 1-based index because projection files use model-1, model-2, ... .
     model_order = []
-    first_subject = "subj01"
+    first_subject = f"subj{subjects[0]:02d}"
     ordered = sorted(
         subject_records[first_subject], key=lambda record: Path(record["path"]).name
     )
@@ -234,6 +237,7 @@ def prepare_grouped_rdms(paths: ExperimentPaths, profile: str) -> dict:
         "created_at": datetime.now(timezone.utc).isoformat(),
         "group_name": group,
         "profile": profile,
+        "subject_numbers": list(subjects),
         "rdm_metric": "correlation",
         "normalization_before_rdm": "none",
         "embedding_manifest": str((directory / "manifest.json").resolve()),

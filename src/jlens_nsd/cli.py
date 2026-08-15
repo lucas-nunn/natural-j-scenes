@@ -10,7 +10,7 @@ import numpy as np
 from scipy.spatial.distance import pdist
 
 from .conditions import load_union_ids, prepare_conditions
-from .config import MODEL_SPECS, ExperimentPaths, model_spec
+from .config import MODEL_SPECS, ExperimentPaths, model_spec, validate_subjects
 from .extract import (
     extract_embeddings,
     prefetch_artifacts,
@@ -56,16 +56,22 @@ def _layers(value: str | None) -> list[int] | None:
 
 def _subjects(value: str) -> list[int]:
     subjects = [int(item.strip()) for item in value.split(",") if item.strip()]
-    if not subjects or any(not 1 <= item <= 8 for item in subjects):
-        raise argparse.ArgumentTypeError("subjects must be a comma list in 1..8")
-    return subjects
+    try:
+        return list(validate_subjects(subjects))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
 
 
 def _json(value) -> None:
     print(json.dumps(value, indent=2, sort_keys=True))
 
 
-def smoke(paths: ExperimentPaths, *, with_data: bool = False) -> dict:
+def smoke(
+    paths: ExperimentPaths,
+    *,
+    with_data: bool = False,
+    subjects: list[int] | None = None,
+) -> dict:
     """Fast model/GPU-free validation, optionally including configured data."""
     table = [["A", "dog", "runs", ".", "The", "dog", "crosses", "grass", "."]]
     prompts = [prompts_for_condition(table, 1)]
@@ -84,12 +90,13 @@ def smoke(paths: ExperimentPaths, *, with_data: bool = False) -> dict:
         "results_dir": str(paths.results),
     }
     if with_data:
+        selected_subjects = validate_subjects(subjects or range(1, 9))
         paths.require("captions")
         assert paths.captions is not None
         union_ids = load_union_ids(paths)
         captions = load_caption_table(paths.captions)
         prompts_for_condition(captions, int(union_ids[0]))
-        for subject in range(1, 9):
+        for subject in selected_subjects:
             ids = np.load(
                 paths.conditions / f"subj{subject:02d}_condition_ids.npy",
                 allow_pickle=False,
@@ -100,7 +107,11 @@ def smoke(paths: ExperimentPaths, *, with_data: bool = False) -> dict:
             )
             if ids.shape != (835,) or sampled.shape != (8, 100):
                 raise RuntimeError(f"subj{subject:02d} alignment smoke failed")
-        result["data_contract"] = {"n_union_ids": len(union_ids), "ok": True}
+        result["data_contract"] = {
+            "n_union_ids": len(union_ids),
+            "subjects": list(selected_subjects),
+            "ok": True,
+        }
     return result
 
 
@@ -113,11 +124,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--jlens-checkout", type=Path)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("prepare", help="lock condition IDs and sample choices")
+    prepare = subparsers.add_parser(
+        "prepare", help="lock condition IDs and sample choices"
+    )
+    prepare.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
     smoke_parser = subparsers.add_parser(
         "smoke", help="run the fast model-free smoke test"
     )
     smoke_parser.add_argument("--with-data", action="store_true")
+    smoke_parser.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
 
     for command in ("prefetch", "preflight", "extract", "rdms"):
         subparser = subparsers.add_parser(command)
@@ -139,6 +154,8 @@ def build_parser() -> argparse.ArgumentParser:
             subparser.add_argument("--seed", type=int, default=0)
             subparser.add_argument("--max-conditions", type=int)
             subparser.add_argument("--output-name")
+        if command == "rdms":
+            subparser.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
 
     searchlight = subparsers.add_parser("searchlight")
     searchlight.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
@@ -161,6 +178,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     summary = subparsers.add_parser("summarize")
     summary.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
+    summary.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
     return parser
 
 
@@ -168,9 +186,15 @@ def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
     paths = _paths(args)
     if args.command == "prepare":
-        _json(prepare_conditions(paths))
+        _json(prepare_conditions(paths, _subjects(args.subjects)))
     elif args.command == "smoke":
-        _json(smoke(paths, with_data=args.with_data))
+        _json(
+            smoke(
+                paths,
+                with_data=args.with_data,
+                subjects=_subjects(args.subjects),
+            )
+        )
     elif args.command == "prefetch":
         _json(prefetch_artifacts(_spec(args)))
     elif args.command == "preflight":
@@ -203,7 +227,7 @@ def main(argv: list[str] | None = None) -> None:
             )
         )
     elif args.command == "rdms":
-        _json(prepare_grouped_rdms(paths, args.profile))
+        _json(prepare_grouped_rdms(paths, args.profile, _subjects(args.subjects)))
     elif args.command == "searchlight":
         run_searchlight_subject(
             paths,
@@ -228,7 +252,7 @@ def main(argv: list[str] | None = None) -> None:
             )
         )
     elif args.command == "summarize":
-        _json(summarize(paths, args.profile))
+        _json(summarize(paths, args.profile, _subjects(args.subjects)))
     else:  # pragma: no cover - argparse enforces the command set
         raise AssertionError(args.command)
 
