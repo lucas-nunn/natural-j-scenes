@@ -1,47 +1,77 @@
 # Jacobian Lens × NSD
 
-Standalone, resumable representational-similarity analysis of ordinary and
-Jacobian-transported Qwen residuals against Natural Scenes Dataset (NSD) brain
-responses.
+## Abstract
 
-```mermaid
-flowchart LR
-  A[Locked 1-based NSD IDs<br/>and matched samples] --> B[Deterministic caption prompts]
-  B --> C[Qwen raw / J / final<br/>residual chunks]
-  C --> D[Grouped subject RDMs<br/>+ MPNet reference]
-  D --> E[One streamed searchlight<br/>per subject/sample]
-  E --> F[fsaverage projection]
-  F --> G[Maps + HTML report]
-```
+This project tests whether Jacobian-transported residual representations from
+Qwen3.5-4B align with human brain responses to natural scenes differently from
+matched raw residual representations. Caption-derived text—not images—is passed
+through the language model, and representational similarity analysis (RSA)
+compares the resulting features with Natural Scenes Dataset (NSD) fMRI
+responses. The comparison holds model, prompt, layer, token position, stimuli,
+and brain-analysis pipeline fixed. The accompanying layer-23 maps are
+descriptive: raw and J-space topographies appear broadly similar, with modest
+local differences, but the figure alone does not establish superior alignment.
 
-## Scientific contract
+## Research question
 
-- Subjects 1–8, sessions 1–10, sorted three-repeat conditions only.
-- Existing eight disjoint 100-image samples per subject are reused exactly.
-- Two fixed prompts (`visualize`, `plain`) are tokenized without a chat template,
-  generation, or truncation. Features use the final non-padding prompt token.
-- Runtime-selected fitted layers nearest 25%, 50%, 75%, and the penultimate
-  decoder block; each yields raw `h_l` and transported `J_l h_l`, plus one final
-  block residual per prompt.
-- Subject RDMs use SciPy correlation distance without feature normalization.
-  All features and the MPNet reference are lexically grouped so each brain RDM
-  is computed once.
+**Do Jacobian-transported (J-space) representations exhibit a different
+spatial distribution or magnitude of brain alignment than raw LLM residual
+representations?** Here, *different* denotes a change relative to the matched
+raw control; it does not imply that J-space is *better*. A claim of better
+alignment requires a defined comparison metric and subject-level inference,
+not visual inspection alone.
 
-The overall methodological paradigm follows Doerig et al.'s alignment of
-language-model representations with NSD brain responses
-([Doerig et al., 2025](https://doi.org/10.1038/s42256-025-01072-0)). These
-choices also follow representational similarity analysis
-([Kriegeskorte et al., 2008](https://doi.org/10.3389/neuro.06.004.2008)), the
-NSD repeated-image design ([Allen et al., 2022](https://doi.org/10.1038/s41593-021-00962-x)),
-COCO caption collection ([Lin et al., 2014](https://doi.org/10.1007/978-3-319-10602-1_48)),
-and the Jacobian Lens residual-transport definition
-([Gurnee et al., 2026](https://transformer-circuits.pub/2026/workspace/index.html)).
-See [the full design](docs/DESIGN.md).
+![Raw and Jacobian-transported layer-23 NSD searchlight maps](docs/assets/visualize_layer23_raw_then_j_all_subjects.jpg)
 
-## Install
+*Figure 1. Raw versus J-space brain alignment at Qwen3.5-4B layer 23 under the
+`visualize` prompt condition. The upper four rows show raw (non-J-space)
+residuals and the lower four rows show Jacobian-transported residuals; within
+each block, subjects 1–8 are ordered row-wise from left to right. Each cortical
+map is the subject-level mean over eight matched 100-stimulus samples, projected
+to `fsaverage`, with stream-ROI contours overlaid. Color encodes searchlight RSA
+correlation (Pearson r between the brain and model correlation-distance RDMs).
+Panels use independent symmetric color limits, reported by the maximum absolute
+value in each title. These maps are descriptive and do not by themselves test
+whether either representation is better.*
 
-Lightweight development and model-free tests do not install Torch, TensorFlow,
-NSD tooling, or weights:
+## Methodology
+
+- **Model and features.** The primary model is
+  [`Qwen/Qwen3.5-4B`](https://huggingface.co/Qwen/Qwen3.5-4B). Layers 8, 16, 23,
+  and 30 contribute the raw residual \(h_l\) and its transported representation
+  \(J_l h_l\); the final decoder-block residual is an additional control. The
+  fixed pretrained `qwen-n1000` lens contains layer-to-final average Jacobians
+  estimated from 1,000 WikiText examples, following the
+  [Jacobian Lens](https://transformer-circuits.pub/2026/workspace/index.html)
+  formulation (Gurnee et al., 2026).
+- **Text inputs.** Each NSD stimulus is represented by its COCO captions. The
+  `plain` pipeline supplies the reconstructed captions directly; `visualize`
+  asks Qwen to integrate those captions into a coherent scene. Both pipelines
+  are deterministic, use no image pixels, chat template, text generation, or
+  truncation, and read out the final non-padding prompt token.
+- **Representational comparison.** For every subject and feature, pairwise
+  correlation-distance RDMs are computed without feature normalization.
+  Matched NSD searchlights compare these model RDMs with local fMRI-pattern
+  RDMs using Pearson correlation. Analyses use subjects 1–8, sessions 1–10,
+  three-repeat conditions, and the same eight disjoint 100-stimulus samples per
+  subject. MPNet is retained as a semantic reference; the primary comparison is
+  always \(J_l h_l\) versus \(h_l\) from the same Qwen layer, prompt, readout,
+  stimuli, and searchlight pipeline.
+
+The overall LLM–NSD alignment paradigm follows
+[Doerig et al. (2025)](https://doi.org/10.1038/s42256-025-01072-0), and the RDM
+comparison follows the original RSA framework of
+[Kriegeskorte, Mur, and Bandettini (2008)](https://doi.org/10.3389/neuro.06.004.2008).
+The repeated-image dataset and caption provenance are described by
+[Allen et al. (2022)](https://doi.org/10.1038/s41593-021-00962-x) and
+[Lin et al. (2014)](https://doi.org/10.1007/978-3-319-10602-1_48), respectively.
+See [DESIGN.md](docs/DESIGN.md) for the full protocol and interpretation
+guardrails.
+
+## Installation
+
+Lightweight development and model-free tests do not install model weights,
+Torch, TensorFlow, or NSD tooling:
 
 ```bash
 python -m venv .venv
@@ -51,24 +81,27 @@ jlens-nsd --help
 jlens-nsd smoke
 ```
 
-Model extraction:
+Install model extraction support separately:
 
 ```bash
 python -m pip install -e '.[model]'
 ```
 
-The NSD source dependency is declared in the `nsd-upstream` extra and pinned to
-`a60e0eafb8d02841159e344adb732062734bc302`. The historical KietzmannLab URL
-currently points to an unavailable repository; the same public history is now
-at `adriendoerig/visuo_llm`. Its package metadata pins TensorFlow 2.15 and a
-large, legacy dependency set. On a compatible Python 3.10/3.11 environment:
+The `nsd-upstream` extra pins NSD source commit
+`a60e0eafb8d02841159e344adb732062734bc302`. Its
+[historical KietzmannLab repository](https://github.com/KietzmannLab/nsd_visuo_semantics)
+is unavailable; the same public history is currently hosted at
+[`adriendoerig/visuo_llm`](https://github.com/adriendoerig/visuo_llm). Because
+the upstream metadata pins TensorFlow 2.15 and a large legacy dependency set,
+use the extra on a compatible Python 3.10/3.11 environment:
 
 ```bash
 python -m pip install -e '.[nsd-upstream]'
 ```
 
-For a modern pre-provisioned scientific environment (including Python 3.12),
-install only its source package and use this project's direct runtime extra:
+In a modern pre-provisioned scientific environment, including Python 3.12,
+install the source without its dependency set and add this project's runtime
+extra:
 
 ```bash
 python -m pip install --no-deps \
@@ -76,28 +109,30 @@ python -m pip install --no-deps \
 python -m pip install -e '.[nsd-runtime]'
 ```
 
-The optional model extra pins Anthropic's `jacobian-lens` source. An explicit
-local checkout can be used instead with `--jlens-checkout` or
+The `model` extra pins Anthropic's `jacobian-lens` source. A local checkout can
+instead be selected with `--jlens-checkout` or
 `JLENS_NSD_JLENS_CHECKOUT`.
 
-## Configure external data
+## Configuration and running
 
-No package default contains a workstation path. Global CLI flags have matching
-environment variables:
+External paths are supplied by global CLI flags or matching environment
+variables; no workstation path is built into the package.
 
-| CLI flag | Environment variable | Meaning |
+| CLI flag | Environment variable | Purpose |
 |---|---|---|
-| `--results-dir` | `JLENS_NSD_RESULTS` | All new/resumed run artifacts; default `./results` |
+| `--results-dir` | `JLENS_NSD_RESULTS` | New or resumed artifacts; default `./results` |
 | `--nsd-dir` | `JLENS_NSD_NSD_DIR` | NSD root |
 | `--captions` | `JLENS_NSD_CAPTIONS` | 73,000-row tokenized caption pickle |
 | `--mpnet-base` | `JLENS_NSD_MPNET_BASE` | Existing 10-session MPNet result tree |
 | `--jlens-checkout` | `JLENS_NSD_JLENS_CHECKOUT` | Optional Jacobian Lens source checkout |
 
-Model-specific local directories use `JLENS_NSD_QWEN4B_MODEL`,
-`JLENS_NSD_QWEN1_7B_MODEL`, and `JLENS_NSD_LENS_ROOT`, or the extraction flags
-`--model-path` and `--lens-root`.
+Local model and lens directories can be set with
+`JLENS_NSD_QWEN4B_MODEL`, `JLENS_NSD_QWEN1_7B_MODEL`, and
+`JLENS_NSD_LENS_ROOT`. The extraction stages also accept `--model-path` and
+`--lens-root`; the orchestrator accepts `--qwen4b-model`,
+`--qwen1-7b-model`, and `--lens-root`.
 
-Example (global flags precede the stage):
+Global flags precede an individual stage:
 
 ```bash
 jlens-nsd \
@@ -110,10 +145,8 @@ jlens-nsd \
 jlens-nsd --results-dir /path/to/jlens-results smoke --with-data
 ```
 
-## Run
-
-The durable orchestration executes extraction and TensorFlow searchlights in
-separate processes and resumes validated chunks/sample maps:
+The resumable end-to-end run uses the canonical 4B profile and a matched 1.7B
+fallback:
 
 ```bash
 jlens-nsd-orchestrate \
@@ -121,25 +154,24 @@ jlens-nsd-orchestrate \
   --nsd-dir /path/to/NSD \
   --captions /path/to/nsd_allWords_per_image.pkl \
   --mpnet-base /path/to/mpnet_10_sessions \
-  --profile qwen4b --fallback-profile qwen1.7b
+  --profile qwen4b --fallback-profile qwen1.7b \
+  --subjects 1,2,3,4,5,6,7,8
 ```
 
-Individual stages are `prepare`, `prefetch`, `preflight`, `extract`, `rdms`,
+For subset validation, `--subjects 1` scopes condition preparation, RDMs,
+searchlight, projection, plots, and the descriptive report to subject 1. The
+available stages are `prepare`, `prefetch`, `preflight`, `extract`, `rdms`,
 `searchlight`, `project`, `plot`, and `summarize`. See the
-[runbook](docs/RUNBOOK.md) and [migration notes](docs/MIGRATION.md).
+[runbook](docs/RUNBOOK.md) for stage-specific commands and resume behavior, the
+[migration guide](docs/MIGRATION.md) for existing artifact paths, and the
+[upstream compatibility note](docs/UPSTREAM_COMPATIBILITY.md) for the precise
+dependency boundary.
 
-## Dependency boundary and limits
-
-The pinned upstream remains the source of NSD condition/mask/RDM/sphere and
-mapping primitives. [A small local adapter](docs/UPSTREAM_COMPATIBILITY.md)
-retains only interfaces absent upstream: streamed beta averaging and grouped
-searchlight correlation, explicit subject/session/sample selection, selective
-projection, and ROI plotting compatibility.
-
-Unit, lint, package, CLI, and synthetic smoke paths are CPU/model/data-free.
-Exact Qwen/lens loading and layer semantics are checked by `preflight` on the
-real artifacts. Full extraction, searchlight numerics, projection, and plots
-cannot be validated without the configured model weights, GPU, NSD betas,
-searchlight geometry, and pycortex/fsaverage assets.
+Generated results, external datasets, and model weights remain outside Git and
+are excluded by `.gitignore`; only compact documentation assets such as Figure
+1 belong in the repository. Model-free unit, lint, package, CLI, and synthetic
+smoke checks run without external data. Real extraction and searchlight checks
+require the configured weights, GPU, NSD data, searchlight geometry, and
+`pycortex`/`fsaverage` assets.
 
 See [ATTRIBUTION.md](ATTRIBUTION.md) and [LICENSE](LICENSE).
