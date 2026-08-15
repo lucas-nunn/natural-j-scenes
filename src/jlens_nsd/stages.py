@@ -8,6 +8,7 @@ import itertools
 import json
 import math
 import pickle
+import re
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
@@ -390,6 +391,29 @@ def _whole_prompt_readout_rows(
     return rows
 
 
+def _manifest_subject_numbers(manifest: dict) -> tuple[int, ...]:
+    """Read subject numbers from either group-manifest schema.
+
+    Group manifests written before subject-subset execution record a
+    ``subjects`` mapping keyed by ``subjNN`` and carry no ``subject_numbers``
+    list. The locked historical comparator is one of those and is immutable,
+    so the reader adapts instead of the artifact.
+    """
+    declared = manifest.get("subject_numbers")
+    if declared is not None:
+        return tuple(int(subject) for subject in declared)
+    subjects = manifest.get("subjects")
+    if not isinstance(subjects, dict):
+        return ()
+    numbers = []
+    for key in subjects:
+        match = re.fullmatch(r"subj(\d+)", str(key))
+        if match is None:
+            return ()
+        numbers.append(int(match.group(1)))
+    return tuple(sorted(numbers))
+
+
 def _load_historical_final_token_scores(
     results_root: Path,
     profile: str,
@@ -411,7 +435,7 @@ def _load_historical_final_token_scores(
             raise FileNotFoundError(f"historical comparator artifact missing: {path}")
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    source_subjects = tuple(manifest.get("subject_numbers", ()))
+    source_subjects = _manifest_subject_numbers(manifest)
     if summary.get("profile") != profile or source_subjects != tuple(
         range(1, N_SUBJECTS + 1)
     ):

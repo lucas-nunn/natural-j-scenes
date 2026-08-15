@@ -8,10 +8,31 @@ from jlens_nsd.stages import (
     _bh_adjust,
     _comparison_rows,
     _exact_sign_flip_p,
+    _manifest_subject_numbers,
     _mean_ci,
     _performance_table_rows,
     _whole_prompt_readout_rows,
 )
+
+
+class ManifestSubjectNumbersTests(unittest.TestCase):
+    def test_reads_explicit_subject_numbers(self) -> None:
+        manifest = {"subject_numbers": [1, 2, 3]}
+        self.assertEqual(_manifest_subject_numbers(manifest), (1, 2, 3))
+
+    def test_falls_back_to_legacy_subjects_mapping(self) -> None:
+        """The locked historical comparator predates ``subject_numbers``."""
+        manifest = {"subjects": {f"subj{index:02d}": {} for index in range(1, 9)}}
+        self.assertEqual(_manifest_subject_numbers(manifest), tuple(range(1, 9)))
+
+    def test_explicit_numbers_win_over_legacy_mapping(self) -> None:
+        manifest = {"subject_numbers": [2], "subjects": {"subj01": {}}}
+        self.assertEqual(_manifest_subject_numbers(manifest), (2,))
+
+    def test_unrecognised_shapes_yield_no_subjects(self) -> None:
+        self.assertEqual(_manifest_subject_numbers({}), ())
+        self.assertEqual(_manifest_subject_numbers({"subjects": ["subj01"]}), ())
+        self.assertEqual(_manifest_subject_numbers({"subjects": {"one": {}}}), ())
 
 
 class SummaryStatisticsTests(unittest.TestCase):
