@@ -17,7 +17,6 @@ flowchart LR
 ## Scientific contract
 
 - Subjects 1–8, sessions 1–10, sorted three-repeat conditions only.
-- NSD IDs stay 1-based; `condition_id - 1` occurs only at caption lookup.
 - Existing eight disjoint 100-image samples per subject are reused exactly.
 - Two fixed prompts (`visualize`, `plain`) are tokenized without a chat template,
   generation, or truncation. Features use the final non-padding prompt token.
@@ -28,7 +27,10 @@ flowchart LR
   All features and the MPNet reference are lexically grouped so each brain RDM
   is computed once.
 
-These choices follow representational similarity analysis
+The overall methodological paradigm follows Doerig et al.'s alignment of
+language-model representations with NSD brain responses
+([Doerig et al., 2025](https://doi.org/10.1038/s42256-025-01072-0)). These
+choices also follow representational similarity analysis
 ([Kriegeskorte et al., 2008](https://doi.org/10.3389/neuro.06.004.2008)), the
 NSD repeated-image design ([Allen et al., 2022](https://doi.org/10.1038/s41593-021-00962-x)),
 COCO caption collection ([Lin et al., 2014](https://doi.org/10.1007/978-3-319-10602-1_48)),
