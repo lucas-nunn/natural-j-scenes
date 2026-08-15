@@ -68,6 +68,26 @@ The repeated-image dataset and caption provenance are described by
 See [DESIGN.md](docs/DESIGN.md) for the full protocol and interpretation
 guardrails.
 
+![Three NSD stimuli, their human captions, and layer-23 J-space vocabulary readouts](docs/assets/visualize_layer23_jspace_readouts.png)
+
+*Figure 2. Illustrative Qwen3.5-4B vocabulary readouts from
+`unembed(J_23 h_23)` under the `visualize` prompt for subject-1 conditions
+10,543, 34,275, and 60,417. Each row uses the same NSD condition for the image,
+captions, and stored transported vector. The five displayed tokens retain their
+raw vocabulary ranks (`#`) and logits after a deterministic formatting-only and
+duplicate-token filter; no semantic terms were selected or removed. The brain
+RSA itself uses the full 2,560-dimensional transported vectors before
+unembedding. Stimulus sources (NSD crop / COCO ID) are
+10,543 / 23,163: [“Chair as Frame” by zeevveez](https://www.flickr.com/photos/zeevveez/7990954613/),
+34,275 / 104,825: [“Coca-Cola cake” by TheSeafarer](https://www.flickr.com/photos/sheilascarborough/9270434659/),
+and 60,417 / 207,117: [“zebra crossing!” by krugergirl26](https://www.flickr.com/photos/71888644@N00/6114561350/);
+all three are licensed [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+NSD and COCO provenance is described by Allen et al. (2022) and Lin et al.
+(2014), cited above.*
+
+The audited generation and validation procedure is in
+[`scripts/make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py).
+
 ## Installation
 
 Lightweight development and model-free tests do not install model weights,
