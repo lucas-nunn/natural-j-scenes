@@ -4,12 +4,14 @@
 Example, from the repository root::
 
     python scripts/make_layer_performance_summary.py \
-      --report-dir /path/to/results/reports/qwen4b
+      --report-dir /path/to/results/reports/qwen4b \
+      --result-root /path/to/results
 
 The report directory must contain feature_scores.csv, comparisons.csv,
 subject_scores.npy, sample_scores.npy, and summary.json from the completed
-eight-subject run. The script does not read searchlight volumes or recompute
-searchlights.
+eight-subject run. The result root must contain the grouped model manifest and
+all native-space searchlight correlation volumes. Searchlights are not
+recomputed, and rendered or projected maps are never read.
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ import hashlib
 import itertools
 import json
 import math
+import pickle
 import platform
 from collections.abc import Sequence
 from pathlib import Path
@@ -33,6 +36,7 @@ N_SUBJECTS = 8
 N_SAMPLES = 8
 N_SESSIONS = 10
 ALPHA = 0.05
+GROUP_NAME = "jlens_qwen4b_group"
 REQUIRED_FILES = (
     "feature_scores.csv",
     "comparisons.csv",
@@ -75,8 +79,14 @@ TABLE_FIELDS = (
     "control_feature",
     "raw_group_mean",
     "raw_ci_95",
+    "raw_peak_searchlight_centre_mean",
+    "raw_peak_searchlight_centre_ci_95",
+    "raw_peak_searchlight_centre_range",
     "j_group_mean",
     "j_ci_95",
+    "j_peak_searchlight_centre_mean",
+    "j_peak_searchlight_centre_ci_95",
+    "j_peak_searchlight_centre_range",
     "j_minus_raw_delta",
     "delta_ci_95",
     "exact_p_two_sided",
@@ -84,6 +94,9 @@ TABLE_FIELDS = (
     "bh_significant_q_lt_0_05",
     "final_control_group_mean",
     "final_control_ci_95",
+    "final_control_peak_searchlight_centre_mean",
+    "final_control_peak_searchlight_centre_ci_95",
+    "final_control_peak_searchlight_centre_range",
 )
 
 
@@ -95,6 +108,23 @@ def parse_args() -> argparse.Namespace:
         required=True,
         type=Path,
         help="completed qwen4b report directory containing the five source files",
+    )
+    parser.add_argument(
+        "--result-root",
+        required=True,
+        type=Path,
+        help=(
+            "authoritative full result root containing searchlight/serialised_models_"
+            "correlation and searchlight/searchlight_respectedsampling_correlation"
+        ),
+    )
+    parser.add_argument(
+        "--searchlight-centres-root",
+        type=Path,
+        help=(
+            "optional directory containing subjXX authoritative searchlight-centre "
+            "arrays; defaults to the upstream mpnet_10_sessions/precomputed sibling"
+        ),
     )
     parser.add_argument(
         "--table-output",
@@ -333,6 +363,279 @@ def validate_report(report_dir: Path) -> dict[str, Any]:
     }
 
 
+def validate_model_order(manifest: dict[str, Any]) -> None:
+    """Validate the manifest mapping used by grouped volume axis zero."""
+    expected_metadata = {
+        "schema_version": 1,
+        "profile": "qwen4b",
+        "group_name": GROUP_NAME,
+    }
+    mismatches = {
+        key: (manifest.get(key), expected)
+        for key, expected in expected_metadata.items()
+        if manifest.get(key) != expected
+    }
+    if mismatches:
+        raise ValueError(f"unexpected group manifest metadata: {mismatches}")
+
+    model_order = manifest.get("model_order")
+    if not isinstance(model_order, list):
+        raise ValueError("group manifest model_order must be a list")
+    features = tuple(item.get("feature") for item in model_order)
+    indices = tuple(item.get("model_index") for item in model_order)
+    model_names = tuple(item.get("model_name") for item in model_order)
+    expected_names = tuple(
+        f"{GROUP_NAME}__{feature}" for feature in EXPECTED_MODEL_ORDER
+    )
+    if features != EXPECTED_MODEL_ORDER:
+        raise ValueError(
+            f"group manifest model order mismatch: {features!r} != "
+            f"{EXPECTED_MODEL_ORDER!r}"
+        )
+    if indices != tuple(range(1, len(EXPECTED_MODEL_ORDER) + 1)):
+        raise ValueError("group manifest model indices are not consecutive and 1-based")
+    if model_names != expected_names:
+        raise ValueError("group manifest model names do not match feature order")
+
+
+def _load_searchlight_centres(path: Path) -> np.ndarray:
+    """Load and strictly validate one authoritative native-space centre array."""
+    if not path.is_file():
+        raise FileNotFoundError(f"searchlight-centre array not found: {path}")
+    with path.open("rb") as handle:
+        raw_centres = np.asarray(pickle.load(handle))
+    if raw_centres.ndim != 1 or len(raw_centres) == 0:
+        raise ValueError(f"searchlight centres must be a nonempty 1D array: {path}")
+    if not np.issubdtype(raw_centres.dtype, np.integer):
+        raise ValueError(f"searchlight centres must have integer dtype: {path}")
+    centres = raw_centres.astype(np.int64, copy=False)
+    if np.any(centres < 0):
+        raise ValueError(f"searchlight centres contain negative indices: {path}")
+    if len(np.unique(centres)) != len(centres):
+        raise ValueError(f"searchlight centres contain duplicate indices: {path}")
+    return centres
+
+
+def validated_centre_values(
+    volume: np.ndarray,
+    centres: np.ndarray,
+    *,
+    label: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Select authoritative centres and return values plus per-model finite counts."""
+    volume = np.asarray(volume)
+    if volume.ndim != 4:
+        raise ValueError(
+            f"{label} must have shape (models, x, y, z), got {volume.shape}"
+        )
+    if volume.shape[0] != len(EXPECTED_MODEL_ORDER):
+        raise ValueError(
+            f"{label} has {volume.shape[0]} models, expected {len(EXPECTED_MODEL_ORDER)}"
+        )
+    if volume.dtype != np.float64:
+        raise ValueError(f"{label} must have dtype float64, got {volume.dtype}")
+    centres = np.asarray(centres)
+    if centres.ndim != 1 or not np.issubdtype(centres.dtype, np.integer):
+        raise ValueError(f"{label} centres must be a 1D integer array")
+    spatial_size = int(np.prod(volume.shape[1:]))
+    if len(centres) == 0 or np.any(centres < 0) or np.any(centres >= spatial_size):
+        raise ValueError(f"{label} centres are empty or outside its spatial shape")
+    values = np.asarray(volume.reshape(volume.shape[0], -1)[:, centres])
+    finite_counts = np.isfinite(values).sum(axis=1)
+    if np.any(finite_counts == 0):
+        features = [
+            EXPECTED_MODEL_ORDER[index] for index in np.flatnonzero(finite_counts == 0)
+        ]
+        raise ValueError(f"{label} has no finite centre values for {features}")
+    return values, finite_counts
+
+
+def aggregate_peak_searchlight_centres(
+    sample_center_maps: Sequence[np.ndarray],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Average sample maps centrewise, then take each model's finite maximum.
+
+    A centre is eligible only when all sample values are finite. The second
+    return value is the number of finite samples at each winning centre.
+    """
+    if not sample_center_maps:
+        raise ValueError("at least one sample centre map is required")
+    expected_shape = np.asarray(sample_center_maps[0]).shape
+    if len(expected_shape) != 2:
+        raise ValueError("sample centre maps must have shape (models, centres)")
+    sums = np.zeros(expected_shape, dtype=np.float64)
+    counts = np.zeros(expected_shape, dtype=np.uint16)
+    for sample_index, sample_map in enumerate(sample_center_maps):
+        values = np.asarray(sample_map, dtype=np.float64)
+        if values.shape != expected_shape:
+            raise ValueError(
+                f"sample centre map {sample_index} has shape {values.shape}, "
+                f"expected {expected_shape}"
+            )
+        finite = np.isfinite(values)
+        np.add(sums, values, out=sums, where=finite)
+        counts += finite
+
+    mean_maps = np.full(expected_shape, np.nan, dtype=np.float64)
+    complete = counts == len(sample_center_maps)
+    np.divide(sums, len(sample_center_maps), out=mean_maps, where=complete)
+    finite_mean_counts = np.isfinite(mean_maps).sum(axis=1)
+    if np.any(finite_mean_counts == 0):
+        raise ValueError("a model has no finite subject-mean searchlight centres")
+    safe_means = np.where(np.isfinite(mean_maps), mean_maps, -np.inf)
+    peak_indices = np.argmax(safe_means, axis=1)
+    model_indices = np.arange(expected_shape[0])
+    peaks = mean_maps[model_indices, peak_indices]
+    peak_sample_counts = counts[model_indices, peak_indices].astype(np.int64)
+    return peaks, peak_sample_counts
+
+
+def _default_searchlight_centres_root(result_root: Path) -> Path:
+    return result_root.parent.parent / "results" / "mpnet_10_sessions" / "precomputed"
+
+
+def load_peak_summaries(
+    result_root: Path,
+    report_data: dict[str, Any],
+    searchlight_centres_root: Path | None = None,
+) -> dict[str, Any]:
+    """Validate native grouped volumes and compute subject-first peak summaries."""
+    result_root = result_root.resolve()
+    centres_root = (
+        searchlight_centres_root.resolve()
+        if searchlight_centres_root is not None
+        else _default_searchlight_centres_root(result_root)
+    )
+    manifest_path = (
+        result_root
+        / "searchlight"
+        / "serialised_models_correlation"
+        / GROUP_NAME
+        / "group_manifest.json"
+    )
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"group manifest not found: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    validate_model_order(manifest)
+
+    report_sample_scores = report_data["sample_scores"]
+    subject_peaks = np.empty((N_SUBJECTS, len(EXPECTED_MODEL_ORDER)), dtype=np.float64)
+    provenance_subjects: dict[str, Any] = {}
+    for subject in range(1, N_SUBJECTS + 1):
+        subj = f"subj{subject:02d}"
+        centre_path = (
+            centres_root / subj / f"{subj}-func1pt8mm-6rad-searchlight_centers.npy"
+        )
+        centres = _load_searchlight_centres(centre_path)
+        volume_dir = (
+            result_root
+            / "searchlight"
+            / "searchlight_respectedsampling_correlation"
+            / subj
+            / GROUP_NAME
+            / "corr_vols_correlation"
+        )
+        expected_files = [
+            volume_dir / f"{subj}_nsd-{GROUP_NAME}_func1pt8mm_sample-{sample}.npy"
+            for sample in range(N_SAMPLES)
+        ]
+        actual_files = sorted(volume_dir.glob("*sample-*.npy"))
+        if actual_files != expected_files:
+            missing = sorted(
+                str(path) for path in set(expected_files) - set(actual_files)
+            )
+            extra = sorted(
+                str(path) for path in set(actual_files) - set(expected_files)
+            )
+            raise ValueError(
+                f"expected exactly samples 0..{N_SAMPLES - 1} for {subj}; "
+                f"missing={missing}, extra={extra}"
+            )
+
+        center_maps: list[np.ndarray] = []
+        volume_records: list[dict[str, Any]] = []
+        expected_shape: tuple[int, ...] | None = None
+        for sample_index, volume_path in enumerate(expected_files):
+            volume = np.load(volume_path, mmap_mode="r", allow_pickle=False)
+            shape = tuple(int(value) for value in volume.shape)
+            if expected_shape is None:
+                expected_shape = shape
+            elif shape != expected_shape:
+                raise ValueError(
+                    f"{volume_path} shape {shape} differs from {expected_shape}"
+                )
+            values, finite_counts = validated_centre_values(
+                volume, centres, label=str(volume_path)
+            )
+            sample_means = np.divide(
+                np.where(np.isfinite(values), values, 0.0).sum(axis=1),
+                finite_counts,
+            )
+            for model_index, feature in enumerate(EXPECTED_MODEL_ORDER):
+                assert_close(
+                    sample_means[model_index],
+                    report_sample_scores[
+                        subject - 1,
+                        sample_index,
+                        model_index,
+                    ],
+                    f"{subj} sample {sample_index} {feature} searchlight mean",
+                )
+            center_maps.append(values)
+            volume_records.append(
+                {
+                    "sample_index": sample_index,
+                    "path": str(volume_path.resolve()),
+                    "sha256": sha256_file(volume_path),
+                    "shape_models_x_native_xyz": "x".join(map(str, shape)),
+                    "finite_centre_counts_in_model_order_csv": ",".join(
+                        map(str, finite_counts.tolist())
+                    ),
+                }
+            )
+
+        peaks, winning_counts = aggregate_peak_searchlight_centres(center_maps)
+        subject_peaks[subject - 1] = peaks
+        provenance_subjects[subj] = {
+            "searchlight_centres": {
+                "path": str(centre_path.resolve()),
+                "sha256": sha256_file(centre_path),
+                "count": len(centres),
+            },
+            "sample_volumes": volume_records,
+            "winning_centre_finite_sample_counts_in_model_order": (
+                winning_counts.tolist()
+            ),
+        }
+
+    peaks_by_feature: dict[str, dict[str, Any]] = {}
+    for model_index, feature in enumerate(EXPECTED_MODEL_ORDER):
+        values = subject_peaks[:, model_index]
+        mean, low, high = mean_ci(values)
+        peaks_by_feature[feature] = {
+            "mean": mean,
+            "ci_low": low,
+            "ci_high": high,
+            "range_low": float(values.min()),
+            "range_high": float(values.max()),
+            "subject_peaks": values.tolist(),
+        }
+
+    return {
+        "peaks": peaks_by_feature,
+        "subject_peaks": subject_peaks,
+        "searchlight_provenance": {
+            "result_root": str(result_root),
+            "searchlight_centres_root": str(centres_root),
+            "group_manifest": {
+                "path": str(manifest_path.resolve()),
+                "sha256": sha256_file(manifest_path),
+            },
+            "subjects": provenance_subjects,
+        },
+    }
+
+
 def format_number(value: float) -> str:
     return repr(float(value))
 
@@ -341,9 +644,14 @@ def format_ci(row: dict[str, Any]) -> str:
     return f"[{format_number(row['ci_low'])}, {format_number(row['ci_high'])}]"
 
 
+def format_range(row: dict[str, Any]) -> str:
+    return f"[{format_number(row['range_low'])}, {format_number(row['range_high'])}]"
+
+
 def build_table_rows(data: dict[str, Any]) -> list[dict[str, str]]:
     scores = data["scores"]
     comparisons = data["comparisons"]
+    peaks = data["peaks"]
     rows: list[dict[str, str]] = []
     for prompt in PROMPTS:
         for layer in LAYERS:
@@ -351,6 +659,8 @@ def build_table_rows(data: dict[str, Any]) -> list[dict[str, str]]:
             j_feature = f"{prompt}__l{layer:02d}__j"
             raw = scores[raw_feature]
             j_score = scores[j_feature]
+            raw_peak = peaks[raw_feature]
+            j_peak = peaks[j_feature]
             delta = comparisons[(j_feature, raw_feature)]
             rows.append(
                 {
@@ -362,8 +672,14 @@ def build_table_rows(data: dict[str, Any]) -> list[dict[str, str]]:
                     "control_feature": "",
                     "raw_group_mean": format_number(raw["mean_correlation"]),
                     "raw_ci_95": format_ci(raw),
+                    "raw_peak_searchlight_centre_mean": format_number(raw_peak["mean"]),
+                    "raw_peak_searchlight_centre_ci_95": format_ci(raw_peak),
+                    "raw_peak_searchlight_centre_range": format_range(raw_peak),
                     "j_group_mean": format_number(j_score["mean_correlation"]),
                     "j_ci_95": format_ci(j_score),
+                    "j_peak_searchlight_centre_mean": format_number(j_peak["mean"]),
+                    "j_peak_searchlight_centre_ci_95": format_ci(j_peak),
+                    "j_peak_searchlight_centre_range": format_range(j_peak),
                     "j_minus_raw_delta": format_number(delta["mean_delta"]),
                     "delta_ci_95": format_ci(delta),
                     "exact_p_two_sided": format_number(delta["exact_p"]),
@@ -371,10 +687,14 @@ def build_table_rows(data: dict[str, Any]) -> list[dict[str, str]]:
                     "bh_significant_q_lt_0_05": str(delta["fdr_q"] < ALPHA).upper(),
                     "final_control_group_mean": "",
                     "final_control_ci_95": "",
+                    "final_control_peak_searchlight_centre_mean": "",
+                    "final_control_peak_searchlight_centre_ci_95": "",
+                    "final_control_peak_searchlight_centre_range": "",
                 }
             )
         control_feature = f"{prompt}__final"
         control = scores[control_feature]
+        control_peak = peaks[control_feature]
         rows.append(
             {
                 "prompt": prompt,
@@ -385,8 +705,14 @@ def build_table_rows(data: dict[str, Any]) -> list[dict[str, str]]:
                 "control_feature": control_feature,
                 "raw_group_mean": "",
                 "raw_ci_95": "",
+                "raw_peak_searchlight_centre_mean": "",
+                "raw_peak_searchlight_centre_ci_95": "",
+                "raw_peak_searchlight_centre_range": "",
                 "j_group_mean": "",
                 "j_ci_95": "",
+                "j_peak_searchlight_centre_mean": "",
+                "j_peak_searchlight_centre_ci_95": "",
+                "j_peak_searchlight_centre_range": "",
                 "j_minus_raw_delta": "",
                 "delta_ci_95": "",
                 "exact_p_two_sided": "",
@@ -394,6 +720,13 @@ def build_table_rows(data: dict[str, Any]) -> list[dict[str, str]]:
                 "bh_significant_q_lt_0_05": "",
                 "final_control_group_mean": format_number(control["mean_correlation"]),
                 "final_control_ci_95": format_ci(control),
+                "final_control_peak_searchlight_centre_mean": format_number(
+                    control_peak["mean"]
+                ),
+                "final_control_peak_searchlight_centre_ci_95": format_ci(control_peak),
+                "final_control_peak_searchlight_centre_range": format_range(
+                    control_peak
+                ),
             }
         )
     return rows
@@ -652,12 +985,13 @@ def write_metadata(
 
     generator = Path(__file__).resolve()
     metadata = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generator": "scripts/make_layer_performance_summary.py",
         "generator_sha256": sha256_file(generator),
         "source_report_name": data["summary"]["profile"],
         "source_summary_created_at": data["summary"]["created_at"],
         "source_files_sha256": data["source_hashes"],
+        "source_searchlight": data["searchlight_provenance"],
         "validated_contract": {
             "expected_feature_ids_in_npy_column_order": list(EXPECTED_MODEL_ORDER),
             "independent_unit": "subject",
@@ -669,7 +1003,10 @@ def write_metadata(
                 "JSON rows exactly equal source CSV rows",
                 "subject_scores exactly equal sample_scores mean over samples",
                 "CSV/JSON means, t CIs, deltas, exact p-values, and BH q-values reproduce from NPY arrays",
-                "all arrays are finite float64 with expected shapes",
+                "report score arrays are finite float64 with expected shapes",
+                "grouped volume axis zero exactly matches the manifest model order",
+                "all 8 subject x 8 sample native grouped volumes have expected shapes and a finite authoritative centre for every model",
+                "whole-searchlight sample means recomputed from native volumes and authoritative centres reproduce sample_scores.npy",
             ],
         },
         "methods": {
@@ -689,6 +1026,29 @@ def write_metadata(
                 "Benjamini-Hochberg adjustment over the source report's 24 J-versus-"
                 "raw/final/MPNet comparisons"
             ),
+            "peak_label": (
+                "peak SEARCHLIGHT-CENTRE RSA correlations, not single-voxel "
+                "correlations"
+            ),
+            "peak_searchlight_centre": (
+                "For each subject and feature, first average that subject's eight "
+                "sample correlation volumes centrewise, restricted to the "
+                "authoritative valid searchlight centres; a centre with any "
+                "nonfinite sample value has a nonfinite subject mean and is "
+                "excluded. Then take the maximum finite centre from that "
+                "subject-mean map. Across the eight subjects, report mean subject "
+                "peak, two-sided 95% subject t CI, and observed subject peak range. "
+                "This avoids selecting a maximum over all 64 sample maps."
+            ),
+            "peak_inference_guardrail": (
+                "Peaks are descriptive and noise-sensitive; no p or q significance "
+                "is attached to peak differences. Existing J-versus-raw inference "
+                "uses whole-searchlight means."
+            ),
+        },
+        "derived_peak_subject_values_in_model_order": {
+            f"subj{subject:02d}": data["subject_peaks"][subject - 1].tolist()
+            for subject in range(1, N_SUBJECTS + 1)
         },
         "runtime": {
             "python": platform.python_version(),
@@ -719,6 +1079,12 @@ def write_metadata(
 def main() -> None:
     args = parse_args()
     data = validate_report(args.report_dir)
+    peak_data = load_peak_summaries(
+        args.result_root,
+        data,
+        args.searchlight_centres_root,
+    )
+    data.update(peak_data)
     rows = build_table_rows(data)
     write_table(args.table_output, rows)
     dimensions = write_figure(args.figure_output, data)

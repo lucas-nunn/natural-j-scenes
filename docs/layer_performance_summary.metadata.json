@@ -1,12 +1,185 @@
 {
+  "derived_peak_subject_values_in_model_order": {
+    "subj01": [
+      0.2785035204142332,
+      0.06491083512082696,
+      0.030528338043950498,
+      0.03512194787617773,
+      0.034262996225152165,
+      0.030227327610191423,
+      0.04269353544805199,
+      0.037982639274559915,
+      0.06278615118935704,
+      0.0552758458070457,
+      0.2148603666573763,
+      0.06397965783253312,
+      0.06738840788602829,
+      0.03437762083194684,
+      0.03728260935167782,
+      0.2211513426154852,
+      0.21510456688702106,
+      0.21621660329401493,
+      0.1978785451501608
+    ],
+    "subj02": [
+      0.2780095711350441,
+      0.052689127158373594,
+      0.022981650661677122,
+      0.02493403817061335,
+      0.02518180168408435,
+      0.024731320678256452,
+      0.03993004886433482,
+      0.03492294671013951,
+      0.05223422637209296,
+      0.047940323827788234,
+      0.2073658313602209,
+      0.06622916413471103,
+      0.073283726349473,
+      0.02774819638580084,
+      0.03226818566326983,
+      0.2242133431136608,
+      0.22166483290493488,
+      0.21284508518874645,
+      0.19769092090427876
+    ],
+    "subj03": [
+      0.27058646082878113,
+      0.06056202412582934,
+      0.02456067269667983,
+      0.029645317517861258,
+      0.03091529686935246,
+      0.026085595309268683,
+      0.04168510437011719,
+      0.03710528905503452,
+      0.05808662436902523,
+      0.052419187501072884,
+      0.2104347087442875,
+      0.0501772069837898,
+      0.05146637745201588,
+      0.02642651292262599,
+      0.028147004079073668,
+      0.22948556952178478,
+      0.22574200481176376,
+      0.21227805688977242,
+      0.19743162766098976
+    ],
+    "subj04": [
+      0.25674979016184807,
+      0.06855395389720798,
+      0.05150980528560467,
+      0.052534961490891874,
+      0.04815620870795101,
+      0.04939172696322203,
+      0.0571776156721171,
+      0.05827240156941116,
+      0.06546198157593608,
+      0.06311179348267615,
+      0.18676503002643585,
+      0.06140585569664836,
+      0.07413641572929919,
+      0.04366145032690838,
+      0.049825123976916075,
+      0.21348553150892258,
+      0.2098612803965807,
+      0.18807766400277615,
+      0.17598907835781574
+    ],
+    "subj05": [
+      0.30272214487195015,
+      0.07386915432289243,
+      0.030978183494880795,
+      0.03594177699415013,
+      0.03712682018522173,
+      0.02831360325217247,
+      0.04785071325022727,
+      0.04010641516651958,
+      0.0707888943143189,
+      0.06532740849070251,
+      0.21639788523316383,
+      0.08224708028137684,
+      0.08252170542255044,
+      0.039338311820756644,
+      0.0508221045602113,
+      0.24468924291431904,
+      0.23713970929384232,
+      0.21923593059182167,
+      0.20093277655541897
+    ],
+    "subj06": [
+      0.23070174641907215,
+      0.04769270308315754,
+      0.025080071412958205,
+      0.02726994403928984,
+      0.02848349220585078,
+      0.030043404549360275,
+      0.03150577121414244,
+      0.02835709770442918,
+      0.04569025943055749,
+      0.04194325511343777,
+      0.17013739608228207,
+      0.045113108470104635,
+      0.055420743650756776,
+      0.02366282371804118,
+      0.024106937926262617,
+      0.16441407427191734,
+      0.15585900470614433,
+      0.17012752313166857,
+      0.15146055724471807
+    ],
+    "subj07": [
+      0.28813188523054123,
+      0.052840718533843756,
+      0.026459985645487905,
+      0.03031381475739181,
+      0.032035285723395646,
+      0.02509547828231007,
+      0.03856409224681556,
+      0.03352754400111735,
+      0.049848608672618866,
+      0.04613261576741934,
+      0.2073008269071579,
+      0.04565015039406717,
+      0.04745584027841687,
+      0.025151347246719524,
+      0.024371299310587347,
+      0.21183854155242443,
+      0.20111289620399475,
+      0.209310257807374,
+      0.18847725167870522
+    ],
+    "subj08": [
+      0.18157299049198627,
+      0.048789602937176824,
+      0.02816655219066888,
+      0.026879634067881852,
+      0.03148575848899782,
+      0.02506258280482143,
+      0.03938818507594988,
+      0.03591949085239321,
+      0.04743003682233393,
+      0.043904842750635,
+      0.12802457436919212,
+      0.036502453818684444,
+      0.04332018128479831,
+      0.018264291458763182,
+      0.017462754680309445,
+      0.1316633252426982,
+      0.12479155231267214,
+      0.1285796845331788,
+      0.11518911179155111
+    ]
+  },
   "generator": "scripts/make_layer_performance_summary.py",
-  "generator_sha256": "5290812c0de791f81f676540a2a3d46e80c68fb1dda707d0d4d9152731e6412e",
+  "generator_sha256": "52cb8c8e469e05ef1f0200cd8178e1a5e0a3ba8b9b52e9fa80cefb3886e226d2",
   "methods": {
     "bh_q": "Benjamini-Hochberg adjustment over the source report's 24 J-versus-raw/final/MPNet comparisons",
     "confidence_interval": "two-sided 95% Student t interval over 8 subject scores (df=7)",
     "delta": "paired within-subject J-space minus raw score, then group mean",
     "exact_p": "two-sided exhaustive sign-flip test of the mean paired subject delta over all 2^8 sign assignments",
-    "mean_correlation": "searchlight-center RSA correlations averaged within each sample, then 8 sample means averaged within subject, then 8 subject scores averaged"
+    "mean_correlation": "searchlight-center RSA correlations averaged within each sample, then 8 sample means averaged within subject, then 8 subject scores averaged",
+    "peak_inference_guardrail": "Peaks are descriptive and noise-sensitive; no p or q significance is attached to peak differences. Existing J-versus-raw inference uses whole-searchlight means.",
+    "peak_label": "peak SEARCHLIGHT-CENTRE RSA correlations, not single-voxel correlations",
+    "peak_searchlight_centre": "For each subject and feature, first average that subject's eight sample correlation volumes centrewise, restricted to the authoritative valid searchlight centres; a centre with any nonfinite sample value has a nonfinite subject mean and is excluded. Then take the maximum finite centre from that subject-mean map. Across the eight subjects, report mean subject peak, two-sided 95% subject t CI, and observed subject peak range. This avoids selecting a maximum over all 64 sample maps."
   },
   "outputs": {
     "figure": {
@@ -18,16 +191,16 @@
     },
     "table": {
       "name": "layer_performance_summary.csv",
-      "sha256": "6ff448538c5f7aa352ef27b7fe276862b1cde6fe2f8b25663a5c4174adaaf2ff"
+      "sha256": "9c835a095f305fdb43b48190547f451ebd25e225e6489f7effcba922e5f3a700"
     }
   },
   "runtime": {
     "matplotlib": "3.10.9",
-    "numpy": "2.4.6",
-    "python": "3.12.3",
-    "scipy": "1.17.1"
+    "numpy": "1.26.4",
+    "python": "3.10.20",
+    "scipy": "1.15.3"
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "source_files_sha256": {
     "comparisons.csv": "b0a8db25b5af49b50098619288067f8e40531fe427b699ca78135f9c5f7d62ca",
     "feature_scores.csv": "f31750a0b048bd7b09bf38ee52e8bf4d8f765ed278423ad16cf390d88da62b8f",
@@ -36,13 +209,714 @@
     "summary.json": "d3baf8ddfa81069d42dd3b8cde3a58f48a9fe8ea33bcf816b02394b00e1b1787"
   },
   "source_report_name": "qwen4b",
+  "source_searchlight": {
+    "group_manifest": {
+      "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/serialised_models_correlation/jlens_qwen4b_group/group_manifest.json",
+      "sha256": "1e3274bcd1f593f7caf4366406f31a6d0c858121d2391924f4d703049bfc7097"
+    },
+    "result_root": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results",
+    "searchlight_centres_root": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/mpnet_10_sessions/precomputed",
+    "subjects": {
+      "subj01": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "38272412ec8bfa77b31f8075f081bfb5e325be75ccc03b3a2138f901b6016200",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "8badfea208ed1b757c63bcf68fe1bd6c1ae197e4885be2857011c7618c952f65",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "711b0ecbb61b41534f91f221f909bd2d89a2e2fddd8681013bfce3d179655a28",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "6d8d12cc5bd88ccab12259f7608e6e666898ee32243760ed29deaf3c50ff3edc",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "959d5556c287c14da4c2c42b31fe7b7f97fd533570fb23b5bcb761565be366b1",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "78d21c46e8071ba09f277f9b1087548003883361ab0137e63fa320167db6bf66",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "7f57a99264b38bad70c76007fb012a59cb40043ffe9734d7a4c3e3585aa3645e",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127,365127",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj01/jlens_qwen4b_group/corr_vols_correlation/subj01_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "4d52abd606940c7cd3df90a06e5ff9aabc286eca15f444be4bde0764a979877d",
+            "shape_models_x_native_xyz": "19x81x104x83"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 365127,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/searchlight/subj01/subj01-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "05a40b394a6c5e0af8b4516ba54f6d3c9b84768e5b8b15ebecfa778afb10f6d1"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj02": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "4871336051e46c1dbc90edd10182cd0baaf9cb68cb0f2570d88ae85f3cef3893",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "c5b4404f4509c67ba6c2894ac1a9c8159d68ac860d154dad1b2cf9c9b139a911",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "8cc06d153441698f84d45bc2865b96a4292c7a46d76fdce28ddd7276ae061938",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "40ae256c9ff3582073c5287a8f8b14d06cf975029870d958aa212138207176d8",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "6188ae524cdf45b52a4c01184f24ec2b10fe56c0556ee83feff3924f6efe3f7e",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "9e9139434b8d5d5b6283776b63c509036bda0d8036a3e019af97549bae70564f",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "97bb0af9c7fa188d60fd907a0ac5ae25f01c160c34ef755860e2bc210d067bad",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615,333615",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj02/jlens_qwen4b_group/corr_vols_correlation/subj02_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "c15586683b1d01e7de2f76c2f3b0e4496e0013ff66d21f04ebfb7a6c9aa79f20",
+            "shape_models_x_native_xyz": "19x82x106x84"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 337392,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/searchlight/subj02/subj02-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "92a3b69120f0f0a462aad21f37cf3914e9b54640ddc58911596adfcfe49173c3"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj03": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "b366761696ea89fd60e3bc64badd3ba3231b3154496debd2b68bb776199066c3",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001,351001",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "7aca9e976a308513daebb5ab9a03d88072aae8984922499a46fd2e1f19600793",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "d532d3945bb02782c1a06b71062efb1babd81feaa582d3ea7a189bf7b7ed2454",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "da5ebd09d58baa9be8616481b56dd2c3a0c47d8cf13159eb291f7e2ee511ae51",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "d89866cf34713c1c7048642697a0b586dd5d228832455bd9d33c1a46db864001",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "f5ed9b7c16b59b9290f801b12ff7f6522b6764b0bfd636b7087ea76a368f7675",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "2e6f31dfe34e88754e5b06801fd106d7bfee49c80541f0aa3e8216b0fe18de5f",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104,350104",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj03/jlens_qwen4b_group/corr_vols_correlation/subj03_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "aba5d44a8a60ab0d12af4f598689e09eafdd2da2bd79764485f8796aaa36733f",
+            "shape_models_x_native_xyz": "19x81x106x82"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 352821,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/searchlight/subj03/subj03-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "91b0d0edfdcbbbbf463778d45d844da88f3803a869dde98cf43c9e0d6c734fd6"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj04": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "105f66df1d28b2bde3e37915464c3cb57e6b4b8455ede42b92d52848c889aa4f",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "16fda969cef629aaaa822ef598ef5b0435408389f76fc5d157d92f811dbe79a2",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "6b50f3dff6cd98f3a64f7d1c8962b2f0f2b64290e44f5af4364237494d8547f0",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "32b824c10f91544c23977dc7b38f94e272879c0c39c067ed09556b3b3724ad2f",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "bcde10420e3edc2e502b4f366daddad876b6940297665aae5b945ea27baae345",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "689a17e10464784fbc589bbb1f62303736cea191d18ea0acf9e816689d2042c5",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "1eef13956d32c56b811aa1227778ccf16d58c1850d5f39748d375ada9e056516",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246,324246",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj04/jlens_qwen4b_group/corr_vols_correlation/subj04_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "905d1bc5cd085407053feaa4ff205e3e1b5da3c5bb7eefeb6c9e3e26190b7e49",
+            "shape_models_x_native_xyz": "19x85x99x80"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 324246,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/searchlight/subj04/subj04-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "2696a60471b3165021de6bf38f3e1e4f84a6af9785fd91599a2528937b415294"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj05": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "fdf04ddf1551bad7a76bd2b672898cf9f4f73e786d4bad0af34a75fa966a4a9e",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "d5548119abe44648470a7cc093e0254413bbd20f14649b77560f094a825d0945",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "0e049ff6e46fabb20cd0e8f43d51c2495014e9c7dce802ade527b62f2f5fb952",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "de4debff63352a5abc219a621385da2830b1004b2082682968e80ba2ccedfaea",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "88593e60a02db20c3a3e80495f86dbbd15add9b97f9ded5c977ae116aaf6a390",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "f6840778da7e9e617778aeae9540ae1030940e4b4a1185085e519470e7514a45",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "a202008ff97773d50f73df06d8628432289c9fda8834b913b92a91187c3a9c9b",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065,297065",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj05/jlens_qwen4b_group/corr_vols_correlation/subj05_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "cdb1eafb5ef822eaea27efd55d831473c08862605af04f31c6a078936b6bbbee",
+            "shape_models_x_native_xyz": "19x79x97x78"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 297640,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/searchlight/subj05/subj05-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "509263ffa5652eaf3347c1f2b935fadccc645297112bd77983c6834a2ab577da"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj06": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "0f36159aebe18762bd480f9dd3d4c31f0ac0ae818fb768ed860d4d5c87ef2562",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "753b462326c251428e75d4ebdfa898a3625f1b6093b7b26fb706a901347ed659",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "64d4b17152026d9834cb00bd2360eaaefd2bb90935b92f1962676cda17c493bb",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "b7dd7e96a60c94ccfab02416ef86614b214339b08624eadf8f5a1b698d972869",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "37ab15dd92d536ce0f2cdf922c388118aec972a079a15dc6e8448f379065e369",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "6e9e0dd87fba2fe70a8bbcbef0ea77580c67ac6453d68d3d59c89f631d688bdc",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "57df885449bc9300c4d0d981c25ee5e8c8685dd48432c50f9213ca0074fb9863",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521,372521",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj06/jlens_qwen4b_group/corr_vols_correlation/subj06_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "2b14aa9a04182496e8413917a79c5809e08b90af844d5b761ae235f1d5c78b49",
+            "shape_models_x_native_xyz": "19x85x113x83"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 406399,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/searchlight/subj06/subj06-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "089e8db0e3e4d4a70fa051c7ad58fcc2a31ed972596ace8cae5c46cfaedf98cb"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj07": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "66e632573916f8d9b0c2af6e23b304fa25cea7aeb030323cdd78f99c95bfd1d5",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "742f0a37af346895cfa2b6b65298d5b142721a8a928ad14d8f5f76a970d4a3fe",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "ce30c14db442c4f9adc910f44af45ebef31f3b41fb1a62a2114decc55ff7b24d",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "a6a8d7d994419ff39b968d2fe6f2e2ed0517370808c06f67150aaffd11d9924d",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "104d0424e132b2b269f9aa8edba9398fd10d853f895c035324c1e818c88c2541",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "223da5b6aee983930e27de8d41646d475c6fd2846c0c4fe7f5bc0005991f92e9",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "105942c646e7f24c28471f2444bcaf9f5b970a2d59ace69f07d4c70879100942",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914,290914",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj07/jlens_qwen4b_group/corr_vols_correlation/subj07_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "f09247da0a0993cc6030ee8f91a5992cbcf45f36092409649c9dfbe8c3bf0ea2",
+            "shape_models_x_native_xyz": "19x78x95x81"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 290914,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/mpnet_10_sessions/precomputed/subj07/subj07-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "8ec80a046bee20b932b4d2c3a94ddf47cdc65ad2cda1568dabe0b792e64351fc"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "subj08": {
+        "sample_volumes": [
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-0.npy",
+            "sample_index": 0,
+            "sha256": "7bff63308b3479510be2af5438935ee750cffb98ff9c119e5ddf3804874e3d5f",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-1.npy",
+            "sample_index": 1,
+            "sha256": "853d13e16c5fff23c4d3ce29ebce29b3244b73dc619fd57113deccc3cee47613",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-2.npy",
+            "sample_index": 2,
+            "sha256": "3d5fc23fb4b36895bc2677f75971891da7e63636dae923571e6554d572d6e59a",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-3.npy",
+            "sample_index": 3,
+            "sha256": "587a3127105d20d21c6066f138c25f38ea212c916e74e6a3c743922a52ad4314",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-4.npy",
+            "sample_index": 4,
+            "sha256": "4a7448639718a679b740961269120938dafbb1bbfb7a9d2d362227010ccf7fc3",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-5.npy",
+            "sample_index": 5,
+            "sha256": "ca7e16e1bba803d3d3a6cad2832a5f2051261924d336e9d00e233fa0d4dbb546",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-6.npy",
+            "sample_index": 6,
+            "sha256": "4f6745c10a58e015fb39b5e4dedcf947030f70508089449d0b78d4e9c82badda",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          },
+          {
+            "finite_centre_counts_in_model_order_csv": "281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341,281341",
+            "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results/searchlight/searchlight_respectedsampling_correlation/subj08/jlens_qwen4b_group/corr_vols_correlation/subj08_nsd-jlens_qwen4b_group_func1pt8mm_sample-7.npy",
+            "sample_index": 7,
+            "sha256": "01f150650d18db815a8ef5b1a299fb02e7f46eaaf7807ba7b37ad68d3ac1ba99",
+            "shape_models_x_native_xyz": "19x80x103x78"
+          }
+        ],
+        "searchlight_centres": {
+          "count": 316323,
+          "path": "/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/results/mpnet_10_sessions/precomputed/subj08/subj08-func1pt8mm-6rad-searchlight_centers.npy",
+          "sha256": "1c80392cf9055802a767e5b50ba45a14df54266bb68a608109568468ae404b63"
+        },
+        "winning_centre_finite_sample_counts_in_model_order": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      }
+    }
+  },
   "source_summary_created_at": "2026-08-14T22:51:29.160370+00:00",
   "validated_contract": {
     "checks": [
       "JSON rows exactly equal source CSV rows",
       "subject_scores exactly equal sample_scores mean over samples",
       "CSV/JSON means, t CIs, deltas, exact p-values, and BH q-values reproduce from NPY arrays",
-      "all arrays are finite float64 with expected shapes"
+      "report score arrays are finite float64 with expected shapes",
+      "grouped volume axis zero exactly matches the manifest model order",
+      "all 8 subject x 8 sample native grouped volumes have expected shapes and a finite authoritative centre for every model",
+      "whole-searchlight sample means recomputed from native volumes and authoritative centres reproduce sample_scores.npy"
     ],
     "expected_feature_ids_in_npy_column_order": [
       "mpnet_reference",

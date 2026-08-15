@@ -22,6 +22,17 @@ sample, voxel, or searchlight-level mean. This follows the searchlight RSA logic
 introduced by [Kriegeskorte, Mur, and Bandettini
 (2008)](https://doi.org/10.3389/neuro.06.004.2008).
 
+Peak fields use a different, explicitly descriptive aggregation. For each
+subject and feature, the eight native correlation volumes are first averaged
+centrewise, restricted to that subject's authoritative valid searchlight
+centres; a centre is eligible only if all eight sample correlations are finite.
+The maximum finite centre is then taken from that subject-mean map. The CSV
+reports the mean of the eight subject peaks, its two-sided 95% subject t CI, and
+the observed subject range. These are **peak SEARCHLIGHT-CENTRE RSA
+correlations, not single-voxel correlations**. They are noise-sensitive and
+carry no p/q inference; the existing J−raw tests remain based on
+whole-searchlight means.
+
 Error bars are two-sided 95% Student t intervals over the eight subject scores
 (df = 7). J−raw is calculated within subject after center/sample aggregation,
 then averaged across subjects. The exact paired p-value exhaustively evaluates
@@ -56,6 +67,10 @@ over the full searchlight field, the figure supports a localized descriptive
 late-layer effect under `visualize`, not a general claim that J-space always
 improves brain alignment.
 
+Descriptively, the largest mean subject peak is `visualize` J-space at layer 23
+(peak searchlight-centre r = 0.205118); the matched raw peak is 0.198909. These
+peak values do not change or extend the inferential result above.
+
 ## Auditable artifacts
 
 - [Compact CSV table](layer_performance_summary.csv)
@@ -66,11 +81,15 @@ Regenerate from the completed report directory:
 
 ```bash
 python scripts/make_layer_performance_summary.py \
-  --report-dir /path/to/results/reports/qwen4b
+  --report-dir /path/to/results/reports/qwen4b \
+  --result-root /path/to/results
 ```
 
 The generator requires exactly 19 expected feature IDs, eight subjects, eight
 samples per subject, and the complete 24-comparison family. It verifies exact
 CSV/JSON equality, exact sample-to-subject averaging, and numerical reproduction
-of all means, CIs, deltas, p-values, and q-values from the NPY arrays before
-writing any output. It never reads or recomputes searchlights.
+of all means, CIs, deltas, p-values, and q-values from the NPY arrays. It also
+validates manifest model order, all 64 native grouped-volume shapes and finite
+centre counts, centre-mask bounds/uniqueness, and reproduction of report sample
+means before computing peaks. It reads no rendered or projected map and does
+not recompute searchlights.

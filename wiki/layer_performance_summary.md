@@ -8,7 +8,30 @@
   used.
 - Required source files: `feature_scores.csv`, `comparisons.csv`,
   `subject_scores.npy`, `sample_scores.npy`, and `summary.json`.
-- Searchlights are not recomputed and decoder layers are never averaged.
+- Peak extension authoritative root:
+  `/home/chuddy/dev/research/neuroconnectionism/lucas_exploration/jlens_experiment/results`.
+- Authoritative native centre arrays are the upstream per-subject files under
+  `lucas_exploration/results/mpnet_10_sessions/precomputed` (the same files used
+  by the searchlight stage). Searchlights are not recomputed, rendered/projected
+  maps are never read, and decoder layers are never averaged.
+
+## Peak extension and conflict resolution
+
+- New task requirement conflicts with the earlier generator contract below
+  saying it does not read searchlight volumes. The new authoritative contract
+  supersedes that statement for descriptive peak computation only.
+- Label exactly as peak SEARCHLIGHT-CENTRE RSA correlations, not single-voxel
+  correlations. Each centre summarizes its local spherical searchlight.
+- For each subject/feature, average its eight native sample correlation maps
+  centrewise over only authoritative centre indices. A centre with any
+  nonfinite sample is nonfinite in the subject mean and cannot win. Then take
+  the maximum finite centre.
+- Across subjects report mean subject peak, two-sided 95% subject t CI (df=7),
+  and observed subject peak range. Never maximize 64 sample maps and never mix
+  native coordinates between subjects.
+- Peaks are descriptive/noise-sensitive. No peak delta, p-value, q-value, or
+  significance claim is generated. Existing J-vs-raw inference remains based
+  on paired subject whole-searchlight means.
 
 ## Summary semantics audited from upstream code
 
@@ -43,12 +66,18 @@ remain external and ignored.
   `plain`.
 - MPNet is omitted from the figure to avoid clutter; it remains relevant only
   because its comparisons belong to the source BH family.
-- Generator accepts a report directory argument and contains no workstation
-  source path.
+- Generator requires explicit report and full result roots, permits an explicit
+  centre-root override, and contains no authoritative-data workstation path.
 - NPY column order is validated against the complete lexical grouped-RDM model
   order. CSV and JSON rows must agree exactly; NPY-derived statistics must
   reproduce source values within floating-point roundoff; sample means must
   equal serialized subject scores bit-for-bit.
+- Group manifest feature/index/model-name order is validated against the same
+  19-column contract. All 64 grouped native volumes must be float64 with 19
+  models and stable within-subject spatial shapes; every model/sample must have
+  a finite authoritative centre. Centre arrays must be nonempty, 1D, integer,
+  unique, nonnegative, and in bounds. Native-volume means must reproduce all
+  report sample scores.
 
 ## Result pattern
 
@@ -58,17 +87,31 @@ remain external and ignored.
 - No `plain` layer and no earlier `visualize` layer is significant.
 - Final controls: `visualize` 0.02293069928518198; `plain`
   0.00586490844657969.
+- Descriptive mean subject peaks (raw, J): visualize L8
+  (0.061874174756667344, 0.056413084701489424), L16
+  (0.03303575244353851, 0.029828819338945323), L23
+  (0.19890948093961924, 0.20511762134265155), L30
+  (0.1781312336679548, 0.19458385067991912); plain L8
+  (0.03283017936428223, 0.03003315742898849), L16
+  (0.029868879931200354, 0.033455957511250745), L23
+  (0.03827422804170055, 0.04234938326771953), L30
+  (0.0520069090925972, 0.05654084784328006).
+- Descriptive final-control mean subject peaks: visualize
+  0.19266082742251456; plain 0.05873851489741355.
 
 ## Completed verification
 
-- Generator validation passed against all five authoritative report files.
+- Generator validation passed against all five authoritative report files, the
+  grouped manifest, all 64 native grouped correlation volumes, and all eight
+  authoritative centre arrays.
 - Two consecutive regenerations were byte-identical: CSV SHA-256
-  `6ff448538c5f7aa352ef27b7fe276862b1cde6fe2f8b25663a5c4174adaaf2ff`;
+  `9c835a095f305fdb43b48190547f451ebd25e225e6489f7effcba922e5f3a700`;
   PNG SHA-256
   `e4823d1a16ac601c4e3f39def58baf7cc6ca54dc6281348293b39e8f6cc7489b`;
   metadata SHA-256
-  `33d195cb40b8b532e4a0451fb98cc36fa89fdad1595da10539806f26265d3e10`.
-- Full unit suite: 22 tests passed.
+  `92693420812c6ef4360801feda8842046799f63a88f50f238006a0751666bfa3`.
+- Full unit suite: 27 tests passed, 2 skipped optional-dependency tests.
 - Ruff lint, Ruff formatting check, `git diff --check`, CSV structure/content
-  assertions, PNG metadata/dimensions, and visual inspection passed.
+  assertions, README-to-CSV checks, PNG metadata/dimensions, and preservation
+  checks for unrelated assets passed.
 - Figure dimensions are 3000 × 2040 px at 300 dpi.
