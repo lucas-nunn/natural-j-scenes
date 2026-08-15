@@ -1,0 +1,19 @@
+{
+  "all_pair_final_token_ids_match": true,
+  "all_prompts_end_with_declared_suffix_tokens": true,
+  "common_suffix": "\n\nScene representation:",
+  "common_suffix_nbytes": 23,
+  "common_suffix_token_ids": [
+    271,
+    9723,
+    12669,
+    25
+  ],
+  "common_suffix_utf8_hex": "0a0a5363656e6520726570726573656e746174696f6e3a",
+  "endpoint_ids_hash": "1683fa6caf344b0e5ad23518b44fb5e1d30df461a6c3f2479f937890d13deb5d",
+  "final_readout_token_id": 25,
+  "max_prompt_tokens": 181,
+  "n_conditions": 6148,
+  "paired_suffix_token_hashes_hash": "60233adc2eae5a0b8a41bc3fd10d7604551e2a8b58e5c786d7982747475f17db",
+  "tokenizer_class": "Qwen2Tokenizer"
+}

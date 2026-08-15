@@ -4,3 +4,5 @@
   verification, and unresolved external validation.
 - `layer_performance_summary.md` — audited report semantics, derived-artifact
   exception, generator validation contract, and headline layer results.
+- `matched-readout-control.md` — Lucas control design, namespaces, hard gates,
+  run provenance, endpoint evidence, and analysis-family status.

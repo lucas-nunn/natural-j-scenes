@@ -16,15 +16,17 @@ from typing import Any
 import numpy as np
 
 from .conditions import load_union_ids
-from .config import PROMPT_KINDS, ExperimentPaths, ModelSpec
+from .config import DEFAULT_PROMPT_SET, ExperimentPaths, ModelSpec, run_name
 from .io_utils import atomic_json, atomic_npz, sha256_file, stable_hash
 from .prompts import (
+    MATCHED_READOUT_SUFFIX,
     captions_for_condition,
     load_caption_table,
+    matched_prompt_contract,
+    prompt_set,
     prompts_for_condition,
 )
 
-PROMPT_VERSION = "visual-scene-v1"
 SCHEMA_VERSION = 1
 
 
@@ -158,9 +160,12 @@ def resolve_source_layers(
     return sorted(selected)
 
 
-def feature_registry(layers: Sequence[int]) -> list[dict[str, Any]]:
+def feature_registry(
+    layers: Sequence[int],
+    prompt_kinds: Sequence[str] = ("visualize", "plain"),
+) -> list[dict[str, Any]]:
     features = []
-    for prompt_kind in PROMPT_KINDS:
+    for prompt_kind in prompt_kinds:
         for layer in layers:
             features.extend(
                 [
@@ -187,6 +192,75 @@ def feature_registry(layers: Sequence[int]) -> list[dict[str, Any]]:
             }
         )
     return features
+
+
+def _token_ids(tokenizer, text: str, *, add_special_tokens: bool) -> list[int]:
+    encoded = tokenizer(
+        text,
+        add_special_tokens=add_special_tokens,
+        truncation=False,
+        return_attention_mask=False,
+    )
+    ids = encoded["input_ids"]
+    if ids and isinstance(ids[0], list):
+        if len(ids) != 1:
+            raise ValueError("tokenizer returned multiple rows for one prompt")
+        ids = ids[0]
+    return [int(token_id) for token_id in ids]
+
+
+def audit_matched_prompt_endpoints(
+    tokenizer,
+    prompt_rows: Sequence[dict[str, str]],
+) -> dict[str, Any]:
+    """Prove the declared suffix and actual final token match for every pair."""
+    if not prompt_rows:
+        raise ValueError("endpoint audit requires at least one prompt row")
+    suffix_bytes = MATCHED_READOUT_SUFFIX.encode("utf-8")
+    suffix_ids = _token_ids(tokenizer, MATCHED_READOUT_SUFFIX, add_special_tokens=False)
+    if not suffix_ids:
+        raise ValueError("matched readout suffix tokenized to an empty sequence")
+    endpoint_ids = []
+    pair_token_hashes = []
+    max_tokens = 0
+    for prompts in prompt_rows:
+        matched_prompt_contract(prompts)
+        minimal_ids = _token_ids(
+            tokenizer, prompts["minimal_readout"], add_special_tokens=True
+        )
+        integrate_ids = _token_ids(
+            tokenizer, prompts["integrate_readout"], add_special_tokens=True
+        )
+        if minimal_ids[-len(suffix_ids) :] != suffix_ids:
+            raise ValueError("minimal prompt token suffix differs from declaration")
+        if integrate_ids[-len(suffix_ids) :] != suffix_ids:
+            raise ValueError("integrated prompt token suffix differs from declaration")
+        if minimal_ids[-1] != integrate_ids[-1]:
+            raise ValueError("matched prompts have different final readout token IDs")
+        endpoint_ids.append(minimal_ids[-1])
+        pair_token_hashes.append(
+            stable_hash(
+                {
+                    "minimal_suffix": minimal_ids[-len(suffix_ids) :],
+                    "integrate_suffix": integrate_ids[-len(suffix_ids) :],
+                }
+            )
+        )
+        max_tokens = max(max_tokens, len(minimal_ids), len(integrate_ids))
+    return {
+        "n_conditions": len(prompt_rows),
+        "common_suffix": MATCHED_READOUT_SUFFIX,
+        "common_suffix_utf8_hex": suffix_bytes.hex(),
+        "common_suffix_nbytes": len(suffix_bytes),
+        "common_suffix_token_ids": suffix_ids,
+        "final_readout_token_id": suffix_ids[-1],
+        "all_pair_final_token_ids_match": True,
+        "all_prompts_end_with_declared_suffix_tokens": True,
+        "endpoint_ids_hash": stable_hash(endpoint_ids),
+        "paired_suffix_token_hashes_hash": stable_hash(pair_token_hashes),
+        "max_prompt_tokens": max_tokens,
+        "tokenizer_class": type(tokenizer).__name__,
+    }
 
 
 def _configure_determinism(seed: int) -> None:
@@ -416,7 +490,9 @@ def _manifest_config(
     seed: int,
     lens_path: Path,
     model_source: str,
+    prompt_set_key: str,
 ) -> dict:
+    selected_prompt_set = prompt_set(prompt_set_key)
     config = {
         "schema_version": SCHEMA_VERSION,
         "model_profile": spec.key,
@@ -437,11 +513,12 @@ def _manifest_config(
             if paths.jlens_checkout is not None
             else None
         ),
-        "prompt_version": PROMPT_VERSION,
+        "prompt_set": selected_prompt_set.key,
+        "prompt_version": selected_prompt_set.version,
         "prompt_source_sha256": sha256_file(
             Path(sys.modules[prompts_for_condition.__module__].__file__)
         ),
-        "prompt_kinds": list(PROMPT_KINDS),
+        "prompt_kinds": list(selected_prompt_set.kinds),
         "caption_file": str(paths.captions.resolve()),
         "caption_sha256": sha256_file(paths.captions),
         "nsd_id_base": 1,
@@ -474,6 +551,7 @@ def extract_embeddings(
     seed: int = 0,
     max_conditions: int | None = None,
     output_name: str | None = None,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> dict:
     """Extract all configured features, resuming at atomic chunk boundaries."""
     import torch
@@ -501,8 +579,9 @@ def extract_embeddings(
     layers = resolve_source_layers(
         lens.source_layers, wrapped.n_layers, explicit_layers
     )
-    features = feature_registry(layers)
-    output_dir = paths.embeddings / (output_name or spec.key)
+    selected_prompt_set = prompt_set(prompt_set_key)
+    features = feature_registry(layers, selected_prompt_set.kinds)
+    output_dir = paths.embeddings / (output_name or run_name(spec.key, prompt_set_key))
     chunks_dir = output_dir / "chunks"
     chunks_dir.mkdir(parents=True, exist_ok=True)
     config = _manifest_config(
@@ -517,6 +596,7 @@ def extract_embeddings(
         seed=seed,
         lens_path=resolved_lens,
         model_source=model_source,
+        prompt_set_key=prompt_set_key,
     )
     manifest_path = output_dir / "manifest.json"
     if manifest_path.exists():
@@ -551,18 +631,32 @@ def extract_embeddings(
             {
                 "condition_id_1based": condition_id,
                 "captions": captions_for_condition(caption_table, condition_id),
-                "prompts": prompts_for_condition(caption_table, condition_id),
+                "prompts": prompts_for_condition(
+                    caption_table, condition_id, prompt_set_key
+                ),
             }
         )
     preview_path = output_dir / "prompt_preview.json"
     atomic_json(
         preview_path,
         {
-            "prompt_version": PROMPT_VERSION,
+            "prompt_set": selected_prompt_set.key,
+            "prompt_version": selected_prompt_set.version,
             "nsd_id_base": 1,
             "examples": preview,
         },
     )
+    endpoint_audit = None
+    if selected_prompt_set.matched_readout:
+        all_prompt_rows = [
+            prompts_for_condition(caption_table, int(condition_id), prompt_set_key)
+            for condition_id in union_ids
+        ]
+        endpoint_audit = audit_matched_prompt_endpoints(tokenizer, all_prompt_rows)
+        endpoint_audit_path = output_dir / "endpoint_audit.json"
+        atomic_json(endpoint_audit_path, endpoint_audit)
+    else:
+        endpoint_audit_path = None
     semantic_checks = None
     max_observed_tokens = 0
     effective_batch_size = batch_size
@@ -578,13 +672,13 @@ def extract_embeddings(
             continue
 
         prompt_rows = [
-            prompts_for_condition(caption_table, int(condition_id))
+            prompts_for_condition(caption_table, int(condition_id), prompt_set_key)
             for condition_id in chunk_ids
         ]
         arrays: dict[str, list[np.ndarray]] = {
             feature["name"]: [] for feature in features
         }
-        for prompt_kind in PROMPT_KINDS:
+        for prompt_kind in selected_prompt_set.kinds:
             offset = 0
             while offset < len(prompt_rows):
                 current = min(effective_batch_size, len(prompt_rows) - offset)
@@ -648,6 +742,11 @@ def extract_embeddings(
                 "updated_at": datetime.now(timezone.utc).isoformat(),
                 "complete": False,
                 "prompt_preview": str(preview_path.resolve()),
+                "endpoint_audit": (
+                    str(endpoint_audit_path.resolve())
+                    if endpoint_audit_path is not None
+                    else None
+                ),
                 "completed_chunks": completed_chunks,
                 "effective_batch_size": effective_batch_size,
                 "max_observed_tokens": max_observed_tokens,
@@ -662,6 +761,11 @@ def extract_embeddings(
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "complete": True,
         "prompt_preview": str(preview_path.resolve()),
+        "endpoint_audit": (
+            str(endpoint_audit_path.resolve())
+            if endpoint_audit_path is not None
+            else None
+        ),
         "completed_chunks": completed_chunks,
         "effective_batch_size": effective_batch_size,
         "max_observed_tokens": max_observed_tokens,
@@ -679,6 +783,7 @@ def preflight(
     allow_download: bool = False,
     lens_path: Path | None = None,
     max_length: int = 256,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> dict:
     """Load the matched pair and run two prompts without publishing chunks."""
     import torch
@@ -701,11 +806,27 @@ def preflight(
         for layer in layers
     }
     table = load_caption_table(paths.captions)
-    condition_id = int(load_union_ids(paths)[0])
-    prompt_row = prompts_for_condition(table, condition_id)
+    union_ids = load_union_ids(paths)
+    condition_id = int(union_ids[0])
+    selected_prompt_set = prompt_set(prompt_set_key)
+    prompt_row = prompts_for_condition(table, condition_id, prompt_set_key)
+    endpoint_audit = None
+    if selected_prompt_set.matched_readout:
+        endpoint_audit = audit_matched_prompt_endpoints(
+            tokenizer,
+            [
+                prompts_for_condition(table, int(item), prompt_set_key)
+                for item in union_ids
+            ],
+        )
+        if endpoint_audit["max_prompt_tokens"] > max_length:
+            raise ValueError(
+                "matched prompt endpoint audit found a prompt longer than the "
+                "configured no-truncation guard"
+            )
     results = {}
     semantics = None
-    for kind in PROMPT_KINDS:
+    for kind in selected_prompt_set.kinds:
         batch, n_tokens, checks = _forward_prompt_batch(
             [prompt_row[kind]],
             tokenizer=tokenizer,
@@ -733,6 +854,9 @@ def preflight(
         "d_model": wrapped.d_model,
         "selected_layers": layers,
         "condition_id": condition_id,
+        "prompt_set": selected_prompt_set.key,
+        "prompt_version": selected_prompt_set.version,
+        "endpoint_audit": endpoint_audit,
         "hook_semantics": semantics,
         "prompts": results,
     }

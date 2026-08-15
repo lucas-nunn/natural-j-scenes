@@ -11,12 +11,23 @@ import numpy as np
 from scipy.spatial.distance import pdist
 
 from .conditions import load_union_ids
-from .config import N_SUBJECTS, ExperimentPaths, group_name, validate_subjects
+from .config import (
+    DEFAULT_PROMPT_SET,
+    N_SUBJECTS,
+    ExperimentPaths,
+    group_name,
+    run_name,
+    validate_subjects,
+)
 from .io_utils import atomic_copy, atomic_json, atomic_npy, sha256_file
 
 
-def _embedding_manifest(paths: ExperimentPaths, profile: str) -> tuple[Path, dict]:
-    directory = paths.embeddings / profile
+def _embedding_manifest(
+    paths: ExperimentPaths,
+    profile: str,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
+) -> tuple[Path, dict]:
+    directory = paths.embeddings / run_name(profile, prompt_set_key)
     manifest_path = directory / "manifest.json"
     if not manifest_path.exists():
         raise FileNotFoundError(f"embedding manifest not found: {manifest_path}")
@@ -119,13 +130,17 @@ def prepare_grouped_rdms(
     paths: ExperimentPaths,
     profile: str,
     subjects: Sequence[int] = tuple(range(1, N_SUBJECTS + 1)),
+    *,
+    prompt_set_key: str = DEFAULT_PROMPT_SET,
 ) -> dict:
     """Create selected-subject RDMs without ever allocating a 73K matrix."""
     paths.require("mpnet_base")
     assert paths.mpnet_base is not None
     subjects = validate_subjects(subjects)
-    directory, embedding_manifest = _embedding_manifest(paths, profile)
-    group = group_name(profile)
+    directory, embedding_manifest = _embedding_manifest(paths, profile, prompt_set_key)
+    if embedding_manifest["config"].get("prompt_set", "historical") != prompt_set_key:
+        raise RuntimeError("embedding manifest prompt set does not match RDM request")
+    group = group_name(profile, prompt_set_key)
     union_ids = load_union_ids(paths)
     expected_hash = embedding_manifest["config"]["condition_ids_hash"]
     from .io_utils import stable_hash
@@ -237,6 +252,7 @@ def prepare_grouped_rdms(
         "created_at": datetime.now(timezone.utc).isoformat(),
         "group_name": group,
         "profile": profile,
+        "prompt_set": prompt_set_key,
         "subject_numbers": list(subjects),
         "rdm_metric": "correlation",
         "normalization_before_rdm": "none",

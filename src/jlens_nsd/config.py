@@ -7,6 +7,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+from .prompts import PROMPT_SETS
+
 
 def _env_path(name: str) -> Path | None:
     value = os.environ.get(name)
@@ -138,7 +140,8 @@ N_SUBJECTS = 8
 N_SESSIONS = 10
 N_SAMPLES = 8
 SAMPLE_SIZE = 100
-PROMPT_KINDS = ("visualize", "plain")
+DEFAULT_PROMPT_SET = "historical"
+PROMPT_KINDS = PROMPT_SETS[DEFAULT_PROMPT_SET].kinds
 
 
 def validate_subjects(subjects: Iterable[int]) -> tuple[int, ...]:
@@ -153,6 +156,15 @@ def validate_subjects(subjects: Iterable[int]) -> tuple[int, ...]:
     return selected
 
 
-def group_name(profile: str) -> str:
-    """Return a filesystem-safe grouped model name for one model profile."""
-    return f"jlens_{profile.replace('.', '_')}_group"
+def run_name(profile: str, prompt_set_key: str = DEFAULT_PROMPT_SET) -> str:
+    """Namespace non-historical experiments without renaming legacy outputs."""
+    if prompt_set_key not in PROMPT_SETS:
+        raise ValueError(f"unknown prompt set: {prompt_set_key}")
+    if prompt_set_key == DEFAULT_PROMPT_SET:
+        return profile
+    return f"{profile}__{prompt_set_key}"
+
+
+def group_name(profile: str, prompt_set_key: str = DEFAULT_PROMPT_SET) -> str:
+    """Return a filesystem-safe grouped model name for one experiment run."""
+    return f"jlens_{run_name(profile, prompt_set_key).replace('.', '_')}_group"

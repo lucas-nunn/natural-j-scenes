@@ -9,8 +9,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .config import MODEL_SPECS, ExperimentPaths, validate_subjects
+from .config import DEFAULT_PROMPT_SET, MODEL_SPECS, ExperimentPaths, validate_subjects
 from .io_utils import atomic_json
+from .prompts import PROMPT_SETS
 
 MODULE = "jlens_nsd.cli"
 
@@ -30,6 +31,7 @@ class Orchestrator:
             "status": "running",
             "selected_profile": None,
             "subject_numbers": list(args.subjects),
+            "prompt_set": args.prompt_set,
             "stages": [],
         }
         paths.logs.mkdir(parents=True, exist_ok=True)
@@ -91,6 +93,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
     parser.add_argument(
+        "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
+    parser.add_argument(
         "--fallback-profile", choices=sorted(MODEL_SPECS), default="qwen1.7b"
     )
     parser.add_argument("--results-dir", type=Path)
@@ -133,6 +138,7 @@ def main(argv: list[str] | None = None) -> None:
     runner = Orchestrator(paths, args)
     try:
         subjects_csv = ",".join(str(subject) for subject in args.subjects)
+        prompt_args = ["--prompt-set", args.prompt_set]
         runner.run("prepare", ["prepare", "--subjects", subjects_csv])
         candidates = []
         for profile in (args.profile, args.fallback_profile):
@@ -163,6 +169,7 @@ def main(argv: list[str] | None = None) -> None:
                 "cuda",
                 "--max-length",
                 str(args.max_length),
+                *prompt_args,
                 *artifact_args,
             ]
             if runner.run(f"preflight_{profile}", preflight_args, check=False):
@@ -193,6 +200,7 @@ def main(argv: list[str] | None = None) -> None:
                 str(args.chunk_size),
                 "--max-length",
                 str(args.max_length),
+                *prompt_args,
                 *(["--lens-root", str(args.lens_root)] if args.lens_root else []),
                 *(
                     ["--model-path", str(selected_model_path)]
@@ -203,7 +211,14 @@ def main(argv: list[str] | None = None) -> None:
         )
         runner.run(
             f"rdms_{selected}",
-            ["rdms", "--profile", selected, "--subjects", subjects_csv],
+            [
+                "rdms",
+                "--profile",
+                selected,
+                *prompt_args,
+                "--subjects",
+                subjects_csv,
+            ],
         )
         for subject in args.subjects:
             searchlight_args = [
@@ -212,22 +227,44 @@ def main(argv: list[str] | None = None) -> None:
                 selected,
                 "--subject",
                 str(subject),
+                *prompt_args,
             ]
             if args.allow_cpu_searchlight:
                 searchlight_args.append("--allow-cpu")
             runner.run(f"searchlight_subj{subject:02d}", searchlight_args)
         runner.run(
             f"project_{selected}",
-            ["project", "--profile", selected, "--subjects", subjects_csv],
+            [
+                "project",
+                "--profile",
+                selected,
+                *prompt_args,
+                "--subjects",
+                subjects_csv,
+            ],
         )
         if not args.skip_plots:
             runner.run(
                 f"plot_{selected}",
-                ["plot", "--profile", selected, "--subjects", subjects_csv],
+                [
+                    "plot",
+                    "--profile",
+                    selected,
+                    *prompt_args,
+                    "--subjects",
+                    subjects_csv,
+                ],
             )
         runner.run(
             f"summarize_{selected}",
-            ["summarize", "--profile", selected, "--subjects", subjects_csv],
+            [
+                "summarize",
+                "--profile",
+                selected,
+                *prompt_args,
+                "--subjects",
+                subjects_csv,
+            ],
         )
         runner.finish("complete")
         print(f"overnight pipeline complete for {selected}", flush=True)

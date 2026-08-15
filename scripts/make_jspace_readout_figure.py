@@ -53,8 +53,22 @@ FEATURES = {
         "prompt_kind": "plain",
         "column_title": "Caption-only top words",
         "footer_label": "caption-only (plain) prompt",
+        "counterpart": "visualize__l23__j",
+    },
+    "integrate_readout__l23__j": {
+        "prompt_kind": "integrate_readout",
+        "column_title": "Integrated J-space top words",
+        "footer_label": "matched readout + integration instruction",
+        "counterpart": "minimal_readout__l23__j",
+    },
+    "minimal_readout__l23__j": {
+        "prompt_kind": "minimal_readout",
+        "column_title": "Minimal J-space top words",
+        "footer_label": "matched readout without integration instruction",
+        "counterpart": "integrate_readout__l23__j",
     },
 }
+FEATURES["visualize__l23__j"]["counterpart"] = "plain__l23__j"
 MODEL_NAME = "Qwen/Qwen3.5-4B"
 HEAD_KEY = "model.language_model.embed_tokens.weight"
 NORM_KEY = "model.language_model.norm.weight"
@@ -76,6 +90,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--coco-annotations-dir", type=Path, required=True)
     parser.add_argument("--captions", type=Path, required=True)
     parser.add_argument("--model-dir", type=Path, required=True)
+    parser.add_argument(
+        "--run-name",
+        default="qwen4b",
+        help="Embedding namespace below result-root (default: %(default)s)",
+    )
     parser.add_argument(
         "--feature",
         choices=tuple(FEATURES),
@@ -123,6 +142,7 @@ def validate_manifests(
         "position",
         "prompt_kinds",
         "prompt_version",
+        "prompt_set",
     )
     mismatches = {
         field: (target.get(field), source.get(field))
@@ -218,9 +238,7 @@ def load_vectors(
     found: dict[int, np.ndarray] = {}
     chunk_for: dict[int, str] = {}
     counterpart_hash_for: dict[int, str] = {}
-    prompt_kind = FEATURES[feature]["prompt_kind"]
-    counterpart_kind = "plain" if prompt_kind == "visualize" else "visualize"
-    counterpart_feature = feature.replace(prompt_kind, counterpart_kind, 1)
+    counterpart_feature = FEATURES[feature]["counterpart"]
     chunks_dir = embedding_root / "chunks"
     for chunk_name in source_manifest["completed_chunks"]:
         path = chunks_dir / chunk_name
@@ -627,7 +645,9 @@ def draw_figure(
 def main() -> None:
     args = parse_args()
     condition_path = args.result_root / "conditions" / "subj01_condition_ids.npy"
-    target_manifest_path = args.result_root / "embeddings" / "qwen4b" / "manifest.json"
+    target_manifest_path = (
+        args.result_root / "embeddings" / args.run_name / "manifest.json"
+    )
     source_manifest_path = args.embedding_root / "manifest.json"
     target_manifest = load_json(target_manifest_path)
     source_manifest = load_json(source_manifest_path)
@@ -688,7 +708,7 @@ def main() -> None:
         metadata.update(
             {
                 "prompt_kind": FEATURES[args.feature]["prompt_kind"],
-                "counterpart_feature": DEFAULT_FEATURE,
+                "counterpart_feature": FEATURES[args.feature]["counterpart"],
                 "provenance": {
                     "captions_sha256": sha256_file(args.captions),
                     "source_manifest_sha256": sha256_file(source_manifest_path),
