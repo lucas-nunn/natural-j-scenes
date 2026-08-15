@@ -1,0 +1,56 @@
+{
+  "n_samples": 32,
+  "namespace": "plain_mean_pool",
+  "rows": [
+    {
+      "layer": 8,
+      "rdm_r_actual": 0.7603940036739638,
+      "rdm_r_actual_std": 0.035024692640245936,
+      "rdm_r_orthogonal": 0.9999952339120692,
+      "rdm_r_orthogonal_std": 9.253952242375321e-07,
+      "rdm_r_spectrum_matched": 0.8271526980660022,
+      "rdm_r_spectrum_matched_std": 0.023214900811655004,
+      "rederivation_feature_scale": 2.2452921867370605,
+      "rederivation_max_abs_error": 1.0507404941684229e-06,
+      "rederivation_relative_error": 4.679749479266646e-07
+    },
+    {
+      "layer": 16,
+      "rdm_r_actual": 0.832253175223851,
+      "rdm_r_actual_std": 0.023507786341562812,
+      "rdm_r_orthogonal": 0.9999964368060764,
+      "rdm_r_orthogonal_std": 8.578469080817308e-07,
+      "rdm_r_spectrum_matched": 0.8663094256014088,
+      "rdm_r_spectrum_matched_std": 0.022549034759286712,
+      "rederivation_feature_scale": 6.091100215911865,
+      "rederivation_max_abs_error": 2.8907517908294267e-06,
+      "rederivation_relative_error": 4.74586148373963e-07
+    },
+    {
+      "layer": 23,
+      "rdm_r_actual": 0.9299986822936805,
+      "rdm_r_actual_std": 0.010202262267327577,
+      "rdm_r_orthogonal": 0.9999977918987442,
+      "rdm_r_orthogonal_std": 4.282222463093424e-07,
+      "rdm_r_spectrum_matched": 0.9855537312490755,
+      "rdm_r_spectrum_matched_std": 0.0017143311422652698,
+      "rederivation_feature_scale": 12.205836296081543,
+      "rederivation_max_abs_error": 6.5855741731013495e-06,
+      "rederivation_relative_error": 5.39543052467083e-07
+    },
+    {
+      "layer": 30,
+      "rdm_r_actual": 0.9580808241077647,
+      "rdm_r_actual_std": 0.008713466774582165,
+      "rdm_r_orthogonal": 0.9999993961007541,
+      "rdm_r_orthogonal_std": 1.1105985396254676e-07,
+      "rdm_r_spectrum_matched": 0.9921337266662316,
+      "rdm_r_spectrum_matched_std": 0.0008807650797457588,
+      "rederivation_feature_scale": 25.836097717285156,
+      "rederivation_max_abs_error": 1.1213177456781409e-05,
+      "rederivation_relative_error": 4.340120392592974e-07
+    }
+  ],
+  "sample_size": 100,
+  "seed": 0
+}

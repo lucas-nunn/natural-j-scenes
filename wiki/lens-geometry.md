@@ -57,3 +57,75 @@ Compare against a lens fitted with more prompts, or a rank-matched control: proj
 onto the top-`k` right singular directions of `J_l` with `k` = that layer's effective rank, and
 re-run. If the rank-matched raw control reproduces the J result, the effect is about conditioning
 rather than about the lens direction.
+
+---
+
+# Follow-up: do the lens's *directions* matter, or only its conditioning?
+
+Generator: `scripts/analyze_lens_controls.py`. Cached: `docs/lens_controls.json`. Run 2026-08-16.
+
+Both controls are built from the layer's own SVD `J = U S V^T`, so nothing is imported from
+outside the map itself:
+
+- **`spectrum_matched`** — `Q1 S Q2^T` with fresh random orthogonal `Q1, Q2`. Identical singular
+  values, random directions.
+- **`orthogonal`** — `U V^T`, the lens's own rotation with the spectrum flattened to ones.
+
+| layer | actual J | spectrum-matched | orthogonal (U Vᵀ) |
+|---|---|---|---|
+| 8  | 0.760 | 0.827 | 0.9999952 |
+| 16 | 0.832 | 0.866 | 0.9999964 |
+| 23 | 0.930 | 0.986 | 0.9999978 |
+| 30 | 0.958 | 0.992 | 0.9999994 |
+
+(RDM correlation against raw; lower = more warp.)
+
+## 1. The rotation does nothing; all warp is anisotropy
+
+`U V^T` leaves the RDM essentially untouched — `r = 0.999995` or better at every layer. So
+correlation-distance geometry here is effectively invariant to the lens's rotation, and **100% of
+the measured warp comes from the singular value spectrum**, i.e. from anisotropic rescaling. This
+cleanly decomposes the effect and means "J rotates into a verbalizable basis" cannot by itself
+change any RSA result.
+
+## 2. The directions ARE data-aligned — conditioning alone does not explain the warp
+
+At every layer the real lens warps **more** than a random matrix with the identical spectrum
+(actual < matched). Robustness check at layer 23 over **8 independent random draws**:
+
+```
+actual                      0.9252
+spectrum-matched  mean      0.9868   std 0.00132   range [0.9843, 0.9883]
+gap                        +0.0616  = 46.6 control-SDs
+```
+
+Unambiguous. The lens's high-variance directions are aligned with the directions the *data*
+actually occupies, so its rescaling lands where it has leverage; a random map with the same
+spectrum spreads that rescaling across directions the data barely uses, and therefore does less.
+
+**This is the strongest evidence so far that the released lens encodes something real** rather
+than acting as an arbitrary ill-conditioned matrix.
+
+## 3. But it does not rescue the mechanistic story
+
+Combine with the layer profile above: the lens is demonstrably non-random, **and** the amount by
+which it warps geometry still *anti*-correlates with brain benefit. Layer 8 has both the most warp
+and the most data-aligned warp, and shows no brain effect at all. So "J helps because it
+re-weights toward verbalizable directions" remains unsupported — the re-weighting is real and
+data-aligned, it simply does not buy alignment where it is strongest.
+
+## 4. End-to-end pipeline audit (bonus, and it passes)
+
+The script re-derives `X_raw @ J^T` and compares against the stored J features. Relative error at
+every layer is ~5e-07:
+
+```
+layer 8   max|diff| 1.05e-06   scale  2.25   rel 4.7e-07
+layer 16  max|diff| 2.89e-06   scale  6.09   rel 4.7e-07
+layer 23  max|diff| 6.59e-06   scale 12.21   rel 5.4e-07
+layer 30  max|diff| 1.12e-05   scale 25.84   rel 4.3e-07
+```
+
+This audits extraction end-to-end from committed artifacts alone: correct matrix, correct layer,
+correct orientation, float32 storage as declared. A transposed multiply or an off-by-one layer
+index would fail loudly here.

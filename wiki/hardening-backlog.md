@@ -5,6 +5,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Do the lens directions matter, or only conditioning?** Both: rotation contributes nothing
+      (all warp is anisotropy), but the directions are data-aligned — the real lens warps 46.6
+      control-SDs more than a spectrum-matched random map. Still does not rescue the mechanism.
+      See [[lens-geometry]]. Also audits `raw @ J^T` against stored features (~5e-07).
 - [x] **Measure the metric-warp axiom.** Result inverts the naive prediction — see
       [[lens-geometry]]. `scripts/analyze_lens_geometry.py`, `docs/lens_geometry.json`.
 - [x] **MPNet reference ordering.** Recomputed from raw embeddings; all 8 subjects reproduce the
@@ -17,10 +21,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Open — assumptions and axioms
 
-- [ ] **Rank-matched raw control.** The single highest-value follow-up. Project raw features onto
-      the top-k right singular directions of `J_l` (k = that layer's effective rank) and re-run RSA.
-      If it reproduces the J result, the effect is about conditioning, not about the lens direction.
-      Would settle whether the layer profile means anything. See [[lens-geometry]].
+- [ ] **Brain-side rank-matched control.** The model-side question is now answered (directions are
+      data-aligned), but the *brain* version is still open: feed a spectrum-matched random map's
+      features through RSA and check it does not reproduce the layer-23/30 effect. Needs a
+      searchlight run (~1 h CPU), so it is the main remaining compute-bound item.
 
 ## Open — correctness and simplification
 
