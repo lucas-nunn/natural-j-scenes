@@ -71,4 +71,9 @@ boundary mismatch, modality-mask mismatch, or grid/count mismatch.
   0.025960/0.025510. Final block-31 raw control: 0.028943. Layers remain
   separate; these are descriptive searchlight-centre RSA correlations, not
   single-voxel correlations or population estimates.
-- Commit/push, integration, and the final notification remain pending.
+- Compact figure `docs/assets/image_only_wikitext_pilot_scores.png` is
+  1475×864 RGBA with SHA-256
+  `c5036d83ba8bba9e9dbb61b7a56a8da8d0b2be27e996f3959973eea29cc3c744`.
+- Image feature commit `7111ac6` is pushed; merge commit `0916455` integrates
+  it after the other three feature merges. Final main push and notification
+  remain pending.
