@@ -75,5 +75,5 @@ boundary mismatch, modality-mask mismatch, or grid/count mismatch.
   1475×864 RGBA with SHA-256
   `c5036d83ba8bba9e9dbb61b7a56a8da8d0b2be27e996f3959973eea29cc3c744`.
 - Image feature commit `7111ac6` is pushed; merge commit `0916455` integrates
-  it after the other three feature merges. Final main push and notification
-  remain pending.
+  it after the other three feature merges. Handoff protocol is to push the
+  validated `main` tip, then send exactly one Discord completion message.
