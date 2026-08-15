@@ -169,6 +169,21 @@ interpretation guardrails.
 These vocabulary readouts use the same three licensed conditions and unchanged
 formatting-only filter as Figures 3–4. They remain interpretive only.
 
+## Image-only WikiText transfer pilot
+
+The isolated pilot is an **image-only, decoder-residual, out-of-distribution
+transfer** of the released WikiText lens. It is not a vision-tower Jacobian
+Lens: pixels pass through Qwen's vision stack, and the released matrices act
+only on projected 2,560-dimensional decoder residuals. No caption, generated
+description, semantic instruction, chat template, or image–caption fusion is
+present. See the [audited pilot report](docs/IMAGE_ONLY_WIKITEXT_PILOT.md).
+![Descriptive image-only pilot scores](docs/assets/image_only_wikitext_pilot_scores.png)
+
+*Figure 5. Whole-searchlight mean RSA correlations for subject 1 and one
+deterministic 100-image sample. Raw and J scores remain paired and separate at
+layers 8, 16, 23, and 30; block 31 is a separate final-residual raw control.
+These values are descriptive and do not support population inference.*
+
 ## Installation
 
 Lightweight development and model-free tests do not install model weights,
