@@ -1,0 +1,53 @@
+{
+  "metric": "correlation",
+  "n_samples": 64,
+  "namespace": "plain_mean_pool",
+  "rows": [
+    {
+      "condition": 1943580.2438548196,
+      "effective_rank": 401.22663760384006,
+      "layer": 8,
+      "n_conditions": 6148,
+      "n_singular_values": 2560,
+      "rdm_r_mean": 0.7683232388175887,
+      "rdm_r_min": 0.7001246134967459,
+      "rdm_r_std": 0.028022810904239626,
+      "spectral_entropy": 6.55564164395665
+    },
+    {
+      "condition": 913400.4885446598,
+      "effective_rank": 847.2612147385232,
+      "layer": 16,
+      "n_conditions": 6148,
+      "n_singular_values": 2560,
+      "rdm_r_mean": 0.8309440866199348,
+      "rdm_r_min": 0.782483715173186,
+      "rdm_r_std": 0.02372321067930652,
+      "spectral_entropy": 7.173265688426612
+    },
+    {
+      "condition": 72562.56138854972,
+      "effective_rank": 1877.3685546973352,
+      "layer": 23,
+      "n_conditions": 6148,
+      "n_singular_values": 2560,
+      "rdm_r_mean": 0.9252118771482936,
+      "rdm_r_min": 0.8963457339171934,
+      "rdm_r_std": 0.01201552824385769,
+      "spectral_entropy": 7.672618974340901
+    },
+    {
+      "condition": 7627.571966006295,
+      "effective_rank": 2271.8655670080907,
+      "layer": 30,
+      "n_conditions": 6148,
+      "n_singular_values": 2560,
+      "rdm_r_mean": 0.9566790683170576,
+      "rdm_r_min": 0.9308896445433723,
+      "rdm_r_std": 0.00854544627410441,
+      "spectral_entropy": 7.7850962743453875
+    }
+  ],
+  "sample_size": 100,
+  "seed": 0
+}
