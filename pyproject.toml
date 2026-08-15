@@ -37,6 +37,7 @@ nsd-runtime = [
 ]
 dev = [
     "build>=1.2",
+    "pillow>=10",
     "pytest>=8.3",
     "ruff>=0.12",
 ]

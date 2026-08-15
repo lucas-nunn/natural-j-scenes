@@ -3,6 +3,9 @@
 ## Repository state
 
 - Standalone root: `/home/chuddy/dev/research/jlens-nsd`.
+- Active concise-montage worktree:
+  `/home/chuddy/dev/research/jlens-nsd-four-subject-maps` on branch
+  `concise-four-subject-maps`.
 - Extracted from `neuroconnectionism/lucas_exploration/jlens_experiment` without
   changing the source checkout.
 - Generated results, logs, arrays, maps, notebooks, model weights, and caches
@@ -52,7 +55,8 @@ be referenced without copying.
 
 ## Verification status
 
-- 18 unit tests pass under Python 3.12 with the existing scientific environment.
+- 21 tests and 8 subtests pass; 2 extraction-helper tests skip because the
+  optional model extra is not installed. Montage tests run with Pillow 12.3.
 - Ruff lint and formatting checks pass.
 - Source distribution and wheel build successfully with `uv build`.
 - A dry-run resolver check succeeds across all optional dependency groups.
@@ -85,15 +89,41 @@ be referenced without copying.
   (21, 1394, 9.8125); NSD 60417: Choose (8, 21513, 13.0625), Correct (9,
   38643, 13.0), What (11, 3437, 12.625), These (12, 4081, 12.25), Answer (13,
   21134, 12.1875).
-- `docs/assets/plain_layer23_raw_then_j_all_subjects.jpg` composes, without
-  reanalysis, the existing raw then J maps for subjects 1–8. It is 2240×4036
+- `docs/assets/plain_layer23_raw_then_j_subjects1-4.jpg` composes, without
+  reanalysis, the existing raw then J maps for subjects 1–4. It is 2240×2064
   RGB with SHA-256
-  `45aae6f77287b485b0542fcb405f037920c5106be03fa3db013d33b120b52f16`.
-  EXIF audit metadata records all 16 source filenames, dimensions, and hashes;
-  each source panel retains its original independent symmetric color scale.
+  `ad338c7d0b993fc9bbc8e0ec87228c38e524076ccac499042e9b5ad2c692b624`.
+  EXIF audit metadata records all eight source filenames, dimensions, and
+  hashes in subject-major/raw-then-J order; each source panel retains its
+  original independent symmetric color scale.
 - Vocabulary unembedding is interpretive only. Brain RDMs use the complete
   2,560-dimensional vectors; task-direction-like top tokens and
   representational geometry are different descriptive measurements.
+
+## Concise README brain-map presentation
+
+- README brain-map montages intentionally display subjects 1–4 only for
+  concision. This is a presentation subset: every numerical/statistical
+  analysis and table continues to use all eight subjects. There is no conflict
+  with the eight-subject scientific invariant above.
+- `scripts/make_layer23_brain_map_montage.py` defaults to the ordered subject
+  tuple `(1, 2, 3, 4)` and accepts an explicit comma-separated `--subjects`
+  list. It rejects duplicate, non-integer, empty, and out-of-range selections;
+  canvas height is `HEADER_HEIGHT + row_count * ROW_STRIDE`.
+- Both README montages use raw-left/J-right ordering and were regenerated from
+  the authoritative qwen4b subject maps under the historical experiment result
+  tree. No RSA, projection, thresholds, source plots, or color limits were
+  recomputed.
+- `docs/assets/visualize_layer23_raw_then_j_subjects1-4.jpg` is 2240×2064 RGB,
+  contains eight audited panels, and has SHA-256
+  `44f092c94f4a5699b1af574800e8d74a53e5158a3015919dc08b3e296fd894cf`.
+- `docs/assets/plain_layer23_raw_then_j_subjects1-4.jpg` is 2240×2064 RGB,
+  contains eight audited panels, and has SHA-256
+  `ad338c7d0b993fc9bbc8e0ec87228c38e524076ccac499042e9b5ad2c692b624`.
+- The obsolete `*_all_subjects.jpg` montages were removed. Tests cover subject
+  parsing, dynamic dimensions, panel placement, exact source count/order,
+  source hashes, and EXIF audit round-tripping for generated and checked-in
+  assets.
 
 ## Subject-subset execution
 
