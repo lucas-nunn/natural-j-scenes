@@ -138,37 +138,6 @@ same measurement. The audited generators are
 [`make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py) and
 [`make_layer23_brain_map_montage.py`](scripts/make_layer23_brain_map_montage.py).
 
-## Matched-readout prompt control
-
-The historical `plain`/`visualize` comparison changes both instruction content
-and its final readout context. The scoped `matched_readout` experiment removes
-that confound: `minimal_readout` and `integrate_readout` have the same caption
-block and fixed `Scene representation:` endpoint, and the latter differs only
-by the prefixed integration instruction. Historical IDs and outputs remain the
-default and are not redefined.
-
-Across all 6,148 conditions, the fixed 23-byte suffix tokenized to
-`[271, 9723, 12669, 25]` and both prompts ended on token ID 25. In the completed
-eight-subject run, five of eight within-prompt J-vs-raw contrasts survived
-their BH family; none of the nine direct integrate-vs-minimal contrasts survived
-its separate BH family. This does not establish equivalence between prompts.
-
-![Matched-readout layer performance](docs/assets/matched_readout_layer_summary.png)
-
-Exact means, confidence intervals, deltas, p-values, q-values, and family IDs
-are in the [performance table](docs/matched_readout_performance.csv). See the
-[completed results note](docs/MATCHED_READOUT_RESULTS.md),
-[endpoint audit](docs/matched_readout_endpoint_audit.json), and
-[predeclared design](docs/MATCHED_READOUT_CONTROL.md) for full evidence and
-interpretation guardrails.
-
-![Integrated matched-readout layer-23 J-space vocabulary readouts](docs/assets/integrate_readout_layer23_jspace_readouts.png)
-
-![Minimal matched-readout layer-23 J-space vocabulary readouts](docs/assets/minimal_readout_layer23_jspace_readouts.png)
-
-These vocabulary readouts use the same three licensed conditions and unchanged
-formatting-only filter as Figures 3–4. They remain interpretive only.
-
 ## Image-only WikiText transfer pilot
 
 The isolated pilot is an **image-only, decoder-residual, out-of-distribution
