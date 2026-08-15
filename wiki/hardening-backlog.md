@@ -5,6 +5,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Projection NaN warnings — NOT out-of-mask vertices.** They are undefined searchlight
+      centres, 0% for subjects 1/4/7 but 11% for subject 8. Excluded correctly via nanmean, and the
+      NaN pattern is model-invariant so the paired contrast is fair — now audited rather than
+      assumed. See [[searchlight-coverage]].
 - [x] **Per-subject consistency.** Effect is distributed (7/8 signs, LOO survives every drop), and
       per-subject variance tracks lens conditioning at Spearman +1.000 — early-layer nulls are partly
       a precision problem. See [[subject-consistency]].
@@ -38,10 +42,12 @@ Each item records why it matters, so a later iteration does not re-derive it.
       project an uncommitted lockfile is likely an oversight.
 - [ ] **`_load_historical_final_token_scores` hardcodes `(8, 16, 23, 30)`** in its `wanted` list,
       duplicating the layer set that `resolve_source_layers` derives elsewhere. Single-source it.
-- [ ] **Projection emits `Mean of empty slice` / `Degrees of freedom <= 0`** warnings. Almost
-      certainly out-of-mask vertices, but unverified — confirm and silence deliberately, or fix.
 - [ ] **The 5 model-extra tests skip in any venv without `[model]`.** They now pass when the extra is
       present. Consider a CI-visible marker so a green run cannot be mistaken for full coverage.
+
+- [ ] **Between-subject measurement support is unequal and unreported.** Subjects contribute means
+      over 290k–406k centres, and subjects 6/8 lose 8–11% on top of that. The group mean weights
+      subjects equally regardless. Not a bias in the paired contrast, but worth surfacing.
 
 ## Open — documentation
 

@@ -1,0 +1,77 @@
+{
+  "group": "jlens_qwen4b__plain_mean_pool_group",
+  "rows": [
+    {
+      "fraction_undefined": 0.0,
+      "n_centres": 365127,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 0,
+      "nan_mask_model_invariant": true,
+      "subject": "subj01"
+    },
+    {
+      "fraction_undefined": 0.011194693413003273,
+      "n_centres": 337392,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 3777,
+      "nan_mask_model_invariant": true,
+      "subject": "subj02"
+    },
+    {
+      "fraction_undefined": 0.005158423109735532,
+      "n_centres": 352821,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 1820,
+      "nan_mask_model_invariant": true,
+      "subject": "subj03"
+    },
+    {
+      "fraction_undefined": 0.0,
+      "n_centres": 324246,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 0,
+      "nan_mask_model_invariant": true,
+      "subject": "subj04"
+    },
+    {
+      "fraction_undefined": 0.001931863996774627,
+      "n_centres": 297640,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 575,
+      "nan_mask_model_invariant": true,
+      "subject": "subj05"
+    },
+    {
+      "fraction_undefined": 0.08336142559405904,
+      "n_centres": 406399,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 33878,
+      "nan_mask_model_invariant": true,
+      "subject": "subj06"
+    },
+    {
+      "fraction_undefined": 0.0,
+      "n_centres": 290914,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 0,
+      "nan_mask_model_invariant": true,
+      "subject": "subj07"
+    },
+    {
+      "fraction_undefined": 0.11058949238594727,
+      "n_centres": 316323,
+      "n_models": 10,
+      "n_samples": 8,
+      "n_undefined_centres": 34982,
+      "nan_mask_model_invariant": true,
+      "subject": "subj08"
+    }
+  ]
+}

@@ -364,6 +364,14 @@ def project_to_fsaverage(
             volumes = np.stack(
                 [np.load(path, allow_pickle=False)[model_index] for path in samples]
             )
+            # Some searchlight centres have an undefined correlation and come
+            # back NaN; prevalence is strongly subject-dependent (none for
+            # subjects 1/4/7, ~11% for subject 8). nanmean excludes them rather
+            # than propagating, and the NaN pattern is identical across models,
+            # so the paired J-vs-raw contrast stays averaged over the same
+            # centres. A "Mean of empty slice" RuntimeWarning here is expected
+            # for subjects that have all-NaN centres and is not a fault.
+            # scripts/audit_searchlight_coverage.py checks the invariant.
             mean = np.nanmean(volumes, axis=0)
             with np.errstate(invalid="ignore", divide="ignore"):
                 t_value = mean / (np.nanstd(volumes, axis=0) / np.sqrt(len(samples)))
