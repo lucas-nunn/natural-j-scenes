@@ -6,5 +6,7 @@
   exception, generator validation contract, and headline layer results.
 - `matched-readout-control.md` — Lucas control design, namespaces, hard gates,
   run provenance, endpoint evidence, and analysis-family status.
+- `whole-prompt-pooling.md` — Lucas whole-prompt pooling readout, mask/J audit,
+  inference families, external paths, and run status.
 - `image_only_wikitext_pilot.md` — strict image-only transfer contract,
   implementation boundaries, run inputs, and validation state.

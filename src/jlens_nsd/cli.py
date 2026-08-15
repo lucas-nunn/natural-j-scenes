@@ -11,11 +11,15 @@ from scipy.spatial.distance import pdist
 
 from .conditions import load_union_ids, prepare_conditions
 from .config import (
+    ALL_TOKEN_MEAN,
     DEFAULT_PROMPT_SET,
+    DEFAULT_READOUT_MODE,
     MODEL_SPECS,
+    READOUT_MODES,
     ExperimentPaths,
     model_spec,
     run_name,
+    validate_readout_mode,
     validate_subjects,
 )
 from .extract import (
@@ -79,8 +83,10 @@ def smoke(
     with_data: bool = False,
     subjects: list[int] | None = None,
     prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
 ) -> dict:
     """Fast model/GPU-free validation, optionally including configured data."""
+    validate_readout_mode(readout_mode, prompt_set_key)
     table = [["A", "dog", "runs", ".", "The", "dog", "crosses", "grass", "."]]
     prompts = [prompts_for_condition(table, 1, prompt_set_key)]
     rng = np.random.default_rng(0)
@@ -89,16 +95,22 @@ def smoke(
     if rdm.shape != (10,) or not np.isfinite(rdm).all():
         raise RuntimeError("toy condensed RDM smoke failed")
 
+    prompt_kinds = (
+        ("plain",)
+        if readout_mode == ALL_TOKEN_MEAN
+        else PROMPT_SETS[prompt_set_key].kinds
+    )
     result = {
         "ok": True,
         "prompt_lengths_chars": {
-            kind: [len(row[kind]) for row in prompts]
-            for kind in PROMPT_SETS[prompt_set_key].kinds
+            kind: [len(row[kind]) for row in prompts] for kind in prompt_kinds
         },
         "prompt_set": prompt_set_key,
         "toy_rdm_length": len(rdm),
         "results_dir": str(paths.results),
     }
+    if readout_mode != DEFAULT_READOUT_MODE:
+        result["readout_mode"] = readout_mode
     if with_data:
         selected_subjects = validate_subjects(subjects or range(1, 9))
         paths.require("captions")
@@ -146,6 +158,9 @@ def build_parser() -> argparse.ArgumentParser:
     smoke_parser.add_argument(
         "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
     )
+    smoke_parser.add_argument(
+        "--readout-mode", choices=READOUT_MODES, default=DEFAULT_READOUT_MODE
+    )
 
     for command in ("prefetch", "preflight", "extract", "rdms"):
         subparser = subparsers.add_parser(command)
@@ -157,6 +172,11 @@ def build_parser() -> argparse.ArgumentParser:
                 "--prompt-set",
                 choices=sorted(PROMPT_SETS),
                 default=DEFAULT_PROMPT_SET,
+            )
+            subparser.add_argument(
+                "--readout-mode",
+                choices=READOUT_MODES,
+                default=DEFAULT_READOUT_MODE,
             )
         if command in {"prefetch", "preflight", "extract"}:
             subparser.add_argument("--model-path", type=Path)
@@ -181,6 +201,9 @@ def build_parser() -> argparse.ArgumentParser:
     searchlight.add_argument(
         "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
     )
+    searchlight.add_argument(
+        "--readout-mode", choices=READOUT_MODES, default=DEFAULT_READOUT_MODE
+    )
     searchlight.add_argument("--subject", type=int, required=True)
     searchlight.add_argument("--allow-cpu", action="store_true")
     searchlight.add_argument("--max-samples", type=int)
@@ -190,12 +213,18 @@ def build_parser() -> argparse.ArgumentParser:
     project.add_argument(
         "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
     )
+    project.add_argument(
+        "--readout-mode", choices=READOUT_MODES, default=DEFAULT_READOUT_MODE
+    )
     project.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
 
     plot = subparsers.add_parser("plot")
     plot.add_argument("--profile", choices=sorted(MODEL_SPECS), default="qwen4b")
     plot.add_argument(
         "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
+    )
+    plot.add_argument(
+        "--readout-mode", choices=READOUT_MODES, default=DEFAULT_READOUT_MODE
     )
     plot.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
     plot.add_argument(
@@ -209,7 +238,11 @@ def build_parser() -> argparse.ArgumentParser:
     summary.add_argument(
         "--prompt-set", choices=sorted(PROMPT_SETS), default=DEFAULT_PROMPT_SET
     )
+    summary.add_argument(
+        "--readout-mode", choices=READOUT_MODES, default=DEFAULT_READOUT_MODE
+    )
     summary.add_argument("--subjects", default="1,2,3,4,5,6,7,8")
+    summary.add_argument("--historical-results-root", type=Path)
     return parser
 
 
@@ -225,6 +258,7 @@ def main(argv: list[str] | None = None) -> None:
                 with_data=args.with_data,
                 subjects=_subjects(args.subjects),
                 prompt_set_key=args.prompt_set,
+                readout_mode=args.readout_mode,
             )
         )
     elif args.command == "prefetch":
@@ -238,11 +272,12 @@ def main(argv: list[str] | None = None) -> None:
             lens_path=args.lens_path,
             max_length=args.max_length,
             prompt_set_key=args.prompt_set,
+            readout_mode=args.readout_mode,
         )
         destination = (
             paths.results
             / "preflight"
-            / f"{run_name(args.profile, args.prompt_set)}.json"
+            / f"{run_name(args.profile, args.prompt_set, args.readout_mode)}.json"
         )
         atomic_json(destination, result)
         _json(result)
@@ -262,6 +297,7 @@ def main(argv: list[str] | None = None) -> None:
                 max_conditions=args.max_conditions,
                 output_name=args.output_name,
                 prompt_set_key=args.prompt_set,
+                readout_mode=args.readout_mode,
             )
         )
     elif args.command == "rdms":
@@ -271,6 +307,7 @@ def main(argv: list[str] | None = None) -> None:
                 args.profile,
                 _subjects(args.subjects),
                 prompt_set_key=args.prompt_set,
+                readout_mode=args.readout_mode,
             )
         )
     elif args.command == "searchlight":
@@ -281,6 +318,7 @@ def main(argv: list[str] | None = None) -> None:
             allow_cpu=args.allow_cpu,
             max_samples=args.max_samples,
             prompt_set_key=args.prompt_set,
+            readout_mode=args.readout_mode,
         )
     elif args.command == "project":
         project_subjects(
@@ -288,6 +326,7 @@ def main(argv: list[str] | None = None) -> None:
             args.profile,
             _subjects(args.subjects),
             prompt_set_key=args.prompt_set,
+            readout_mode=args.readout_mode,
         )
     elif args.command == "plot":
         features = args.features.split(",") if args.features else None
@@ -301,6 +340,7 @@ def main(argv: list[str] | None = None) -> None:
                     None if args.roi_overlay.lower() == "none" else args.roi_overlay
                 ),
                 prompt_set_key=args.prompt_set,
+                readout_mode=args.readout_mode,
             )
         )
     elif args.command == "summarize":
@@ -310,6 +350,8 @@ def main(argv: list[str] | None = None) -> None:
                 args.profile,
                 _subjects(args.subjects),
                 prompt_set_key=args.prompt_set,
+                readout_mode=args.readout_mode,
+                historical_results_root=args.historical_results_root,
             )
         )
     else:  # pragma: no cover - argparse enforces the command set

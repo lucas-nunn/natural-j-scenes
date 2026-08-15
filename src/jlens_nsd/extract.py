@@ -16,7 +16,15 @@ from typing import Any
 import numpy as np
 
 from .conditions import load_union_ids
-from .config import DEFAULT_PROMPT_SET, ExperimentPaths, ModelSpec, run_name
+from .config import (
+    ALL_TOKEN_MEAN,
+    DEFAULT_PROMPT_SET,
+    DEFAULT_READOUT_MODE,
+    ExperimentPaths,
+    ModelSpec,
+    run_name,
+    validate_readout_mode,
+)
 from .io_utils import atomic_json, atomic_npz, sha256_file, stable_hash
 from .prompts import (
     MATCHED_READOUT_SUFFIX,
@@ -28,6 +36,8 @@ from .prompts import (
 )
 
 SCHEMA_VERSION = 1
+POOL_J_ATOL = 1e-5
+POOL_J_RTOL = 1e-5
 
 
 def _load_jlens(reference_repo: Path | None):
@@ -163,20 +173,23 @@ def resolve_source_layers(
 def feature_registry(
     layers: Sequence[int],
     prompt_kinds: Sequence[str] = ("visualize", "plain"),
+    *,
+    feature_namespace: str | None = None,
 ) -> list[dict[str, Any]]:
     features = []
     for prompt_kind in prompt_kinds:
+        prefix = feature_namespace or prompt_kind
         for layer in layers:
             features.extend(
                 [
                     {
-                        "name": f"{prompt_kind}__l{layer:02d}__raw",
+                        "name": f"{prefix}__l{layer:02d}__raw",
                         "prompt": prompt_kind,
                         "kind": "raw",
                         "layer": layer,
                     },
                     {
-                        "name": f"{prompt_kind}__l{layer:02d}__j",
+                        "name": f"{prefix}__l{layer:02d}__j",
                         "prompt": prompt_kind,
                         "kind": "j",
                         "layer": layer,
@@ -185,13 +198,87 @@ def feature_registry(
             )
         features.append(
             {
-                "name": f"{prompt_kind}__final",
+                "name": f"{prefix}__final",
                 "prompt": prompt_kind,
                 "kind": "final",
                 "layer": None,
             }
         )
     return features
+
+
+def audit_all_token_mask(
+    tokenizer,
+    condition_ids: Sequence[int],
+    prompts: Sequence[str],
+) -> dict[str, Any]:
+    """Record every historical encoded token and the exact pooling mask."""
+    if len(condition_ids) != len(prompts) or not prompts:
+        raise ValueError("token-mask audit needs equally sized, non-empty inputs")
+    records = []
+    token_counts = []
+    special_counts = []
+    for condition_id, text in zip(condition_ids, prompts, strict=True):
+        encoded = tokenizer(
+            text,
+            add_special_tokens=True,
+            truncation=False,
+            return_attention_mask=True,
+            return_special_tokens_mask=True,
+        )
+        ids = [int(item) for item in encoded["input_ids"]]
+        mask = [int(item) for item in encoded["attention_mask"]]
+        special_mask = [int(item) for item in encoded["special_tokens_mask"]]
+        if not ids or len(ids) != len(mask) or len(ids) != len(special_mask):
+            raise ValueError(f"invalid token audit row for condition {condition_id}")
+        if any(item != 1 for item in mask):
+            raise ValueError("an unpadded historical prompt has a masked token")
+        if any(item not in (0, 1) for item in special_mask):
+            raise ValueError("special token mask is not binary")
+        special_positions = [
+            index for index, item in enumerate(special_mask) if item == 1
+        ]
+        records.append(
+            {
+                "condition_id_1based": int(condition_id),
+                "prompt_sha256": stable_hash(text),
+                "input_ids": ids,
+                "attention_mask": mask,
+                "valid_positions_0based": list(range(len(ids))),
+                "special_tokens_mask": special_mask,
+                "included_special_positions_0based": special_positions,
+                "included_special_token_ids": [
+                    ids[index] for index in special_positions
+                ],
+            }
+        )
+        token_counts.append(len(ids))
+        special_counts.append(len(special_positions))
+    return {
+        "schema_version": 1,
+        "readout_name": "all-token mean-pooled causal decoder residuals",
+        "prompt_kind": "plain",
+        "tokenizer_class": type(tokenizer).__name__,
+        "add_special_tokens": True,
+        "truncation": False,
+        "padding_side": tokenizer.padding_side,
+        "pad_token_id": tokenizer.pad_token_id,
+        "mask_definition": (
+            "For each right-padded extraction batch, include exactly positions where "
+            "attention_mask == 1 and exclude exactly positions where attention_mask == 0."
+        ),
+        "special_token_rule": (
+            "A tokenizer-added special token is included if and only if it is present "
+            "in the historical add_special_tokens=True encoding and its attention mask is 1."
+        ),
+        "n_conditions": len(records),
+        "min_valid_tokens": min(token_counts),
+        "max_valid_tokens": max(token_counts),
+        "min_included_special_tokens": min(special_counts),
+        "max_included_special_tokens": max(special_counts),
+        "records_hash": stable_hash(records),
+        "records": records,
+    }
 
 
 def _token_ids(tokenizer, text: str, *, add_special_tokens: bool) -> list[int]:
@@ -356,7 +443,75 @@ def _gather_last(hidden, attention_mask):
     return hidden[rows, positions]
 
 
-def _validate_hook_semantics(recorder, outputs, layers, attention_mask) -> dict:
+def _masked_mean(hidden, attention_mask):
+    """Mean over valid token positions only, with explicit mask validation."""
+    import torch
+
+    if hidden.ndim != 3 or attention_mask.shape != hidden.shape[:2]:
+        raise ValueError("hidden states and attention mask have incompatible shapes")
+    if torch.any((attention_mask != 0) & (attention_mask != 1)):
+        raise ValueError("attention mask must be binary")
+    counts = attention_mask.sum(dim=1, dtype=torch.long)
+    if torch.any(counts <= 0):
+        raise ValueError("encountered an empty tokenized prompt")
+    weights = attention_mask.to(dtype=hidden.dtype).unsqueeze(-1)
+    return (hidden * weights).sum(dim=1) / counts.to(hidden.dtype).unsqueeze(-1)
+
+
+def _transport_tokens_then_mean(hidden, attention_mask, matrix):
+    """Apply J to every valid token, pool, and verify the linear identity."""
+    import torch
+
+    raw = _masked_mean(hidden.float(), attention_mask)
+    valid = attention_mask.bool()
+    valid_hidden = hidden.float()[valid]
+    transported_valid = valid_hidden @ matrix.T
+    row_ids = torch.arange(hidden.shape[0], device=hidden.device).unsqueeze(1)
+    row_ids = row_ids.expand_as(attention_mask)[valid]
+    transported_sum = torch.zeros_like(raw)
+    transported_sum.index_add_(0, row_ids, transported_valid)
+    counts = attention_mask.sum(dim=1, dtype=torch.long).to(raw.dtype).unsqueeze(-1)
+    transported_mean = transported_sum / counts
+    transported_pooled_raw = raw @ matrix.T
+    max_abs = float(
+        torch.max(torch.abs(transported_mean - transported_pooled_raw)).cpu()
+    )
+    reference = float(torch.max(torch.abs(transported_mean)).cpu())
+    tolerance = POOL_J_ATOL + POOL_J_RTOL * reference
+    if max_abs > tolerance:
+        raise RuntimeError(
+            "tokenwise-J/pool linearity check failed: "
+            f"max_abs={max_abs:.6g}, tolerance={tolerance:.6g}"
+        )
+    return (
+        raw,
+        transported_mean,
+        {
+            "max_abs_error": max_abs,
+            "reference_max_abs": reference,
+            "tolerance": tolerance,
+            "absolute_tolerance": POOL_J_ATOL,
+            "relative_tolerance": POOL_J_RTOL,
+            "n_valid_tokens": int(valid.sum().cpu()),
+        },
+    )
+
+
+def _readout(hidden, attention_mask, readout_mode: str):
+    if readout_mode == DEFAULT_READOUT_MODE:
+        return _gather_last(hidden, attention_mask)
+    if readout_mode == ALL_TOKEN_MEAN:
+        return _masked_mean(hidden.float(), attention_mask)
+    raise ValueError(f"unknown readout mode: {readout_mode}")
+
+
+def _validate_hook_semantics(
+    recorder,
+    outputs,
+    layers,
+    attention_mask,
+    readout_mode: str = DEFAULT_READOUT_MODE,
+) -> dict:
     """Check HF's embedding-offset convention against reference hooks."""
     import torch
 
@@ -368,8 +523,12 @@ def _validate_hook_semantics(recorder, outputs, layers, attention_mask) -> dict:
         # HF tuple element zero is the embedding output. For non-final blocks,
         # element layer+1 is the block output/input to the next block. The last
         # tuple element may be post-final-norm, so it is intentionally excluded.
-        hooked = _gather_last(recorder.activations[layer], attention_mask).float()
-        hf_state = _gather_last(hidden_states[layer + 1], attention_mask).float()
+        hooked = _readout(
+            recorder.activations[layer], attention_mask, readout_mode
+        ).float()
+        hf_state = _readout(
+            hidden_states[layer + 1], attention_mask, readout_mode
+        ).float()
         max_abs = float(torch.max(torch.abs(hooked - hf_state)).cpu())
         reference = float(torch.max(torch.abs(hooked)).cpu())
         tolerance = 2e-4 + 2e-4 * reference
@@ -395,6 +554,7 @@ def _forward_prompt_batch(
     layers: Sequence[int],
     max_length: int,
     validate_semantics: bool,
+    readout_mode: str = DEFAULT_READOUT_MODE,
 ):
     import torch
     from jlens.hooks import ActivationRecorder
@@ -437,17 +597,27 @@ def _forward_prompt_batch(
             outputs,
             [layer for layer in layers if layer < final_layer],
             attention_mask,
+            readout_mode,
         )
 
     result = {}
+    linearity_checks = {}
     for layer in layers:
-        raw = _gather_last(recorder.activations[layer], attention_mask).float()
-        transported = raw @ lens_matrices[layer].T
+        if readout_mode == ALL_TOKEN_MEAN:
+            raw, transported, check = _transport_tokens_then_mean(
+                recorder.activations[layer], attention_mask, lens_matrices[layer]
+            )
+            linearity_checks[str(layer)] = check
+        else:
+            raw = _gather_last(recorder.activations[layer], attention_mask).float()
+            transported = raw @ lens_matrices[layer].T
         result[("raw", layer)] = raw.cpu().numpy().astype(np.float32)
         result[("j", layer)] = transported.cpu().numpy().astype(np.float32)
-    final = _gather_last(recorder.activations[final_layer], attention_mask).float()
+    final = _readout(
+        recorder.activations[final_layer], attention_mask, readout_mode
+    ).float()
     result[("final", None)] = final.cpu().numpy().astype(np.float32)
-    return result, sequence_length, semantic_checks
+    return result, sequence_length, semantic_checks, linearity_checks
 
 
 def _chunk_is_valid(
@@ -491,6 +661,7 @@ def _manifest_config(
     lens_path: Path,
     model_source: str,
     prompt_set_key: str,
+    readout_mode: str,
 ) -> dict:
     selected_prompt_set = prompt_set(prompt_set_key)
     config = {
@@ -533,6 +704,16 @@ def _manifest_config(
         "max_length_guard_no_truncation": max_length,
         "seed": seed,
     }
+    if readout_mode == ALL_TOKEN_MEAN:
+        config.update(
+            {
+                "readout_mode": readout_mode,
+                "position": "all_valid_nonpadding_prompt_tokens_attention_mask_eq_1",
+                "readout_definition": (
+                    "all-token mean-pooled causal decoder residuals"
+                ),
+            }
+        )
     config["fingerprint"] = stable_hash(config)
     return config
 
@@ -552,6 +733,7 @@ def extract_embeddings(
     max_conditions: int | None = None,
     output_name: str | None = None,
     prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
 ) -> dict:
     """Extract all configured features, resuming at atomic chunk boundaries."""
     import torch
@@ -560,6 +742,7 @@ def extract_embeddings(
     assert paths.captions is not None
     if batch_size < 1 or chunk_size < 1:
         raise ValueError("batch_size and chunk_size must be positive")
+    validate_readout_mode(readout_mode, prompt_set_key)
     _configure_determinism(seed)
     union_ids = load_union_ids(paths)
     if max_conditions is not None:
@@ -580,8 +763,18 @@ def extract_embeddings(
         lens.source_layers, wrapped.n_layers, explicit_layers
     )
     selected_prompt_set = prompt_set(prompt_set_key)
-    features = feature_registry(layers, selected_prompt_set.kinds)
-    output_dir = paths.embeddings / (output_name or run_name(spec.key, prompt_set_key))
+    extraction_prompt_kinds = (
+        ("plain",) if readout_mode == ALL_TOKEN_MEAN else selected_prompt_set.kinds
+    )
+    feature_namespace = "plain_mean_pool" if readout_mode == ALL_TOKEN_MEAN else None
+    features = feature_registry(
+        layers,
+        extraction_prompt_kinds,
+        feature_namespace=feature_namespace,
+    )
+    output_dir = paths.embeddings / (
+        output_name or run_name(spec.key, prompt_set_key, readout_mode)
+    )
     chunks_dir = output_dir / "chunks"
     chunks_dir.mkdir(parents=True, exist_ok=True)
     config = _manifest_config(
@@ -597,11 +790,20 @@ def extract_embeddings(
         lens_path=resolved_lens,
         model_source=model_source,
         prompt_set_key=prompt_set_key,
+        readout_mode=readout_mode,
+    )
+    config["prompt_kinds"] = list(extraction_prompt_kinds)
+    config["fingerprint"] = stable_hash(
+        {key: value for key, value in config.items() if key != "fingerprint"}
     )
     manifest_path = output_dir / "manifest.json"
+    previous_manifest = None
     if manifest_path.exists():
-        previous = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if previous.get("config", {}).get("fingerprint") != config["fingerprint"]:
+        previous_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if (
+            previous_manifest.get("config", {}).get("fingerprint")
+            != config["fingerprint"]
+        ):
             raise RuntimeError(
                 f"resume configuration differs from {manifest_path}; use a "
                 "different --output-name to preserve the existing run"
@@ -657,7 +859,25 @@ def extract_embeddings(
         atomic_json(endpoint_audit_path, endpoint_audit)
     else:
         endpoint_audit_path = None
+    token_mask_audit = None
+    if readout_mode == ALL_TOKEN_MEAN:
+        plain_prompts = [
+            prompts_for_condition(caption_table, int(condition_id), prompt_set_key)[
+                "plain"
+            ]
+            for condition_id in union_ids
+        ]
+        token_mask_audit = audit_all_token_mask(tokenizer, union_ids, plain_prompts)
+        token_mask_audit_path = output_dir / "token_mask_audit.json"
+        atomic_json(token_mask_audit_path, token_mask_audit)
+    else:
+        token_mask_audit_path = None
     semantic_checks = None
+    pool_j_linearity = (
+        dict(previous_manifest.get("pool_j_linearity", {}))
+        if previous_manifest is not None
+        else {}
+    )
     max_observed_tokens = 0
     effective_batch_size = batch_size
     completed_chunks = []
@@ -678,7 +898,7 @@ def extract_embeddings(
         arrays: dict[str, list[np.ndarray]] = {
             feature["name"]: [] for feature in features
         }
-        for prompt_kind in selected_prompt_set.kinds:
+        for prompt_kind in extraction_prompt_kinds:
             offset = 0
             while offset < len(prompt_rows):
                 current = min(effective_batch_size, len(prompt_rows) - offset)
@@ -686,7 +906,7 @@ def extract_embeddings(
                     row[prompt_kind] for row in prompt_rows[offset : offset + current]
                 ]
                 try:
-                    batch_result, n_tokens, checks = _forward_prompt_batch(
+                    batch_result, n_tokens, checks, linearity = _forward_prompt_batch(
                         prompts,
                         tokenizer=tokenizer,
                         wrapped=wrapped,
@@ -694,6 +914,7 @@ def extract_embeddings(
                         layers=layers,
                         max_length=max_length,
                         validate_semantics=semantic_checks is None,
+                        readout_mode=readout_mode,
                     )
                 except torch.OutOfMemoryError:
                     if effective_batch_size == 1:
@@ -709,14 +930,35 @@ def extract_embeddings(
                 max_observed_tokens = max(max_observed_tokens, n_tokens)
                 if checks is not None:
                     semantic_checks = checks
+                for layer, check in linearity.items():
+                    aggregate = pool_j_linearity.setdefault(
+                        layer,
+                        {
+                            "max_abs_error": 0.0,
+                            "max_tolerance": 0.0,
+                            "n_valid_tokens": 0,
+                            "n_batches": 0,
+                            "absolute_tolerance": POOL_J_ATOL,
+                            "relative_tolerance": POOL_J_RTOL,
+                        },
+                    )
+                    aggregate["max_abs_error"] = max(
+                        aggregate["max_abs_error"], check["max_abs_error"]
+                    )
+                    aggregate["max_tolerance"] = max(
+                        aggregate["max_tolerance"], check["tolerance"]
+                    )
+                    aggregate["n_valid_tokens"] += check["n_valid_tokens"]
+                    aggregate["n_batches"] += 1
                 for layer in layers:
-                    arrays[f"{prompt_kind}__l{layer:02d}__raw"].append(
+                    prefix = feature_namespace or prompt_kind
+                    arrays[f"{prefix}__l{layer:02d}__raw"].append(
                         batch_result[("raw", layer)]
                     )
-                    arrays[f"{prompt_kind}__l{layer:02d}__j"].append(
+                    arrays[f"{prefix}__l{layer:02d}__j"].append(
                         batch_result[("j", layer)]
                     )
-                arrays[f"{prompt_kind}__final"].append(batch_result[("final", None)])
+                arrays[f"{prefix}__final"].append(batch_result[("final", None)])
                 offset += current
 
         published = {"condition_ids": chunk_ids}
@@ -747,6 +989,14 @@ def extract_embeddings(
                     if endpoint_audit_path is not None
                     else None
                 ),
+                **(
+                    {
+                        "token_mask_audit": str(token_mask_audit_path.resolve()),
+                        "pool_j_linearity": pool_j_linearity,
+                    }
+                    if token_mask_audit_path is not None
+                    else {}
+                ),
                 "completed_chunks": completed_chunks,
                 "effective_batch_size": effective_batch_size,
                 "max_observed_tokens": max_observed_tokens,
@@ -766,6 +1016,14 @@ def extract_embeddings(
             if endpoint_audit_path is not None
             else None
         ),
+        **(
+            {
+                "token_mask_audit": str(token_mask_audit_path.resolve()),
+                "pool_j_linearity": pool_j_linearity,
+            }
+            if token_mask_audit_path is not None
+            else {}
+        ),
         "completed_chunks": completed_chunks,
         "effective_batch_size": effective_batch_size,
         "max_observed_tokens": max_observed_tokens,
@@ -784,12 +1042,14 @@ def preflight(
     lens_path: Path | None = None,
     max_length: int = 256,
     prompt_set_key: str = DEFAULT_PROMPT_SET,
+    readout_mode: str = DEFAULT_READOUT_MODE,
 ) -> dict:
     """Load the matched pair and run two prompts without publishing chunks."""
     import torch
 
     paths.require("captions")
     assert paths.captions is not None
+    validate_readout_mode(readout_mode, prompt_set_key)
     _configure_determinism(0)
     _model, tokenizer, wrapped, lens, resolved_lens, model_source = (
         _load_model_and_lens(
@@ -810,6 +1070,9 @@ def preflight(
     condition_id = int(union_ids[0])
     selected_prompt_set = prompt_set(prompt_set_key)
     prompt_row = prompts_for_condition(table, condition_id, prompt_set_key)
+    extraction_prompt_kinds = (
+        ("plain",) if readout_mode == ALL_TOKEN_MEAN else selected_prompt_set.kinds
+    )
     endpoint_audit = None
     if selected_prompt_set.matched_readout:
         endpoint_audit = audit_matched_prompt_endpoints(
@@ -826,8 +1089,9 @@ def preflight(
             )
     results = {}
     semantics = None
-    for kind in selected_prompt_set.kinds:
-        batch, n_tokens, checks = _forward_prompt_batch(
+    linearity = {}
+    for kind in extraction_prompt_kinds:
+        batch, n_tokens, checks, batch_linearity = _forward_prompt_batch(
             [prompt_row[kind]],
             tokenizer=tokenizer,
             wrapped=wrapped,
@@ -835,8 +1099,10 @@ def preflight(
             layers=layers,
             max_length=max_length,
             validate_semantics=semantics is None,
+            readout_mode=readout_mode,
         )
         semantics = checks or semantics
+        linearity.update(batch_linearity)
         results[kind] = {
             "n_tokens": n_tokens,
             "shapes": {
@@ -845,7 +1111,7 @@ def preflight(
             },
             "finite": all(np.isfinite(value).all() for value in batch.values()),
         }
-    return {
+    result = {
         "model": spec.model_name,
         "model_source": model_source,
         "lens": str(resolved_lens),
@@ -860,3 +1126,19 @@ def preflight(
         "hook_semantics": semantics,
         "prompts": results,
     }
+    if readout_mode == ALL_TOKEN_MEAN:
+        result.update(
+            {
+                "readout_mode": readout_mode,
+                "readout_definition": (
+                    "all-token mean-pooled causal decoder residuals"
+                ),
+                "token_mask_audit": audit_all_token_mask(
+                    tokenizer,
+                    [condition_id],
+                    [prompt_row["plain"]],
+                ),
+                "pool_j_linearity": linearity,
+            }
+        )
+    return result

@@ -96,6 +96,27 @@ Re-run the same command after interruption. Extraction validates atomic chunks;
 searchlight and projection skip complete outputs. State and logs are below
 `$JLENS_NSD_RESULTS`.
 
+### Whole-prompt pooling control
+
+The scoped control reuses only historical `plain` prompts and writes to
+`qwen4b__plain_mean_pool`; historical and matched-readout outputs are untouched.
+Its report requires the immutable historical full-run root for paired readout
+comparisons:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+jlens-nsd-orchestrate \
+  --readout-mode all_token_mean \
+  --historical-results-root /path/to/historical/jlens-results \
+  --profile qwen4b --fallback-profile qwen1.7b \
+  --batch-size 8 --chunk-size 64 --max-length 256
+```
+
+The extraction manifest links `token_mask_audit.json` and records per-layer
+tokenwise-J/pooling linearity errors. See
+[`WHOLE_PROMPT_POOLING.md`](WHOLE_PROMPT_POOLING.md) for the exact estimand and
+the separate 4-test and 9-test BH families.
+
 ## 5. Manual stages
 
 ```bash
