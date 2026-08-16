@@ -5,6 +5,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **31-layer depth sweep.** Depth and effective rank are collinear at r=0.971 — this design
+      *cannot* separate them, and the partials are unstable. The J advantage is non-monotone
+      (negative at layers 0-6, peaks ~l15, negative again at l30). The MPNet proxy disagrees with the
+      brain result in sign at l30, bounding where the proxy may be used. See [[depth-sweep]].
 - [x] **Pooling width sweep.** Steep recovery (4 tokens = 6.7x the endpoint), saturates ~32 tokens
       (97.5% of full), and punctuation is mildly *harmful* — `no_punct` beats the full mean by
       +0.018. See [[pooling-width]].
@@ -66,9 +70,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Open — extensions worth trying
 
-- [ ] **Layer sweep.** Only 4 of 31 available lens layers are used. A cheap extraction over more
-      layers would turn the 4-point layer profile into a real curve, which is what the depth claim
-      needs.
+- [ ] **Brain-side layer sweep, especially layer 15.** Model-side sweep is done and shows the
+      4-point profile misses real structure; layer 15 is the semantic peak and has never been run
+      against cortex. Needs extraction + searchlight. Highest-value remaining compute job.
 - [ ] **Test `no_punct` brain-side.** Semantically it beats the production readout (+0.018), but
       that is one number with no significance test and no fMRI. Needs extraction + searchlight
       (~1 h) run through the predeclared machinery before it could be adopted. See [[pooling-width]].

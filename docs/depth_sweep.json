@@ -1,0 +1,230 @@
+{
+  "n_conditions": 800,
+  "rows": [
+    {
+      "effective_rank": 182.0490754374146,
+      "j_advantage": -0.22407620805264847,
+      "j_vs_semantic": 0.23193553503780848,
+      "layer": 0,
+      "raw_vs_semantic": 0.45601174309045694
+    },
+    {
+      "effective_rank": 179.93024879308516,
+      "j_advantage": -0.20890306745248965,
+      "j_vs_semantic": 0.23987881036783926,
+      "layer": 1,
+      "raw_vs_semantic": 0.4487818778203289
+    },
+    {
+      "effective_rank": 197.57188695643538,
+      "j_advantage": -0.15130698316248098,
+      "j_vs_semantic": 0.2650936076148004,
+      "layer": 2,
+      "raw_vs_semantic": 0.41640059077728137
+    },
+    {
+      "effective_rank": 234.48828486264858,
+      "j_advantage": -0.12359089122291289,
+      "j_vs_semantic": 0.3337176404553951,
+      "layer": 3,
+      "raw_vs_semantic": 0.457308531678308
+    },
+    {
+      "effective_rank": 237.6528805407865,
+      "j_advantage": -0.10868238773558253,
+      "j_vs_semantic": 0.33833942107131604,
+      "layer": 4,
+      "raw_vs_semantic": 0.44702180880689857
+    },
+    {
+      "effective_rank": 248.7148706275403,
+      "j_advantage": -0.11372717851473818,
+      "j_vs_semantic": 0.3805248431024337,
+      "layer": 5,
+      "raw_vs_semantic": 0.49425202161717186
+    },
+    {
+      "effective_rank": 329.50361825259773,
+      "j_advantage": -0.11795526728149702,
+      "j_vs_semantic": 0.44336385556137586,
+      "layer": 6,
+      "raw_vs_semantic": 0.5613191228428729
+    },
+    {
+      "effective_rank": 364.59262960340527,
+      "j_advantage": 0.023497073924765688,
+      "j_vs_semantic": 0.49151503442073596,
+      "layer": 7,
+      "raw_vs_semantic": 0.4680179604959703
+    },
+    {
+      "effective_rank": 401.22663760384006,
+      "j_advantage": 0.06541257509672549,
+      "j_vs_semantic": 0.5372107742960166,
+      "layer": 8,
+      "raw_vs_semantic": 0.4717981991992911
+    },
+    {
+      "effective_rank": 432.3261420065118,
+      "j_advantage": 0.06993126454745435,
+      "j_vs_semantic": 0.54526625587755,
+      "layer": 9,
+      "raw_vs_semantic": 0.4753349913300956
+    },
+    {
+      "effective_rank": 468.6503764047192,
+      "j_advantage": 0.05014164761001255,
+      "j_vs_semantic": 0.5397775522961484,
+      "layer": 10,
+      "raw_vs_semantic": 0.4896359046861359
+    },
+    {
+      "effective_rank": 516.4794373407236,
+      "j_advantage": 0.07033533220851657,
+      "j_vs_semantic": 0.5199998865455273,
+      "layer": 11,
+      "raw_vs_semantic": 0.44966455433701075
+    },
+    {
+      "effective_rank": 569.9777806866133,
+      "j_advantage": 0.06326448484566821,
+      "j_vs_semantic": 0.49813799489895977,
+      "layer": 12,
+      "raw_vs_semantic": 0.43487351005329156
+    },
+    {
+      "effective_rank": 627.3365091233019,
+      "j_advantage": 0.07320003825607002,
+      "j_vs_semantic": 0.4952657737254176,
+      "layer": 13,
+      "raw_vs_semantic": 0.42206573546934756
+    },
+    {
+      "effective_rank": 683.085992270336,
+      "j_advantage": 0.09286509509597485,
+      "j_vs_semantic": 0.49540045595420057,
+      "layer": 14,
+      "raw_vs_semantic": 0.4025353608582257
+    },
+    {
+      "effective_rank": 742.2195093875854,
+      "j_advantage": 0.10465910583008897,
+      "j_vs_semantic": 0.4994144123526339,
+      "layer": 15,
+      "raw_vs_semantic": 0.3947553065225449
+    },
+    {
+      "effective_rank": 847.2612147385232,
+      "j_advantage": 0.08989005637406572,
+      "j_vs_semantic": 0.4973308365618031,
+      "layer": 16,
+      "raw_vs_semantic": 0.4074407801877374
+    },
+    {
+      "effective_rank": 965.227172722624,
+      "j_advantage": 0.0825030990910176,
+      "j_vs_semantic": 0.5032205764290973,
+      "layer": 17,
+      "raw_vs_semantic": 0.42071747733807974
+    },
+    {
+      "effective_rank": 1167.1367276415174,
+      "j_advantage": 0.08930572613168541,
+      "j_vs_semantic": 0.5011503823733265,
+      "layer": 18,
+      "raw_vs_semantic": 0.4118446562416411
+    },
+    {
+      "effective_rank": 1409.5519215300471,
+      "j_advantage": 0.029669896330766554,
+      "j_vs_semantic": 0.5323497419274408,
+      "layer": 19,
+      "raw_vs_semantic": 0.5026798455966742
+    },
+    {
+      "effective_rank": 1568.6438076028292,
+      "j_advantage": 0.03930560136849215,
+      "j_vs_semantic": 0.5289497995714331,
+      "layer": 20,
+      "raw_vs_semantic": 0.4896441982029409
+    },
+    {
+      "effective_rank": 1683.1191140605351,
+      "j_advantage": 0.023046744103463856,
+      "j_vs_semantic": 0.5336705726841083,
+      "layer": 21,
+      "raw_vs_semantic": 0.5106238285806445
+    },
+    {
+      "effective_rank": 1784.8788467273048,
+      "j_advantage": 0.019740920352713243,
+      "j_vs_semantic": 0.5493574318764904,
+      "layer": 22,
+      "raw_vs_semantic": 0.5296165115237772
+    },
+    {
+      "effective_rank": 1877.3685546973352,
+      "j_advantage": 0.02834796831783737,
+      "j_vs_semantic": 0.5769897931155861,
+      "layer": 23,
+      "raw_vs_semantic": 0.5486418247977487
+    },
+    {
+      "effective_rank": 1940.9374016937807,
+      "j_advantage": 0.04685212199079769,
+      "j_vs_semantic": 0.5997814098410831,
+      "layer": 24,
+      "raw_vs_semantic": 0.5529292878502854
+    },
+    {
+      "effective_rank": 1969.4421925265156,
+      "j_advantage": 0.051233124768481075,
+      "j_vs_semantic": 0.6160217829796089,
+      "layer": 25,
+      "raw_vs_semantic": 0.5647886582111278
+    },
+    {
+      "effective_rank": 1986.4524964849577,
+      "j_advantage": 0.035705658620360126,
+      "j_vs_semantic": 0.6335742752070397,
+      "layer": 26,
+      "raw_vs_semantic": 0.5978686165866796
+    },
+    {
+      "effective_rank": 2049.8635981468565,
+      "j_advantage": 0.04937002763921605,
+      "j_vs_semantic": 0.640792032127788,
+      "layer": 27,
+      "raw_vs_semantic": 0.591422004488572
+    },
+    {
+      "effective_rank": 2118.007751706253,
+      "j_advantage": 0.037151428593959035,
+      "j_vs_semantic": 0.6239166303838688,
+      "layer": 28,
+      "raw_vs_semantic": 0.5867652017899098
+    },
+    {
+      "effective_rank": 2183.6847881829945,
+      "j_advantage": 0.012565313964252534,
+      "j_vs_semantic": 0.599957129544266,
+      "layer": 29,
+      "raw_vs_semantic": 0.5873918155800135
+    },
+    {
+      "effective_rank": 2271.8655670080907,
+      "j_advantage": -0.024121366237665143,
+      "j_vs_semantic": 0.5635989669918202,
+      "layer": 30,
+      "raw_vs_semantic": 0.5877203332294854
+    }
+  ],
+  "summary": {
+    "corr_advantage_depth": 0.5847664054897355,
+    "corr_advantage_rank": 0.4079270671205965,
+    "corr_rank_depth": 0.9712483579024357,
+    "n_layers": 31,
+    "partial_advantage_depth_given_rank": 0.8675372049324683,
+    "partial_advantage_rank_given_depth": -0.8286299274494568
+  }
+}
