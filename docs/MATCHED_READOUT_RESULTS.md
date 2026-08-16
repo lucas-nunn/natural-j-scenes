@@ -1,5 +1,15 @@
 # Matched-readout control: completed results
 
+> **HISTORICAL — single-position readout.** Everything below was produced with the
+> final-token readout, where the representation is read at one prompt position. That
+> readout is no longer the project's method: 73.7% of caption prompts end in the same
+> token (a period), and its RDM correlates 0.017–0.067 with a sentence-embedding
+> reference of the same captions, against 0.41–0.58 for the pooled readout. These
+> numbers are retained as a record of what was run, not as current results, and the
+> caption-only figures in particular should be read as close to a measurement of
+> nothing rather than as a weak effect. See `WHOLE_PROMPT_POOLING.md` and
+> `../wiki/why-pooling-won.md`.
+
 ## Completion and endpoint evidence
 
 The canonical Qwen3.5-4B run completed for all eight subjects on 2026-08-15.

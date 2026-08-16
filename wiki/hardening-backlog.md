@@ -5,6 +5,11 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Superseded docs marked HISTORICAL.** `LAYER_PERFORMANCE_SUMMARY.md` and both
+      `MATCHED_READOUT_*` docs now carry a banner explaining the single-position readout and that
+      the caption-only figures are close to a measurement of nothing.
+- [x] **Between-subject coverage surfaced.** `summarize` now emits `subject_coverage`; support
+      ranges 290,914–406,399 centres and 0.889–1.000 usable. Results unchanged.
 - [x] **Layer 15 run against cortex — hypothesis refuted.** The semantic peak is not significant
       brain-side (p=0.28) and is roughly half the layers 23/30 effect. Semantic and brain layer
       profiles correlate at Spearman −0.500. Also verified end-to-end determinism to 9 decimal
@@ -67,20 +72,19 @@ Each item records why it matters, so a later iteration does not re-derive it.
 - [ ] **The 5 model-extra tests skip in any venv without `[model]`.** They now pass when the extra is
       present. Consider a CI-visible marker so a green run cannot be mistaken for full coverage.
 
-- [ ] **Between-subject measurement support is unequal and unreported.** Subjects contribute means
-      over 290k–406k centres, and subjects 6/8 lose 8–11% on top of that. The group mean weights
-      subjects equally regardless. Not a bias in the paired contrast, but worth surfacing.
 
 ## Open — documentation
 
-- [ ] **`docs/MATCHED_READOUT_*` and `docs/LAYER_PERFORMANCE_SUMMARY.md` still describe final-token
-      results** that no longer appear in the README. Either mark them explicitly as superseded
-      historical records, or remove them together with the code paths they document.
 
 ## Open — extensions worth trying
 
 
-- [ ] **Test `no_punct` brain-side.** Semantically it beats the production readout (+0.018), but
+- [ ] **Test `no_punct` brain-side.** DELIBERATELY NOT RUN overnight: needs a third readout mode,
+      which means touching ~10 `== ALL_TOKEN_MEAN` branches in a pipeline just verified
+      deterministic to 9 d.p. Prior also dropped after layer 15 failed to transfer. Worth running
+      rested — and it doubles as a test of where the semantic proxy's validity boundary sits, since
+      this is a *readout* comparison (where the proxy worked) not a *layer* one (where it failed).
+      Original note: Semantically it beats the production readout (+0.018), but
       that is one number with no significance test and no fMRI. Needs extraction + searchlight
       (~1 h) run through the predeclared machinery before it could be adopted. See [[pooling-width]].
 - [ ] **Re-read historical caption-only conclusions.** The `plain` final-token numbers

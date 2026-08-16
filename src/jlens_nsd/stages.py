@@ -723,8 +723,17 @@ def summarize(
     subject_scores = np.empty((len(subjects), n_models), dtype=np.float64)
     sample_scores = np.empty((len(subjects), N_SAMPLES, n_models), dtype=np.float64)
 
+    # Subjects contribute means over different numbers of searchlight centres,
+    # and undefined centres are dropped on top of that (none for some subjects,
+    # over a tenth for others). The group mean weights subjects equally
+    # regardless, so the support behind each subject's estimate is recorded here
+    # rather than left implicit. This is heterogeneity, not bias: the NaN pattern
+    # is identical across models, so the paired J-vs-raw contrast within a
+    # subject is averaged over the same centres either way.
+    coverage = []
     for subject_index, subject in enumerate(subjects):
         centers = _searchlight_centers(paths, subject)
+        finite_per_sample = []
         for sample_index, path in enumerate(_sample_files(paths, group, subject)):
             volumes = np.load(path, allow_pickle=False)
             if volumes.shape[0] != n_models:
@@ -735,7 +744,16 @@ def summarize(
             finite_counts = np.isfinite(flattened).sum(axis=1)
             if np.any(finite_counts == 0):
                 raise ValueError(f"a model has no finite center values in {path}")
+            finite_per_sample.append(int(finite_counts.min()))
             sample_scores[subject_index, sample_index] = np.nanmean(flattened, axis=1)
+        coverage.append(
+            {
+                "subject": int(subject),
+                "n_centers": int(len(centers)),
+                "min_finite_centers_per_sample": min(finite_per_sample),
+                "fraction_usable": min(finite_per_sample) / max(len(centers), 1),
+            }
+        )
         subject_scores[subject_index] = sample_scores[subject_index].mean(axis=0)
 
     score_rows = []
@@ -810,6 +828,7 @@ def summarize(
         "prompt_set": prompt_set_key,
         "group_name": group,
         "independent_unit": "subject",
+        "subject_coverage": coverage,
         "n_subjects": len(subjects),
         "subject_numbers": list(subjects),
         "n_sessions": N_SESSIONS,
