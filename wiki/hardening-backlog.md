@@ -5,6 +5,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Spatial localisation of the J advantage — workspace prediction fails.** No sensory->
+      association gradient: the effect is 8/8 significant in *early visual* cortex and weakest in
+      parietal. Limitation: `streams` is visual-only, so the frontoparietal test is still open.
+      See [[stream-localisation]].
 - [x] **Superseded docs marked HISTORICAL.** `LAYER_PERFORMANCE_SUMMARY.md` and both
       `MATCHED_READOUT_*` docs now carry a banner explaining the single-position readout and that
       the caption-only figures are close to a measurement of nothing.
@@ -77,6 +81,11 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 
 ## Open — extensions worth trying
+
+- [ ] **Whole-cortex localisation via `HCP_MMP1`.** `streams` covers visual cortex only, so the
+      frontoparietal/default-mode prediction of a global-workspace account is untested. HCP_MMP1
+      ships with NSD in the same voxel space; grouping its 180 parcels into networks would settle it,
+      and needs no new runs. See [[stream-localisation]].
 
 
 - [ ] **Test `no_punct` brain-side.** DELIBERATELY NOT RUN overnight: needs a third readout mode,
