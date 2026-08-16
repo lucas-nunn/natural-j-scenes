@@ -60,16 +60,6 @@ either representation is better.*
   `1e-5 + 1e-5 × max_abs`, recording the worst per-layer error in the manifest.
   A generated `token_mask_audit.json` records every condition's input token IDs,
   attention mask, valid positions, and included special tokens.
-
-  Pooling is not a cosmetic choice. **73.7% of the 6,148 caption prompts end in
-  the same token — a period** — so a single-endpoint readout reads an identical
-  token for most of the dataset. Scored against MPNet sentence embeddings of the
-  same captions, an endpoint readout's RDM correlates 0.017-0.067, while the
-  pooled readout reaches 0.41-0.58, and the two readouts correlate only
-  0.04-0.15 with each other. That 8-23x semantic gap is measured with no access
-  to fMRI data and brackets the brain-side gap, so the readout is justified
-  independently of the result it produces. See
-  [`analyze_readout_semantics.py`](scripts/analyze_readout_semantics.py).
 - **Representational comparison.** For every subject and feature, pairwise
   correlation-distance RDMs are computed without feature normalization.
   Matched NSD searchlights compare these model RDMs with local fMRI-pattern
@@ -154,6 +144,68 @@ Generators and full numbers: [`analyze_lens_geometry.py`](scripts/analyze_lens_g
 
 See [WHOLE_PROMPT_POOLING.md](docs/WHOLE_PROMPT_POOLING.md) for the exact
 estimand, the mask contract, and the predeclared inference families.
+
+## Interpretation: what this design can and cannot ask
+
+The limits above are statistical: confounded predictors, insufficient precision,
+a tested alternative that failed. Two further limitations are **structural**.
+Neither is fixed by more subjects, better correction, or a different readout, and
+both bear on how any positive result here should be read.
+
+### The captions already contain the semantics the model is being asked to supply
+
+The stimulus reaching the brain is an **image**. The input reaching the model is a
+**human-written caption of that image**. A person has therefore already performed
+the perceptual-to-semantic extraction that the model is nominally being tested
+on, and the model receives its output rather than the stimulus.
+
+What the comparison measures, then, is largely how well *caption semantics*
+predict visual cortex — a relationship established well before this project. The
+model's marginal contribution over a generic sentence embedding of the same text
+is correspondingly small:
+
+| feature | mean RSA r | vs MPNet |
+|---|---:|---:|
+| `mpnet_reference` (sentence embedding) | 0.026736 | — |
+| `plain_mean_pool__l23__j` (best) | 0.031460 | +17.7% |
+| `plain_mean_pool__l23__raw` | 0.029810 | +11.5% |
+| `plain_mean_pool__l08__j` | 0.025438 | **−4.9%** |
+
+A 4B-parameter language model with a fitted Jacobian lens beats an off-the-shelf
+sentence encoder by 18% at its best layer, and is *worse* than it at layer 8.
+That is the expected profile if the caption text — not the model, and not the
+lens — is carrying most of the signal. Any claim about J-space here has to clear
+the caption baseline first, and the margin available for clearing it is narrow.
+
+A design that avoided this would put the model on the same input the brain
+received, or would use text that is not itself a semantic summary of the
+stimulus.
+
+### Visual encoding may be the wrong paradigm for a workspace construct
+
+J-space is defined as what an activation is *disposed to make the model say* —
+verbalizable, broadcast-ready content. That is an analogue of higher-level,
+report-linked cognition: deliberation, integration, the contents available for
+explicit report. It is not a claim about sensory transduction.
+
+NSD measures **passive viewing of natural images**. The dependent variable is
+stimulus-driven visual response. Testing a construct about verbalizable content
+against a paradigm with no report, no task demand, and no deliberative component
+is plausibly a category mismatch — the experiment may simply not contain the
+phenomenon the lens is built to isolate.
+
+The spatial results are consistent with that reading. The J advantage does not
+concentrate in any cortical system: normalised for regional signal level, it is a
+near-uniform proportional gain of roughly 8% everywhere, with 94 of 180 HCP-MMP1
+parcels individually significant. If J-space corresponded to a specific
+higher-order network one would expect concentration; a flat, global gain looks
+more like a property of the representation as a whole than the signature of a
+workspace.
+
+Paradigms with an explicit report, task-driven attention, or language
+comprehension as the stimulus would put the construct and the measurement on the
+same footing. Naturalistic-listening datasets are one obvious option, and the
+`streams`/HCP-MMP1 localisation machinery here transfers unchanged.
 
 ## Image-only WikiText transfer pilot
 
