@@ -17,6 +17,7 @@ import numpy as np
 
 from .config import (
     ALL_TOKEN_MEAN,
+    ANALYSIS_LAYERS,
     DEFAULT_PROMPT_SET,
     DEFAULT_READOUT_MODE,
     N_SAMPLES,
@@ -25,6 +26,7 @@ from .config import (
     ExperimentPaths,
     group_name,
     run_name,
+    validate_analysis_layers,
     validate_subjects,
 )
 from .io_utils import atomic_json, atomic_npy
@@ -235,7 +237,7 @@ def _comparison_rows(
     index_by_feature = {feature: index for index, feature in enumerate(feature_names)}
     specifications = []
     if readout_mode == ALL_TOKEN_MEAN:
-        for layer in (8, 16, 23, 30):
+        for layer in ANALYSIS_LAYERS:
             specifications.append(
                 {
                     "comparison_type": "j_vs_raw",
@@ -248,7 +250,7 @@ def _comparison_rows(
             )
     elif prompt_set_key == "matched_readout":
         for prompt in ("integrate_readout", "minimal_readout"):
-            for layer in (8, 16, 23, 30):
+            for layer in ANALYSIS_LAYERS:
                 specifications.append(
                     {
                         "comparison_type": "j_vs_raw",
@@ -260,7 +262,7 @@ def _comparison_rows(
                     }
                 )
         for kind in ("raw", "j"):
-            for layer in (8, 16, 23, 30):
+            for layer in ANALYSIS_LAYERS:
                 specifications.append(
                     {
                         "comparison_type": "integrate_vs_minimal",
@@ -352,7 +354,7 @@ def _whole_prompt_readout_rows(
     }
     specifications = []
     for kind in ("raw", "j"):
-        for layer in (8, 16, 23, 30):
+        for layer in ANALYSIS_LAYERS:
             specifications.append((kind, layer))
     specifications.append(("final", None))
     rows = []
@@ -449,7 +451,7 @@ def _load_historical_final_token_scores(
         raise ValueError("historical subject scores have invalid shape or values")
     wanted = []
     for kind in ("raw", "j"):
-        for layer in (8, 16, 23, 30):
+        for layer in ANALYSIS_LAYERS:
             wanted.append(f"plain__l{layer:02d}__{kind}")
     wanted.append("plain__final")
     missing = sorted(set(wanted) - set(all_names))
@@ -598,7 +600,7 @@ def _plot_matched_layer_summary(summary: dict, path: Path) -> None:
     import matplotlib.pyplot as plt
 
     scores = {row["feature"]: row for row in summary["scores"]}
-    layers = np.asarray([8, 16, 23, 30])
+    layers = np.asarray(ANALYSIS_LAYERS)
     colors = {"raw": "#7A8797", "j": "#2457C5"}
     figure, axes = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True)
     for axis, prompt in zip(
@@ -641,7 +643,7 @@ def _plot_whole_prompt_summary(summary: dict, path: Path) -> None:
     import matplotlib.pyplot as plt
 
     scores = {row["feature"]: row for row in summary["scores"]}
-    layers = np.asarray([8, 16, 23, 30])
+    layers = np.asarray(ANALYSIS_LAYERS)
     colors = {"raw": "#7A8797", "j": "#2457C5"}
     figure, axis = plt.subplots(figsize=(9.2, 5.4))
     for kind in ("raw", "j"):
@@ -681,6 +683,20 @@ def _plot_whole_prompt_summary(summary: dict, path: Path) -> None:
     plt.close(figure)
 
 
+def feature_layers(feature_names: Sequence[str]) -> tuple[int, ...]:
+    """Sorted unique layer indices named by a run's features.
+
+    Feature names carry the layer as ``__lNN__``; ``mpnet_reference`` and the
+    ``__final`` control carry none and are skipped.
+    """
+    layers = {
+        int(match.group(1))
+        for name in feature_names
+        if (match := re.search(r"__l(\d{2})__", name))
+    }
+    return tuple(sorted(layers))
+
+
 def summarize(
     paths: ExperimentPaths,
     profile: str,
@@ -696,6 +712,10 @@ def summarize(
     group = manifest["group_name"]
     model_order = manifest["model_order"]
     feature_names = [item["feature"] for item in model_order]
+    # The BH families are predeclared over ANALYSIS_LAYERS. A run extracted with
+    # different --layers would produce features the report never looks for, and
+    # the families would quietly cover fewer tests than their names claim.
+    validate_analysis_layers(feature_layers(feature_names))
     n_models = len(feature_names)
     subject_scores = np.empty((len(subjects), n_models), dtype=np.float64)
     sample_scores = np.empty((len(subjects), N_SAMPLES, n_models), dtype=np.float64)

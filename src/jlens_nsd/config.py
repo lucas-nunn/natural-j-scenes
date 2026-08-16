@@ -142,6 +142,18 @@ N_SAMPLES = 8
 SAMPLE_SIZE = 100
 DEFAULT_PROMPT_SET = "historical"
 PROMPT_KINDS = PROMPT_SETS[DEFAULT_PROMPT_SET].kinds
+#: Layers the reporting and inference stages analyse.
+#:
+#: This is NOT the same thing as the layers an extraction happens to contain.
+#: ``resolve_source_layers`` picks extraction layers from the lens and model at
+#: run time and accepts an explicit ``--layers`` override, so the two can
+#: legitimately differ. The predeclared BH families are defined over exactly
+#: these four layers ("..._j_vs_raw_4", "..._vs_final_token_9"), so changing the
+#: set changes what was predeclared and is a scientific decision, not a
+#: configuration one. ``validate_analysis_layers`` enforces the match.
+ANALYSIS_LAYERS = (8, 16, 23, 30)
+
+
 DEFAULT_READOUT_MODE = "final_token"
 ALL_TOKEN_MEAN = "all_token_mean"
 READOUT_MODES = (DEFAULT_READOUT_MODE, ALL_TOKEN_MEAN)
@@ -196,3 +208,21 @@ def group_name(
 ) -> str:
     """Return a filesystem-safe grouped model name for one experiment run."""
     return f"jlens_{run_name(profile, prompt_set_key, readout_mode).replace('.', '_')}_group"
+
+
+def validate_analysis_layers(layers: Iterable[int]) -> tuple[int, ...]:
+    """Fail loudly when a run's layers differ from the predeclared analysis set.
+
+    A run extracted with different ``--layers`` produces feature names the
+    reporting stages never look for. Without this check the summary would be
+    built from whichever subset happened to match, and the BH families would
+    silently cover fewer tests than their names claim.
+    """
+    selected = tuple(int(layer) for layer in layers)
+    if selected != ANALYSIS_LAYERS:
+        raise ValueError(
+            f"run layers {selected} differ from the predeclared analysis layers "
+            f"{ANALYSIS_LAYERS}; the BH families are defined over the latter, so "
+            "reporting this run would misstate what was predeclared"
+        )
+    return selected

@@ -5,6 +5,11 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Single-source the analysis layer set.** Was hardcoded in 8 places while extraction resolves
+      layers at run time. Now `config.ANALYSIS_LAYERS` + `validate_analysis_layers`, enforced in
+      `summarize` so a `--layers` run fails loudly instead of quietly shrinking the BH families.
+- [x] **Commit `uv.lock`**; **resolve the DESIGN.md prompt contradiction**; **add layer-profile
+      interpretation guardrails to the README**.
 - [x] **Projection NaN warnings — NOT out-of-mask vertices.** They are undefined searchlight
       centres, 0% for subjects 1/4/7 but 11% for subject 8. Excluded correctly via nanmean, and the
       NaN pattern is model-invariant so the paired contrast is fair — now audited rather than
@@ -35,13 +40,11 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Open — correctness and simplification
 
+*(cleared this round: hardcoded layer set, uv.lock, DESIGN.md prompt contradiction, README guardrails)*
+
 - [ ] **`readout_mode` still defaults to `final_token`** while all documentation now says pooling is
       the method. Doc/code divergence. Changing the default is a behaviour change affecting the
       historical namespace — needs a decision, not a silent edit.
-- [ ] **`uv.lock` is untracked and not ignored** in the main worktree. For a reproducibility-focused
-      project an uncommitted lockfile is likely an oversight.
-- [ ] **`_load_historical_final_token_scores` hardcodes `(8, 16, 23, 30)`** in its `wanted` list,
-      duplicating the layer set that `resolve_source_layers` derives elsewhere. Single-source it.
 - [ ] **The 5 model-extra tests skip in any venv without `[model]`.** They now pass when the extra is
       present. Consider a CI-visible marker so a green run cannot be mistaken for full coverage.
 
@@ -54,9 +57,6 @@ Each item records why it matters, so a later iteration does not re-derive it.
 - [ ] **`docs/MATCHED_READOUT_*` and `docs/LAYER_PERFORMANCE_SUMMARY.md` still describe final-token
       results** that no longer appear in the README. Either mark them explicitly as superseded
       historical records, or remove them together with the code paths they document.
-- [ ] **`docs/DESIGN.md` "Prompt" section still presents `visualize` as the chosen primary prompt**,
-      but pooling is defined only for `plain`, so `visualize` is unreachable under the documented
-      method. Contradiction to resolve.
 
 ## Open — extensions worth trying
 

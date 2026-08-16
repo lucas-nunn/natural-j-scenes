@@ -37,13 +37,20 @@
 
 ### Prompt
 
-1. Caption text alone (**kept as the ablation**).
+1. **Chosen: caption text alone.** Deterministic, adds no instruction text, and
+   introduces nothing whose tokens could themselves drive the representation.
 2. A chat-template instruction. Templates can change across Transformers/model
    revisions and may add hidden control tokens.
-3. **Chosen primary:** deterministic plain text asking the model to reconcile
-   the captions into one coherent scene, including entities, attributes,
-   spatial relations, actions, and setting, and explicitly discouraging a word
-   list. No answer is generated.
+3. A scene-reconciliation instruction asking the model to integrate the captions
+   into one coherent description. This was the historical primary, and it is
+   **not available under the chosen readout**: all-token mean pooling is defined
+   only for the unchanged caption prompt, so extraction narrows to that prompt
+   and no pooled features exist for the instructed variant.
+
+   The exclusion is deliberate rather than incidental. Pooling averages over
+   every prompt token, so an instruction block would contribute its own tokens
+   to the representation for every stimulus alike — exactly the confound that
+   the pooling limitation above warns about, amplified by a constant prefix.
 
 ### Layer features
 

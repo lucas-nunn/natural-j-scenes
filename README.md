@@ -103,6 +103,35 @@ at layers 23 and 30. It is also small — roughly `+0.0016` against a base near
 carries both the strongest single feature (`plain_mean_pool__l23__j`) and the
 largest J−raw contrast.
 
+### What the layer profile cannot yet establish
+
+The depth pattern is the natural thing to read as evidence about *where* the
+workspace lives. It cannot currently support that reading, for two measured
+reasons.
+
+**The lens is ill-conditioned exactly where the effect is absent.** `J_l` is an
+*average* Jacobian, so the further a source layer sits from the final layer, the
+more nonlinear blocks are averaged through and the more its rank collapses. At
+layer 8 the map uses roughly 400 of 2,560 directions with a condition number near
+`2e6`; at layer 30 it is close to a mild, well-conditioned reweighting. "Early
+layer" is therefore confounded with "barely usable lens".
+
+**The early-layer nulls are partly a precision problem.** Across-subject variance
+of the J−raw difference tracks the lens's condition number monotonically over
+these four layers, so the early layers carry roughly double the per-subject noise
+and a ~7x worse effect-to-noise ratio. A null there is as consistent with "cannot
+measure it" as with "nothing to measure".
+
+A separate result cuts against the mechanistic reading directly: the J-space
+advantage appears where the lens changes representational geometry *least*. The
+warp is real and demonstrably data-aligned — the released lens alters the RDM far
+more than a random matrix with the identical singular spectrum — but its
+magnitude *anti*-correlates with brain benefit across layers.
+
+Generators and full numbers: [`analyze_lens_geometry.py`](scripts/analyze_lens_geometry.py),
+[`analyze_lens_controls.py`](scripts/analyze_lens_controls.py), and
+[`analyze_subject_consistency.py`](scripts/analyze_subject_consistency.py).
+
 See [WHOLE_PROMPT_POOLING.md](docs/WHOLE_PROMPT_POOLING.md) for the exact
 estimand, the mask contract, and the predeclared inference families.
 

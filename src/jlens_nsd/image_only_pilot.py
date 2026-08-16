@@ -24,9 +24,11 @@ from typing import Any
 import numpy as np
 from scipy.spatial.distance import pdist
 
+from .config import ANALYSIS_LAYERS
 from .io_utils import atomic_json, atomic_npy, atomic_npz, sha256_file, stable_hash
 
-PILOT_LAYERS = (8, 16, 23, 30)
+#: The pilot deliberately mirrors the main analysis layers.
+PILOT_LAYERS = ANALYSIS_LAYERS
 FINAL_BLOCK = 31
 SUBJECT = 1
 SAMPLE_ROW = 0
