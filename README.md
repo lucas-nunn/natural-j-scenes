@@ -103,52 +103,48 @@ at layers 23 and 30. It is also small — roughly `+0.0016` against a base near
 carries both the strongest single feature (`plain_mean_pool__l23__j`) and the
 largest J−raw contrast.
 
-### What the layer profile cannot yet establish
+### What J-space reads out, in words
 
-The depth pattern is the natural thing to read as evidence about *where* the
-workspace lives. It cannot currently support that reading, for two measured
-reasons.
+![Three NSD stimuli, their human captions, and the layer-23 J-space vocabulary readouts](docs/assets/pooled_layer23_jspace_readouts.png)
 
-**The lens is ill-conditioned exactly where the effect is absent.** `J_l` is an
-*average* Jacobian, so the further a source layer sits from the final layer, the
-more nonlinear blocks are averaged through and the more its rank collapses. At
-layer 8 the map uses roughly 400 of 2,560 directions with a condition number near
-`2e6`; at layer 30 it is close to a mild, well-conditioned reweighting. "Early
-layer" is therefore confounded with "barely usable lens".
+*Figure 2. Vocabulary readouts from `unembed(J_23 h_23)` for three subject-1
+conditions, using the documented pooled caption readout. Each row pairs one NSD
+stimulus with its human captions and the five highest-scoring vocabulary tokens
+of its transported representation, with raw ranks and logits retained after a
+deterministic formatting-only and duplicate-token filter; no semantic term was
+selected or removed. Rows are chosen without looking at their content: the
+subject-1 set is restricted to images whose COCO metadata carries CC BY 2.0,
+then indices floor(n/6), floor(n/2) and floor(5n/6) sample three equal spans of
+the sorted eligible set. Stimulus sources (NSD crop / COCO ID) are
+10,543 / 23,163: [“Chair as Frame” by zeevveez](https://www.flickr.com/photos/zeevveez/7990954613/),
+34,275 / 104,825: [“Coca-Cola cake” by TheSeafarer](https://www.flickr.com/photos/sheilascarborough/9270434659/),
+and 60,417 / 207,117: [“zebra crossing!” by krugergirl26](https://www.flickr.com/photos/71888644@N00/6114561350/);
+all three are licensed [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).*
 
-**The early-layer nulls are partly a precision problem.** Across-subject variance
-of the J−raw difference tracks the lens's condition number monotonically over
-these four layers, so the early layers carry roughly double the per-subject noise
-and a ~7x worse effect-to-noise ratio. A null there is as consistent with "cannot
-measure it" as with "nothing to measure".
+The readouts are recognisably about the scene — `sitting / cats / sleeping /
+sits / chair` for the first row, `cake / chocolate / pizza / dessert / cheese`
+for the second, `road / grass / crossing / street / park` for the third. That is
+what the transported representation is disposed to make the model *say* about
+each stimulus.
 
-**The obvious alternative was tested and failed.** A model-side sweep of all 31
-fitted layers places the J advantage's peak near layer 15. Layer 15 was then run
-against cortex for the first time: it is not significant even uncorrected
-(Δ = +0.00079, 6/8 subjects, p = 0.281), roughly half the layers 23/30 effect.
-Across the five shared layers, model-side and brain-side profiles correlate at
-Spearman −0.500. Semantic alignment is therefore not a usable stand-in for
-cortical alignment when comparing layers, and no layer outside the predeclared
-set is currently a better candidate. *(Exploratory: no family was predeclared
-over that layer set, so those p-values are uncorrected.)*
+It is also a useful reminder of what the caption pipeline is doing. These words
+are close paraphrases of the captions the model was given, which is exactly the
+concern raised under [Interpretation](#interpretation-what-this-design-can-and-cannot-ask):
+the semantic content visible here entered through a human description of the
+image rather than through the image itself.
 
-A separate result cuts against the mechanistic reading directly: the J-space
-advantage appears where the lens changes representational geometry *least*. The
-warp is real and demonstrably data-aligned — the released lens alters the RDM far
-more than a random matrix with the identical singular spectrum — but its
-magnitude *anti*-correlates with brain benefit across layers.
-
-Generators and full numbers: [`analyze_lens_geometry.py`](scripts/analyze_lens_geometry.py),
-[`analyze_lens_controls.py`](scripts/analyze_lens_controls.py), and
-[`analyze_subject_consistency.py`](scripts/analyze_subject_consistency.py).
-
-See [WHOLE_PROMPT_POOLING.md](docs/WHOLE_PROMPT_POOLING.md) for the exact
-estimand, the mask contract, and the predeclared inference families.
+Vocabulary unembedding is an **interpretive diagnostic only**, analogous to the
+readout role discussed by the [Tuned Lens](https://arxiv.org/abs/2303.08112).
+The brain RDMs do not use these tokens or logits — they use the full
+2,560-dimensional vectors. Top words that look like scene content and
+representational geometry are different measurements. The audited generator is
+[`make_jspace_readout_figure.py`](scripts/make_jspace_readout_figure.py); the
+figure embeds its selection rule, per-row vector hashes, and the unembedding
+adapter in PNG metadata.
 
 ## Interpretation: what this design can and cannot ask
 
-The limits above are statistical: confounded predictors, insufficient precision,
-a tested alternative that failed. Two further limitations are **structural**.
+Two limitations of this design are **structural** rather than statistical.
 Neither is fixed by more subjects, better correction, or a different readout, and
 both bear on how any positive result here should be read.
 
@@ -207,6 +203,16 @@ comprehension as the stimulus would put the construct and the measurement on the
 same footing. Naturalistic-listening datasets are one obvious option, and the
 `streams`/HCP-MMP1 localisation machinery here transfers unchanged.
 
+Generators for the figures quoted above:
+[`analyze_cortex_localisation.py`](scripts/analyze_cortex_localisation.py) for the
+normalised whole-cortex localisation,
+[`analyze_lens_geometry.py`](scripts/analyze_lens_geometry.py) and
+[`analyze_lens_controls.py`](scripts/analyze_lens_controls.py) for the lens's
+conditioning and direction controls, and
+[`analyze_subject_consistency.py`](scripts/analyze_subject_consistency.py) for
+per-subject robustness. The `wiki/` directory records the full set of checks and
+what each one settled.
+
 ## Image-only WikiText transfer pilot
 
 The isolated pilot is an **image-only, decoder-residual, out-of-distribution
@@ -217,7 +223,7 @@ description, semantic instruction, chat template, or image–caption fusion is
 present. See the [audited pilot report](docs/IMAGE_ONLY_WIKITEXT_PILOT.md).
 ![Descriptive image-only pilot scores](docs/assets/image_only_wikitext_pilot_scores.png)
 
-*Figure 2. Whole-searchlight mean RSA correlations for subject 1 and one
+*Figure 3. Whole-searchlight mean RSA correlations for subject 1 and one
 deterministic 100-image sample. Raw and J scores remain paired and separate at
 layers 8, 16, 23, and 30; block 31 is a separate final-residual raw control.
 These values are descriptive and do not support population inference.*

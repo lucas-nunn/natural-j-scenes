@@ -49,6 +49,15 @@ FEATURES = {
         "column_title": "J-space top words",
         "footer_label": "visualize prompt",
     },
+    "plain_mean_pool__l23__j": {
+        # The documented readout: all-token mean pooling over the caption prompt.
+        # Its counterpart is the matched raw feature at the same layer, so the
+        # audit records the raw/J pair rather than a cross-prompt pair.
+        "prompt_kind": "plain",
+        "column_title": "J-space top words",
+        "footer_label": "all-token mean-pooled caption prompt",
+        "counterpart": "plain_mean_pool__l23__raw",
+    },
     "plain__l23__j": {
         "prompt_kind": "plain",
         "column_title": "Caption-only top words",
