@@ -1,0 +1,57 @@
+{
+  "group": "jlens_qwen4b__plain_mean_pool_group",
+  "multiplicity_correction": "none \u2014 no predeclared family",
+  "rows": [
+    {
+      "j_mean": 0.025438119325182824,
+      "layer": 8,
+      "mean_delta": -0.0004756045697019971,
+      "n_positive": 4,
+      "raw_mean": 0.02591372389488482,
+      "uncorrected_exact_p": 0.640625
+    },
+    {
+      "j_mean": 0.02959631443174618,
+      "layer": 15,
+      "mean_delta": 0.0007873410588909084,
+      "n_positive": 6,
+      "raw_mean": 0.028808973372855273,
+      "uncorrected_exact_p": 0.28125
+    },
+    {
+      "j_mean": 0.02973812410640581,
+      "layer": 16,
+      "mean_delta": 0.0003562242210807178,
+      "n_positive": 6,
+      "raw_mean": 0.02938189988532509,
+      "uncorrected_exact_p": 0.640625
+    },
+    {
+      "j_mean": 0.031459783838773195,
+      "layer": 23,
+      "mean_delta": 0.0016493655327289578,
+      "n_positive": 7,
+      "raw_mean": 0.029810418306044237,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "j_mean": 0.029724242513401687,
+      "layer": 30,
+      "mean_delta": 0.0014593673510718505,
+      "n_positive": 7,
+      "raw_mean": 0.02826487516232984,
+      "uncorrected_exact_p": 0.0234375
+    }
+  ],
+  "status": "exploratory",
+  "subjects": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

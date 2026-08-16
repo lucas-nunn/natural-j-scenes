@@ -5,6 +5,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Layer 15 run against cortex — hypothesis refuted.** The semantic peak is not significant
+      brain-side (p=0.28) and is roughly half the layers 23/30 effect. Semantic and brain layer
+      profiles correlate at Spearman −0.500. Also verified end-to-end determinism to 9 decimal
+      places. See [[layer15-experiment]].
 - [x] **`readout_mode` default investigated — it was load-bearing.** `_load_historical_final_token_scores`
       resolved the comparator namespace via `group_name(profile)` with no explicit mode, so flipping
       the default would have silently repointed it into the pooled namespace. Now pinned to an
@@ -75,14 +79,7 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Open — extensions worth trying
 
-- [~] **IN FLIGHT (launched 2026-08-16 04:32):** brain-side layer sweep with layer 15 added.
-      Root `results/layer_sweep_exploratory_20260816`, layers 8,15,16,23,30, all 8 subjects,
-      ~75 min. `summarize` is deliberately skipped — `validate_analysis_layers` would reject this
-      layer set, correctly — and it is analysed by `scripts/analyze_exploratory_layers.py` with
-      uncorrected p-values, clearly labelled exploratory.
-- [ ] **Brain-side layer sweep, especially layer 15.** Model-side sweep is done and shows the
-      4-point profile misses real structure; layer 15 is the semantic peak and has never been run
-      against cortex. Needs extraction + searchlight. Highest-value remaining compute job.
+
 - [ ] **Test `no_punct` brain-side.** Semantically it beats the production readout (+0.018), but
       that is one number with no significance test and no fMRI. Needs extraction + searchlight
       (~1 h) run through the predeclared machinery before it could be adopted. See [[pooling-width]].
