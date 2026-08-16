@@ -1,0 +1,47 @@
+{
+  "layer": 23,
+  "n_conditions": 1200,
+  "n_punctuation_tokens": 696,
+  "rows": [
+    {
+      "j_vs_semantic": 0.05000650968373762,
+      "raw_vs_semantic": 0.039113564970529244,
+      "variant": "last_1"
+    },
+    {
+      "j_vs_semantic": 0.12608824541638242,
+      "raw_vs_semantic": 0.11640452748086749,
+      "variant": "last_2"
+    },
+    {
+      "j_vs_semantic": 0.3060841459631457,
+      "raw_vs_semantic": 0.2637025233373678,
+      "variant": "last_4"
+    },
+    {
+      "j_vs_semantic": 0.42522183376825684,
+      "raw_vs_semantic": 0.38846051167614887,
+      "variant": "last_8"
+    },
+    {
+      "j_vs_semantic": 0.4815501184879695,
+      "raw_vs_semantic": 0.4343261158904582,
+      "variant": "last_16"
+    },
+    {
+      "j_vs_semantic": 0.5617915463155099,
+      "raw_vs_semantic": 0.5440003917030061,
+      "variant": "last_32"
+    },
+    {
+      "j_vs_semantic": 0.5787977849179323,
+      "raw_vs_semantic": 0.557736287955388,
+      "variant": "all"
+    },
+    {
+      "j_vs_semantic": 0.5875465965882508,
+      "raw_vs_semantic": 0.5754796404400988,
+      "variant": "no_punct"
+    }
+  ]
+}

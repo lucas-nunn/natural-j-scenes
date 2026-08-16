@@ -5,6 +5,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Pooling width sweep.** Steep recovery (4 tokens = 6.7x the endpoint), saturates ~32 tokens
+      (97.5% of full), and punctuation is mildly *harmful* — `no_punct` beats the full mean by
+      +0.018. See [[pooling-width]].
 - [x] **Explain WHY pooling won, without fMRI.** 73.7% of prompts end in the same token ('.'); the
       endpoint RDM correlates 0.017-0.067 with an MPNet semantic reference vs 0.41-0.58 for pooled,
       and the two readouts correlate only 0.04-0.15. See [[why-pooling-won]].
@@ -66,10 +69,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 - [ ] **Layer sweep.** Only 4 of 31 available lens layers are used. A cheap extraction over more
       layers would turn the 4-point layer profile into a real curve, which is what the depth claim
       needs.
-- [ ] **Pooling variants.** Now better motivated: since 73.7% of prompts end in '.', a *last-k*
-      mean (k small) should recover much of the gain if the problem is purely the endpoint, while a
-      content-token-only pool would test whether punctuation is actively harmful. Needs re-extraction
-      (~2 min GPU each) plus a searchlight run to test brain-side.
+- [ ] **Test `no_punct` brain-side.** Semantically it beats the production readout (+0.018), but
+      that is one number with no significance test and no fMRI. Needs extraction + searchlight
+      (~1 h) run through the predeclared machinery before it could be adopted. See [[pooling-width]].
 - [ ] **Re-read historical caption-only conclusions.** The `plain` final-token numbers
       (0.003-0.006) are close to a measurement of nothing, not a weak finding. Any earlier claim
       resting on that condition needs revisiting. See [[why-pooling-won]].
