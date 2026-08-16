@@ -1,0 +1,1652 @@
+{
+  "frontal_parcels_listed": [
+    "8C",
+    "8Av",
+    "IFJp",
+    "IFJa",
+    "IFSp",
+    "IFSa",
+    "p9-46v",
+    "a9-46v",
+    "46",
+    "9-46d",
+    "a47r",
+    "p47r",
+    "9m",
+    "10d",
+    "a10p",
+    "p10p",
+    "s6-8",
+    "i6-8"
+  ],
+  "layer": 23,
+  "parcels": [
+    {
+      "mean_delta": 0.01195416304964506,
+      "n_positive": 8,
+      "name": "TPOJ2",
+      "parcel": 140,
+      "raw_alignment_level": 0.17452364513277796,
+      "relative_advantage": 0.06849595102457497,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.011396501749516678,
+      "n_positive": 8,
+      "name": "MST",
+      "parcel": 2,
+      "raw_alignment_level": 0.2144022132791839,
+      "relative_advantage": 0.05315477660054152,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.010060562642732595,
+      "n_positive": 7,
+      "name": "TPOJ3",
+      "parcel": 141,
+      "raw_alignment_level": 0.17598627781200482,
+      "relative_advantage": 0.05716674486109461,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.009971811271326281,
+      "n_positive": 8,
+      "name": "FST",
+      "parcel": 157,
+      "raw_alignment_level": 0.21608377335076134,
+      "relative_advantage": 0.04614789494229807,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.009866113855408865,
+      "n_positive": 7,
+      "name": "MT",
+      "parcel": 23,
+      "raw_alignment_level": 0.2199943996401471,
+      "relative_advantage": 0.04484711370629083,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.008995568743556143,
+      "n_positive": 8,
+      "name": "V4t",
+      "parcel": 156,
+      "raw_alignment_level": 0.2181827618412202,
+      "relative_advantage": 0.04122951175264046,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.008683303516977913,
+      "n_positive": 8,
+      "name": "FFC",
+      "parcel": 18,
+      "raw_alignment_level": 0.18236116556101745,
+      "relative_advantage": 0.047615968510973945,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.00815331729220753,
+      "n_positive": 8,
+      "name": "TPOJ1",
+      "parcel": 139,
+      "raw_alignment_level": 0.10493910431308441,
+      "relative_advantage": 0.07769570119335321,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.00777563851156091,
+      "n_positive": 7,
+      "name": "PHA3",
+      "parcel": 127,
+      "raw_alignment_level": 0.16405952043246755,
+      "relative_advantage": 0.04739522882344171,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.007646376301164318,
+      "n_positive": 8,
+      "name": "STV",
+      "parcel": 28,
+      "raw_alignment_level": 0.09480706159555465,
+      "relative_advantage": 0.08065197014314854,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.007268948553621608,
+      "n_positive": 7,
+      "name": "PGi",
+      "parcel": 150,
+      "raw_alignment_level": 0.08976793624754992,
+      "relative_advantage": 0.08097488766563911,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.007260494873112003,
+      "n_positive": 8,
+      "name": "POS1",
+      "parcel": 31,
+      "raw_alignment_level": 0.06689697515274462,
+      "relative_advantage": 0.10853248381611053,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0072478891211878015,
+      "n_positive": 7,
+      "name": "VVC",
+      "parcel": 163,
+      "raw_alignment_level": 0.1795942031674756,
+      "relative_advantage": 0.04035703265115402,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.006988631267972386,
+      "n_positive": 7,
+      "name": "PHA2",
+      "parcel": 155,
+      "raw_alignment_level": 0.15135528056830666,
+      "relative_advantage": 0.04617368645303667,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.006948046201060894,
+      "n_positive": 7,
+      "name": "PH",
+      "parcel": 138,
+      "raw_alignment_level": 0.18873327215471963,
+      "relative_advantage": 0.03681410342615704,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0069019257729631975,
+      "n_positive": 6,
+      "name": "LO3",
+      "parcel": 159,
+      "raw_alignment_level": 0.20358975168628293,
+      "relative_advantage": 0.033901145395562764,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.006469894680334688,
+      "n_positive": 7,
+      "name": "v23ab",
+      "parcel": 33,
+      "raw_alignment_level": 0.06556728322283405,
+      "relative_advantage": 0.09867565594179635,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0064186691381374165,
+      "n_positive": 8,
+      "name": "TE2p",
+      "parcel": 136,
+      "raw_alignment_level": 0.11605171607442073,
+      "relative_advantage": 0.055308696460992464,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.006229083238230346,
+      "n_positive": 8,
+      "name": "LO2",
+      "parcel": 21,
+      "raw_alignment_level": 0.1717454221910199,
+      "relative_advantage": 0.03626928251573536,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0062240699221805165,
+      "n_positive": 8,
+      "name": "V8",
+      "parcel": 7,
+      "raw_alignment_level": 0.15956358728154574,
+      "relative_advantage": 0.03900683124651935,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.006210318556180927,
+      "n_positive": 8,
+      "name": "ProS",
+      "parcel": 121,
+      "raw_alignment_level": 0.07711712330230544,
+      "relative_advantage": 0.08053099351016985,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.006125018958488005,
+      "n_positive": 8,
+      "name": "PIT",
+      "parcel": 22,
+      "raw_alignment_level": 0.13365586313365974,
+      "relative_advantage": 0.04582678840181376,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0061210685541256875,
+      "n_positive": 7,
+      "name": "PHA1",
+      "parcel": 126,
+      "raw_alignment_level": 0.11309363402079073,
+      "relative_advantage": 0.05412390013924579,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.005898777692879572,
+      "n_positive": 7,
+      "name": "VMV3",
+      "parcel": 154,
+      "raw_alignment_level": 0.1951280325784923,
+      "relative_advantage": 0.030230293489515545,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.005817525972406705,
+      "n_positive": 8,
+      "name": "PHT",
+      "parcel": 137,
+      "raw_alignment_level": 0.12219662910486909,
+      "relative_advantage": 0.04760790878620806,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.005409868966711379,
+      "n_positive": 8,
+      "name": "PCV",
+      "parcel": 27,
+      "raw_alignment_level": 0.06608251254223481,
+      "relative_advantage": 0.08186536435420508,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.004940510022822176,
+      "n_positive": 8,
+      "name": "31pd",
+      "parcel": 161,
+      "raw_alignment_level": 0.051839199358655025,
+      "relative_advantage": 0.09530452020758906,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.004905422955028925,
+      "n_positive": 6,
+      "name": "VMV2",
+      "parcel": 160,
+      "raw_alignment_level": 0.17068208020027292,
+      "relative_advantage": 0.02874011700158012,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.004781577445901897,
+      "n_positive": 7,
+      "name": "7m",
+      "parcel": 30,
+      "raw_alignment_level": 0.05967123462012308,
+      "relative_advantage": 0.08013203474575661,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.004672195166154303,
+      "n_positive": 7,
+      "name": "LO1",
+      "parcel": 20,
+      "raw_alignment_level": 0.17542587996671655,
+      "relative_advantage": 0.02663344295061114,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.004605866972734643,
+      "n_positive": 6,
+      "name": "PGp",
+      "parcel": 143,
+      "raw_alignment_level": 0.13452096391384974,
+      "relative_advantage": 0.034239027425378425,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0045958784754933125,
+      "n_positive": 8,
+      "name": "31pv",
+      "parcel": 35,
+      "raw_alignment_level": 0.04584966465396694,
+      "relative_advantage": 0.10023799541782852,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.00457492827004307,
+      "n_positive": 6,
+      "name": "VMV1",
+      "parcel": 153,
+      "raw_alignment_level": 0.1423890263122245,
+      "relative_advantage": 0.03212978126566696,
+      "uncorrected_exact_p": 0.0625
+    },
+    {
+      "mean_delta": 0.004398173914660734,
+      "n_positive": 8,
+      "name": "STSva",
+      "parcel": 176,
+      "raw_alignment_level": 0.022807000471531946,
+      "relative_advantage": 0.19284315445823766,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.004350926529384806,
+      "n_positive": 7,
+      "name": "PreS",
+      "parcel": 119,
+      "raw_alignment_level": 0.05528164160216839,
+      "relative_advantage": 0.07870472734322967,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.004339230089080822,
+      "n_positive": 8,
+      "name": "STSda",
+      "parcel": 128,
+      "raw_alignment_level": 0.022996928339485093,
+      "relative_advantage": 0.1886873770715928,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.004256641843311194,
+      "n_positive": 8,
+      "name": "TF",
+      "parcel": 135,
+      "raw_alignment_level": 0.0711992484333228,
+      "relative_advantage": 0.059784926624576455,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.004210329352057158,
+      "n_positive": 8,
+      "name": "PSL",
+      "parcel": 25,
+      "raw_alignment_level": 0.06013593810284808,
+      "relative_advantage": 0.0700135307585358,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0041675067397230646,
+      "n_positive": 8,
+      "name": "d23ab",
+      "parcel": 34,
+      "raw_alignment_level": 0.0453593094554984,
+      "relative_advantage": 0.09187764958837759,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.004131576335036224,
+      "n_positive": 6,
+      "name": "IP0",
+      "parcel": 146,
+      "raw_alignment_level": 0.1215918581287409,
+      "relative_advantage": 0.03397905417862543,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.003925284932402508,
+      "n_positive": 8,
+      "name": "V4",
+      "parcel": 6,
+      "raw_alignment_level": 0.11299069723899927,
+      "relative_advantage": 0.03473989477292718,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0037605038550269977,
+      "n_positive": 8,
+      "name": "V1",
+      "parcel": 1,
+      "raw_alignment_level": 0.04572740873733625,
+      "relative_advantage": 0.08223741425252817,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.003647416245450575,
+      "n_positive": 7,
+      "name": "H",
+      "parcel": 120,
+      "raw_alignment_level": 0.05230744315582542,
+      "relative_advantage": 0.06973034859656234,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.003642939302601744,
+      "n_positive": 8,
+      "name": "V2",
+      "parcel": 4,
+      "raw_alignment_level": 0.050923149778815846,
+      "relative_advantage": 0.07153798063208602,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.003510050412234689,
+      "n_positive": 7,
+      "name": "RSC",
+      "parcel": 14,
+      "raw_alignment_level": 0.0332453357192985,
+      "relative_advantage": 0.10558023663443257,
+      "uncorrected_exact_p": 0.046875
+    },
+    {
+      "mean_delta": 0.003485084315618607,
+      "n_positive": 7,
+      "name": "STSdp",
+      "parcel": 129,
+      "raw_alignment_level": 0.03457533114963552,
+      "relative_advantage": 0.10079684560462542,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0034801014921883116,
+      "n_positive": 7,
+      "name": "9m",
+      "parcel": 69,
+      "raw_alignment_level": 0.014128539997907455,
+      "relative_advantage": 0.24631713487053447,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0034465587381164167,
+      "n_positive": 7,
+      "name": "10r",
+      "parcel": 65,
+      "raw_alignment_level": 0.014365701938994328,
+      "relative_advantage": 0.23991579059294427,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.003286930470234557,
+      "n_positive": 7,
+      "name": "31a",
+      "parcel": 162,
+      "raw_alignment_level": 0.04219416270711107,
+      "relative_advantage": 0.07790012312960541,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0032088362219616622,
+      "n_positive": 6,
+      "name": "V3CD",
+      "parcel": 158,
+      "raw_alignment_level": 0.16245220931082444,
+      "relative_advantage": 0.019752493583033423,
+      "uncorrected_exact_p": 0.0859375
+    },
+    {
+      "mean_delta": 0.003163098754419931,
+      "n_positive": 8,
+      "name": "TE1a",
+      "parcel": 132,
+      "raw_alignment_level": 0.013658476067426789,
+      "relative_advantage": 0.23158504205043778,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.003149509746465577,
+      "n_positive": 6,
+      "name": "7Pm",
+      "parcel": 29,
+      "raw_alignment_level": 0.06691136948727726,
+      "relative_advantage": 0.04706987423212784,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0031293064667131856,
+      "n_positive": 8,
+      "name": "V3",
+      "parcel": 5,
+      "raw_alignment_level": 0.07268196570008303,
+      "relative_advantage": 0.04305478582714791,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.003111117956577375,
+      "n_positive": 6,
+      "name": "V3B",
+      "parcel": 19,
+      "raw_alignment_level": 0.13811066511810238,
+      "relative_advantage": 0.022526268727451056,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.0030668283593052854,
+      "n_positive": 6,
+      "name": "p32",
+      "parcel": 64,
+      "raw_alignment_level": 0.013006976061881989,
+      "relative_advantage": 0.2357833476985383,
+      "uncorrected_exact_p": 0.046875
+    },
+    {
+      "mean_delta": 0.003029853765233731,
+      "n_positive": 7,
+      "name": "STSvp",
+      "parcel": 130,
+      "raw_alignment_level": 0.027203956793010298,
+      "relative_advantage": 0.11137548071728347,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0028416022262988806,
+      "n_positive": 6,
+      "name": "PeEc",
+      "parcel": 122,
+      "raw_alignment_level": 0.04162011985945574,
+      "relative_advantage": 0.06827472472194941,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.002771254834518764,
+      "n_positive": 8,
+      "name": "PI",
+      "parcel": 178,
+      "raw_alignment_level": 0.022028750578413487,
+      "relative_advantage": 0.1258017255519877,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.00275302975172308,
+      "n_positive": 8,
+      "name": "A5",
+      "parcel": 125,
+      "raw_alignment_level": 0.018994543464062534,
+      "relative_advantage": 0.14493792688051607,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.002584100599509706,
+      "n_positive": 6,
+      "name": "10v",
+      "parcel": 88,
+      "raw_alignment_level": 0.009821946103795536,
+      "relative_advantage": 0.26309456111870955,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0025269385007524077,
+      "n_positive": 8,
+      "name": "IFJa",
+      "parcel": 79,
+      "raw_alignment_level": 0.03652224593272614,
+      "relative_advantage": 0.0691890226413518,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0024883597178383295,
+      "n_positive": 6,
+      "name": "V7",
+      "parcel": 16,
+      "raw_alignment_level": 0.11455434362318033,
+      "relative_advantage": 0.021722089613848604,
+      "uncorrected_exact_p": 0.0703125
+    },
+    {
+      "mean_delta": 0.002469588852000052,
+      "n_positive": 6,
+      "name": "PGs",
+      "parcel": 151,
+      "raw_alignment_level": 0.04702741399258302,
+      "relative_advantage": 0.05251381358944266,
+      "uncorrected_exact_p": 0.046875
+    },
+    {
+      "mean_delta": 0.0024654984630818498,
+      "n_positive": 6,
+      "name": "DVT",
+      "parcel": 142,
+      "raw_alignment_level": 0.0814692172933862,
+      "relative_advantage": 0.03026294525701799,
+      "uncorrected_exact_p": 0.15625
+    },
+    {
+      "mean_delta": 0.002437976258299151,
+      "n_positive": 6,
+      "name": "V6",
+      "parcel": 3,
+      "raw_alignment_level": 0.0750754618350666,
+      "relative_advantage": 0.0324736764677538,
+      "uncorrected_exact_p": 0.1640625
+    },
+    {
+      "mean_delta": 0.0024144709899868028,
+      "n_positive": 7,
+      "name": "47m",
+      "parcel": 66,
+      "raw_alignment_level": 0.03017409978550388,
+      "relative_advantage": 0.08001799580270338,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.002317221010409713,
+      "n_positive": 6,
+      "name": "45",
+      "parcel": 75,
+      "raw_alignment_level": 0.02122033819604361,
+      "relative_advantage": 0.10919811875768047,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0022973333703534397,
+      "n_positive": 7,
+      "name": "TGd",
+      "parcel": 131,
+      "raw_alignment_level": 0.01188227384873237,
+      "relative_advantage": 0.1933412240451372,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.00229043577956169,
+      "n_positive": 6,
+      "name": "POS2",
+      "parcel": 15,
+      "raw_alignment_level": 0.06359170093633153,
+      "relative_advantage": 0.03601784109934236,
+      "uncorrected_exact_p": 0.21875
+    },
+    {
+      "mean_delta": 0.0022619380720935497,
+      "n_positive": 6,
+      "name": "IFSa",
+      "parcel": 82,
+      "raw_alignment_level": 0.034528703021349194,
+      "relative_advantage": 0.06550892081567579,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.002248027399188285,
+      "n_positive": 6,
+      "name": "9p",
+      "parcel": 71,
+      "raw_alignment_level": 0.009322237707616421,
+      "relative_advantage": 0.24114675785960807,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.0022461002059861526,
+      "n_positive": 7,
+      "name": "55b",
+      "parcel": 12,
+      "raw_alignment_level": 0.03425433291040019,
+      "relative_advantage": 0.06557127274559181,
+      "uncorrected_exact_p": 0.046875
+    },
+    {
+      "mean_delta": 0.0022454724292865695,
+      "n_positive": 7,
+      "name": "8C",
+      "parcel": 73,
+      "raw_alignment_level": 0.030825448840116527,
+      "relative_advantage": 0.07284476021527676,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.0022308274199986213,
+      "n_positive": 7,
+      "name": "V3A",
+      "parcel": 13,
+      "raw_alignment_level": 0.08951933890624957,
+      "relative_advantage": 0.02492006137729511,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.002218964162405873,
+      "n_positive": 6,
+      "name": "8Ad",
+      "parcel": 68,
+      "raw_alignment_level": 0.01573631722556571,
+      "relative_advantage": 0.14100911481378087,
+      "uncorrected_exact_p": 0.1328125
+    },
+    {
+      "mean_delta": 0.0021933815033189042,
+      "n_positive": 7,
+      "name": "IFJp",
+      "parcel": 80,
+      "raw_alignment_level": 0.043692808077031714,
+      "relative_advantage": 0.05020005808397363,
+      "uncorrected_exact_p": 0.09375
+    },
+    {
+      "mean_delta": 0.0021640412561875827,
+      "n_positive": 7,
+      "name": "STGa",
+      "parcel": 123,
+      "raw_alignment_level": 0.012746343649914336,
+      "relative_advantage": 0.1697774134782665,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.002133070689399534,
+      "n_positive": 8,
+      "name": "TA2",
+      "parcel": 107,
+      "raw_alignment_level": 0.015733882009797688,
+      "relative_advantage": 0.1355717990049273,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.002131379367791493,
+      "n_positive": 7,
+      "name": "A4",
+      "parcel": 175,
+      "raw_alignment_level": 0.02055630890877056,
+      "relative_advantage": 0.10368492598795877,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0021230092774287205,
+      "n_positive": 7,
+      "name": "FEF",
+      "parcel": 10,
+      "raw_alignment_level": 0.038438885673638776,
+      "relative_advantage": 0.05523077061738736,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.002119366093241525,
+      "n_positive": 7,
+      "name": "TGv",
+      "parcel": 172,
+      "raw_alignment_level": 0.022628249963959075,
+      "relative_advantage": 0.09366018568016195,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.002106299665717665,
+      "n_positive": 7,
+      "name": "i6-8",
+      "parcel": 97,
+      "raw_alignment_level": 0.0246850808963492,
+      "relative_advantage": 0.08532682856344927,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0020981237286303105,
+      "n_positive": 6,
+      "name": "IFSp",
+      "parcel": 81,
+      "raw_alignment_level": 0.03350408920781673,
+      "relative_advantage": 0.06262291494080681,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.002059675232084246,
+      "n_positive": 8,
+      "name": "PBelt",
+      "parcel": 124,
+      "raw_alignment_level": 0.024391138711957423,
+      "relative_advantage": 0.08444358651752976,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.00201854423336984,
+      "n_positive": 7,
+      "name": "8Av",
+      "parcel": 67,
+      "raw_alignment_level": 0.018682185101324307,
+      "relative_advantage": 0.10804647435094482,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.0019750969264224105,
+      "n_positive": 6,
+      "name": "47s",
+      "parcel": 94,
+      "raw_alignment_level": 0.014944291995523256,
+      "relative_advantage": 0.13216396782223438,
+      "uncorrected_exact_p": 0.078125
+    },
+    {
+      "mean_delta": 0.0019416531420505282,
+      "n_positive": 7,
+      "name": "s32",
+      "parcel": 165,
+      "raw_alignment_level": 0.011789510637358482,
+      "relative_advantage": 0.16469327708122486,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.001921125125722866,
+      "n_positive": 5,
+      "name": "a24",
+      "parcel": 61,
+      "raw_alignment_level": 0.010843635988267077,
+      "relative_advantage": 0.17716613945742393,
+      "uncorrected_exact_p": 0.09375
+    },
+    {
+      "mean_delta": 0.0018824219010637499,
+      "n_positive": 7,
+      "name": "13l",
+      "parcel": 92,
+      "raw_alignment_level": 0.019363553856542287,
+      "relative_advantage": 0.09721469080572435,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0018608258230203207,
+      "n_positive": 6,
+      "name": "TE1m",
+      "parcel": 177,
+      "raw_alignment_level": 0.010451198173666219,
+      "relative_advantage": 0.17804904204276073,
+      "uncorrected_exact_p": 0.078125
+    },
+    {
+      "mean_delta": 0.0018478731143162209,
+      "n_positive": 5,
+      "name": "EC",
+      "parcel": 118,
+      "raw_alignment_level": 0.02165332478018552,
+      "relative_advantage": 0.08533900142703114,
+      "uncorrected_exact_p": 0.0625
+    },
+    {
+      "mean_delta": 0.0018453357317386445,
+      "n_positive": 7,
+      "name": "TE2a",
+      "parcel": 134,
+      "raw_alignment_level": 0.015846963361820933,
+      "relative_advantage": 0.11644727697070928,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0018167526595324023,
+      "n_positive": 7,
+      "name": "PEF",
+      "parcel": 11,
+      "raw_alignment_level": 0.04162091359312896,
+      "relative_advantage": 0.043649994742843014,
+      "uncorrected_exact_p": 0.078125
+    },
+    {
+      "mean_delta": 0.0017837910704158742,
+      "n_positive": 7,
+      "name": "PFop",
+      "parcel": 147,
+      "raw_alignment_level": 0.02860273454536505,
+      "relative_advantage": 0.06236435427482334,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0017718403923684335,
+      "n_positive": 7,
+      "name": "RI",
+      "parcel": 104,
+      "raw_alignment_level": 0.030192368500074604,
+      "relative_advantage": 0.0586850412998919,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.0017474684698489118,
+      "n_positive": 7,
+      "name": "5mv",
+      "parcel": 37,
+      "raw_alignment_level": 0.03561018111737497,
+      "relative_advantage": 0.04907215900107525,
+      "uncorrected_exact_p": 0.0703125
+    },
+    {
+      "mean_delta": 0.0017316569691334242,
+      "n_positive": 7,
+      "name": "Pir",
+      "parcel": 110,
+      "raw_alignment_level": 0.011096332945042756,
+      "relative_advantage": 0.15605668807072295,
+      "uncorrected_exact_p": 0.078125
+    },
+    {
+      "mean_delta": 0.0017288977367952126,
+      "n_positive": 6,
+      "name": "23c",
+      "parcel": 38,
+      "raw_alignment_level": 0.03056572971860011,
+      "relative_advantage": 0.05656327372884965,
+      "uncorrected_exact_p": 0.15625
+    },
+    {
+      "mean_delta": 0.0017280357329227897,
+      "n_positive": 7,
+      "name": "47l",
+      "parcel": 76,
+      "raw_alignment_level": 0.013574328452572365,
+      "relative_advantage": 0.1273017474831562,
+      "uncorrected_exact_p": 0.046875
+    },
+    {
+      "mean_delta": 0.0017218315528508366,
+      "n_positive": 6,
+      "name": "TE1p",
+      "parcel": 133,
+      "raw_alignment_level": 0.05036288096094097,
+      "relative_advantage": 0.034188503913948176,
+      "uncorrected_exact_p": 0.0703125
+    },
+    {
+      "mean_delta": 0.00169229361024194,
+      "n_positive": 6,
+      "name": "9a",
+      "parcel": 87,
+      "raw_alignment_level": 0.010189106278021508,
+      "relative_advantage": 0.1660885227875496,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.0016578609389623323,
+      "n_positive": 7,
+      "name": "8BL",
+      "parcel": 70,
+      "raw_alignment_level": 0.012047762382091303,
+      "relative_advantage": 0.1376073735838865,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0016516304418409261,
+      "n_positive": 6,
+      "name": "PF",
+      "parcel": 148,
+      "raw_alignment_level": 0.04174977702149266,
+      "relative_advantage": 0.03956022186635085,
+      "uncorrected_exact_p": 0.0859375
+    },
+    {
+      "mean_delta": 0.0016486664712812246,
+      "n_positive": 7,
+      "name": "6r",
+      "parcel": 78,
+      "raw_alignment_level": 0.024151055350330117,
+      "relative_advantage": 0.06826477962830263,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0016305415987437496,
+      "n_positive": 7,
+      "name": "FOP1",
+      "parcel": 113,
+      "raw_alignment_level": 0.016439858411892164,
+      "relative_advantage": 0.09918221665244138,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0016099885434060553,
+      "n_positive": 7,
+      "name": "PFcm",
+      "parcel": 105,
+      "raw_alignment_level": 0.029903811601254708,
+      "relative_advantage": 0.05383890738993631,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0015996530417275588,
+      "n_positive": 6,
+      "name": "d32",
+      "parcel": 62,
+      "raw_alignment_level": 0.00876204647334939,
+      "relative_advantage": 0.1825661444039424,
+      "uncorrected_exact_p": 0.1328125
+    },
+    {
+      "mean_delta": 0.0015618894622307401,
+      "n_positive": 8,
+      "name": "43",
+      "parcel": 99,
+      "raw_alignment_level": 0.011428464911080214,
+      "relative_advantage": 0.13666660171625017,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0015408405709341384,
+      "n_positive": 7,
+      "name": "s6-8",
+      "parcel": 98,
+      "raw_alignment_level": 0.013983857305903546,
+      "relative_advantage": 0.11018709196093154,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.0015407340051381041,
+      "n_positive": 6,
+      "name": "6a",
+      "parcel": 96,
+      "raw_alignment_level": 0.03167847596950717,
+      "relative_advantage": 0.048636620228232334,
+      "uncorrected_exact_p": 0.0625
+    },
+    {
+      "mean_delta": 0.0015266941908809923,
+      "n_positive": 7,
+      "name": "AAIC",
+      "parcel": 112,
+      "raw_alignment_level": 0.010499665758469948,
+      "relative_advantage": 0.14540407532967678,
+      "uncorrected_exact_p": 0.140625
+    },
+    {
+      "mean_delta": 0.0014952577597697192,
+      "n_positive": 7,
+      "name": "p24pr",
+      "parcel": 57,
+      "raw_alignment_level": 0.016999756553971714,
+      "relative_advantage": 0.08795759839398269,
+      "uncorrected_exact_p": 0.1640625
+    },
+    {
+      "mean_delta": 0.0014719397896771728,
+      "n_positive": 4,
+      "name": "PFm",
+      "parcel": 149,
+      "raw_alignment_level": 0.029405268249440106,
+      "relative_advantage": 0.050057009417188346,
+      "uncorrected_exact_p": 0.171875
+    },
+    {
+      "mean_delta": 0.0014639660952617001,
+      "n_positive": 5,
+      "name": "44",
+      "parcel": 74,
+      "raw_alignment_level": 0.019007804159416223,
+      "relative_advantage": 0.0770192118449658,
+      "uncorrected_exact_p": 0.125
+    },
+    {
+      "mean_delta": 0.0014456604550900577,
+      "n_positive": 8,
+      "name": "PoI2",
+      "parcel": 106,
+      "raw_alignment_level": 0.018657162676121705,
+      "relative_advantage": 0.07748554698192563,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0014438029250980885,
+      "n_positive": 5,
+      "name": "OFC",
+      "parcel": 93,
+      "raw_alignment_level": 0.005633117895726384,
+      "relative_advantage": 0.2563061792463891,
+      "uncorrected_exact_p": 0.0625
+    },
+    {
+      "mean_delta": 0.0014095687043078698,
+      "n_positive": 5,
+      "name": "pOFC",
+      "parcel": 166,
+      "raw_alignment_level": 0.007747335598744473,
+      "relative_advantage": 0.18194238346100602,
+      "uncorrected_exact_p": 0.09375
+    },
+    {
+      "mean_delta": 0.0013603337721228535,
+      "n_positive": 7,
+      "name": "9-46d",
+      "parcel": 86,
+      "raw_alignment_level": 0.01084595415649714,
+      "relative_advantage": 0.12542315341688604,
+      "uncorrected_exact_p": 0.03125
+    },
+    {
+      "mean_delta": 0.0013328187786838214,
+      "n_positive": 8,
+      "name": "6v",
+      "parcel": 56,
+      "raw_alignment_level": 0.02098805197432306,
+      "relative_advantage": 0.06350369154385561,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.0013159899833512477,
+      "n_positive": 5,
+      "name": "5m",
+      "parcel": 36,
+      "raw_alignment_level": 0.026310915656648018,
+      "relative_advantage": 0.05001688274648604,
+      "uncorrected_exact_p": 0.0703125
+    },
+    {
+      "mean_delta": 0.0013145086151269145,
+      "n_positive": 5,
+      "name": "FOP2",
+      "parcel": 115,
+      "raw_alignment_level": 0.023283493033659227,
+      "relative_advantage": 0.05645667568979562,
+      "uncorrected_exact_p": 0.1015625
+    },
+    {
+      "mean_delta": 0.0012893994840806023,
+      "n_positive": 4,
+      "name": "10d",
+      "parcel": 72,
+      "raw_alignment_level": 0.010973309894829924,
+      "relative_advantage": 0.11750324163250898,
+      "uncorrected_exact_p": 0.1875
+    },
+    {
+      "mean_delta": 0.0012805170330938782,
+      "n_positive": 5,
+      "name": "p47r",
+      "parcel": 171,
+      "raw_alignment_level": 0.019561951498317347,
+      "relative_advantage": 0.06545957509423454,
+      "uncorrected_exact_p": 0.15625
+    },
+    {
+      "mean_delta": 0.0012732484818993822,
+      "n_positive": 7,
+      "name": "24dv",
+      "parcel": 41,
+      "raw_alignment_level": 0.011168452877099031,
+      "relative_advantage": 0.11400401612565197,
+      "uncorrected_exact_p": 0.0390625
+    },
+    {
+      "mean_delta": 0.0012611285895101196,
+      "n_positive": 8,
+      "name": "11l",
+      "parcel": 91,
+      "raw_alignment_level": 0.014882110904527965,
+      "relative_advantage": 0.08474124387330122,
+      "uncorrected_exact_p": 0.0078125
+    },
+    {
+      "mean_delta": 0.001259652710457853,
+      "n_positive": 7,
+      "name": "PoI1",
+      "parcel": 167,
+      "raw_alignment_level": 0.018310752149949382,
+      "relative_advantage": 0.06879306213870276,
+      "uncorrected_exact_p": 0.015625
+    },
+    {
+      "mean_delta": 0.0011867698895677776,
+      "n_positive": 5,
+      "name": "p32pr",
+      "parcel": 60,
+      "raw_alignment_level": 0.0102225872816596,
+      "relative_advantage": 0.116092908465254,
+      "uncorrected_exact_p": 0.171875
+    },
+    {
+      "mean_delta": 0.0011801862667245738,
+      "n_positive": 6,
+      "name": "46",
+      "parcel": 84,
+      "raw_alignment_level": 0.016649876738982966,
+      "relative_advantage": 0.0708825828098391,
+      "uncorrected_exact_p": 0.1015625
+    },
+    {
+      "mean_delta": 0.0011712603538188025,
+      "n_positive": 6,
+      "name": "LBelt",
+      "parcel": 174,
+      "raw_alignment_level": 0.018742533861663017,
+      "relative_advantage": 0.06249210285352938,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.0011706190695524848,
+      "n_positive": 4,
+      "name": "p24",
+      "parcel": 180,
+      "raw_alignment_level": 0.009941178906724498,
+      "relative_advantage": 0.11775455210454412,
+      "uncorrected_exact_p": 0.3203125
+    },
+    {
+      "mean_delta": 0.0011648344335981227,
+      "n_positive": 6,
+      "name": "33pr",
+      "parcel": 58,
+      "raw_alignment_level": 0.012574868335051052,
+      "relative_advantage": 0.09263193876561521,
+      "uncorrected_exact_p": 0.2109375
+    },
+    {
+      "mean_delta": 0.0011633840283960786,
+      "n_positive": 5,
+      "name": "10pp",
+      "parcel": 90,
+      "raw_alignment_level": 0.004495222560727383,
+      "relative_advantage": 0.2588045447538038,
+      "uncorrected_exact_p": 0.09375
+    },
+    {
+      "mean_delta": 0.0011370739589642244,
+      "n_positive": 6,
+      "name": "IP2",
+      "parcel": 144,
+      "raw_alignment_level": 0.03542038217436847,
+      "relative_advantage": 0.032102249867508606,
+      "uncorrected_exact_p": 0.2578125
+    },
+    {
+      "mean_delta": 0.0011110081864549447,
+      "n_positive": 5,
+      "name": "a24pr",
+      "parcel": 59,
+      "raw_alignment_level": 0.011777092449120202,
+      "relative_advantage": 0.09433637302710837,
+      "uncorrected_exact_p": 0.2578125
+    },
+    {
+      "mean_delta": 0.0010932676487607415,
+      "n_positive": 6,
+      "name": "a9-46v",
+      "parcel": 85,
+      "raw_alignment_level": 0.01729169291568043,
+      "relative_advantage": 0.06322502106021938,
+      "uncorrected_exact_p": 0.1875
+    },
+    {
+      "mean_delta": 0.0010883425706949318,
+      "n_positive": 6,
+      "name": "FOP3",
+      "parcel": 114,
+      "raw_alignment_level": 0.016204605480168565,
+      "relative_advantage": 0.06716254659990714,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.001075769751953112,
+      "n_positive": 7,
+      "name": "SFL",
+      "parcel": 26,
+      "raw_alignment_level": 0.009426302887721734,
+      "relative_advantage": 0.11412425049001555,
+      "uncorrected_exact_p": 0.0859375
+    },
+    {
+      "mean_delta": 0.0010676233480599246,
+      "n_positive": 6,
+      "name": "8BM",
+      "parcel": 63,
+      "raw_alignment_level": 0.011567166712159786,
+      "relative_advantage": 0.0922977402009434,
+      "uncorrected_exact_p": 0.125
+    },
+    {
+      "mean_delta": 0.0010351876766698607,
+      "n_positive": 6,
+      "name": "a47r",
+      "parcel": 77,
+      "raw_alignment_level": 0.011611841993559361,
+      "relative_advantage": 0.08914930785693082,
+      "uncorrected_exact_p": 0.0546875
+    },
+    {
+      "mean_delta": 0.0010233513621312868,
+      "n_positive": 6,
+      "name": "FOP5",
+      "parcel": 169,
+      "raw_alignment_level": 0.01789874052362001,
+      "relative_advantage": 0.05717449005871808,
+      "uncorrected_exact_p": 0.265625
+    },
+    {
+      "mean_delta": 0.001003001304724034,
+      "n_positive": 7,
+      "name": "SCEF",
+      "parcel": 43,
+      "raw_alignment_level": 0.010263213513198347,
+      "relative_advantage": 0.097727802645262,
+      "uncorrected_exact_p": 0.0234375
+    },
+    {
+      "mean_delta": 0.0009404433948469776,
+      "n_positive": 6,
+      "name": "MBelt",
+      "parcel": 173,
+      "raw_alignment_level": 0.012008668524701532,
+      "relative_advantage": 0.07831371087581517,
+      "uncorrected_exact_p": 0.0859375
+    },
+    {
+      "mean_delta": 0.0009253791460901955,
+      "n_positive": 7,
+      "name": "MI",
+      "parcel": 109,
+      "raw_alignment_level": 0.013189254100823077,
+      "relative_advantage": 0.07016159814772598,
+      "uncorrected_exact_p": 0.1015625
+    },
+    {
+      "mean_delta": 0.0009235486641158098,
+      "n_positive": 4,
+      "name": "23d",
+      "parcel": 32,
+      "raw_alignment_level": 0.024624005893375656,
+      "relative_advantage": 0.03750602839013544,
+      "uncorrected_exact_p": 0.6484375
+    },
+    {
+      "mean_delta": 0.0009214190048047755,
+      "n_positive": 6,
+      "name": "OP4",
+      "parcel": 100,
+      "raw_alignment_level": 0.010728118089537539,
+      "relative_advantage": 0.08588822355557195,
+      "uncorrected_exact_p": 0.046875
+    },
+    {
+      "mean_delta": 0.0009073541677750836,
+      "n_positive": 5,
+      "name": "Ig",
+      "parcel": 168,
+      "raw_alignment_level": 0.015563218813989354,
+      "relative_advantage": 0.058301189401737875,
+      "uncorrected_exact_p": 0.1171875
+    },
+    {
+      "mean_delta": 0.0008988757358230813,
+      "n_positive": 6,
+      "name": "PFt",
+      "parcel": 116,
+      "raw_alignment_level": 0.04053276300672505,
+      "relative_advantage": 0.022176522623783213,
+      "uncorrected_exact_p": 0.4296875
+    },
+    {
+      "mean_delta": 0.0008767700361507944,
+      "n_positive": 7,
+      "name": "p9-46v",
+      "parcel": 83,
+      "raw_alignment_level": 0.026282822612218537,
+      "relative_advantage": 0.033359051616594464,
+      "uncorrected_exact_p": 0.078125
+    },
+    {
+      "mean_delta": 0.0008470447329915142,
+      "n_positive": 7,
+      "name": "FOP4",
+      "parcel": 108,
+      "raw_alignment_level": 0.012142059374056824,
+      "relative_advantage": 0.06976120828410225,
+      "uncorrected_exact_p": 0.09375
+    },
+    {
+      "mean_delta": 0.0008375342136089154,
+      "n_positive": 6,
+      "name": "25",
+      "parcel": 164,
+      "raw_alignment_level": 0.0069256144847492825,
+      "relative_advantage": 0.12093283786633344,
+      "uncorrected_exact_p": 0.2109375
+    },
+    {
+      "mean_delta": 0.0008276344721832953,
+      "n_positive": 7,
+      "name": "a10p",
+      "parcel": 89,
+      "raw_alignment_level": 0.005026676099178449,
+      "relative_advantage": 0.16464845871381337,
+      "uncorrected_exact_p": 0.1015625
+    },
+    {
+      "mean_delta": 0.000827259203939874,
+      "n_positive": 6,
+      "name": "24dd",
+      "parcel": 40,
+      "raw_alignment_level": 0.012915367458773573,
+      "relative_advantage": 0.06405231648116262,
+      "uncorrected_exact_p": 0.15625
+    },
+    {
+      "mean_delta": 0.0008212488211842251,
+      "n_positive": 6,
+      "name": "52",
+      "parcel": 103,
+      "raw_alignment_level": 0.013705879816507591,
+      "relative_advantage": 0.059919452977772306,
+      "uncorrected_exact_p": 0.171875
+    },
+    {
+      "mean_delta": 0.0008069455424078993,
+      "n_positive": 5,
+      "name": "6d",
+      "parcel": 54,
+      "raw_alignment_level": 0.017110712588377174,
+      "relative_advantage": 0.04716025345174898,
+      "uncorrected_exact_p": 0.1640625
+    },
+    {
+      "mean_delta": 0.0007819370543540778,
+      "n_positive": 5,
+      "name": "p10p",
+      "parcel": 170,
+      "raw_alignment_level": 0.007839690763270575,
+      "relative_advantage": 0.09974080330023986,
+      "uncorrected_exact_p": 0.203125
+    },
+    {
+      "mean_delta": 0.0007717484721653789,
+      "n_positive": 5,
+      "name": "AVI",
+      "parcel": 111,
+      "raw_alignment_level": 0.012986552799029414,
+      "relative_advantage": 0.059426738111984394,
+      "uncorrected_exact_p": 0.296875
+    },
+    {
+      "mean_delta": 0.0007676563536861612,
+      "n_positive": 5,
+      "name": "7Am",
+      "parcel": 45,
+      "raw_alignment_level": 0.051886284184530826,
+      "relative_advantage": 0.014794976471162052,
+      "uncorrected_exact_p": 0.5703125
+    },
+    {
+      "mean_delta": 0.0007661244248266873,
+      "n_positive": 5,
+      "name": "A1",
+      "parcel": 24,
+      "raw_alignment_level": 0.008672717527128691,
+      "relative_advantage": 0.08833729709634978,
+      "uncorrected_exact_p": 0.15625
+    },
+    {
+      "mean_delta": 0.0007126957725977841,
+      "n_positive": 6,
+      "name": "AIP",
+      "parcel": 117,
+      "raw_alignment_level": 0.03739518493323807,
+      "relative_advantage": 0.019058490387737506,
+      "uncorrected_exact_p": 0.375
+    },
+    {
+      "mean_delta": 0.0006527837805964699,
+      "n_positive": 6,
+      "name": "a32pr",
+      "parcel": 179,
+      "raw_alignment_level": 0.00818734246734111,
+      "relative_advantage": 0.07973085078587966,
+      "uncorrected_exact_p": 0.46875
+    },
+    {
+      "mean_delta": 0.0005975644216114233,
+      "n_positive": 5,
+      "name": "OP2-3",
+      "parcel": 102,
+      "raw_alignment_level": 0.010131203310016752,
+      "relative_advantage": 0.058982571302325905,
+      "uncorrected_exact_p": 0.2578125
+    },
+    {
+      "mean_delta": 0.0005795429282068917,
+      "n_positive": 6,
+      "name": "OP1",
+      "parcel": 101,
+      "raw_alignment_level": 0.009652957897325804,
+      "relative_advantage": 0.060037859314339775,
+      "uncorrected_exact_p": 0.1796875
+    },
+    {
+      "mean_delta": 0.0005721599979127317,
+      "n_positive": 6,
+      "name": "IPS1",
+      "parcel": 17,
+      "raw_alignment_level": 0.1016959591954574,
+      "relative_advantage": 0.005626182224340425,
+      "uncorrected_exact_p": 0.7578125
+    },
+    {
+      "mean_delta": 0.0005644242683578637,
+      "n_positive": 6,
+      "name": "4",
+      "parcel": 8,
+      "raw_alignment_level": 0.009625917736669036,
+      "relative_advantage": 0.05863589153767044,
+      "uncorrected_exact_p": 0.203125
+    },
+    {
+      "mean_delta": 0.0005437375591278222,
+      "n_positive": 6,
+      "name": "6ma",
+      "parcel": 44,
+      "raw_alignment_level": 0.014813307463693587,
+      "relative_advantage": 0.03670601993919901,
+      "uncorrected_exact_p": 0.1640625
+    },
+    {
+      "mean_delta": 0.00035870021312962733,
+      "n_positive": 5,
+      "name": "1",
+      "parcel": 51,
+      "raw_alignment_level": 0.011616255815243188,
+      "relative_advantage": 0.030879159243284784,
+      "uncorrected_exact_p": 0.5546875
+    },
+    {
+      "mean_delta": 0.00025838838504473516,
+      "n_positive": 4,
+      "name": "6mp",
+      "parcel": 55,
+      "raw_alignment_level": 0.010059495268603785,
+      "relative_advantage": 0.025686018845416523,
+      "uncorrected_exact_p": 0.609375
+    },
+    {
+      "mean_delta": 0.0002462085576077268,
+      "n_positive": 4,
+      "name": "3a",
+      "parcel": 53,
+      "raw_alignment_level": 0.007254824415230432,
+      "relative_advantage": 0.033937217982953294,
+      "uncorrected_exact_p": 0.5703125
+    },
+    {
+      "mean_delta": 0.00024294431959091567,
+      "n_positive": 5,
+      "name": "3b",
+      "parcel": 9,
+      "raw_alignment_level": 0.00842939213504254,
+      "relative_advantage": 0.02882109595791033,
+      "uncorrected_exact_p": 0.6640625
+    },
+    {
+      "mean_delta": 0.0001146704396322549,
+      "n_positive": 5,
+      "name": "LIPd",
+      "parcel": 95,
+      "raw_alignment_level": 0.05158283763074642,
+      "relative_advantage": 0.0022230347320773324,
+      "uncorrected_exact_p": 0.8984375
+    },
+    {
+      "mean_delta": 7.80212752569984e-05,
+      "n_positive": 6,
+      "name": "LIPv",
+      "parcel": 48,
+      "raw_alignment_level": 0.05770027613967879,
+      "relative_advantage": 0.0013521820080744026,
+      "uncorrected_exact_p": 0.953125
+    },
+    {
+      "mean_delta": -2.6006596824654145e-06,
+      "n_positive": 5,
+      "name": "2",
+      "parcel": 52,
+      "raw_alignment_level": 0.026048027514535388,
+      "relative_advantage": -9.984094500108263e-05,
+      "uncorrected_exact_p": 0.9921875
+    },
+    {
+      "mean_delta": -5.8796137161340456e-05,
+      "n_positive": 5,
+      "name": "7PL",
+      "parcel": 46,
+      "raw_alignment_level": 0.061226136195819,
+      "relative_advantage": -0.0009603110830527227,
+      "uncorrected_exact_p": 0.953125
+    },
+    {
+      "mean_delta": -0.00018127372209604054,
+      "n_positive": 6,
+      "name": "MIP",
+      "parcel": 50,
+      "raw_alignment_level": 0.07109919184323166,
+      "relative_advantage": -0.002549589065593536,
+      "uncorrected_exact_p": 0.8984375
+    },
+    {
+      "mean_delta": -0.00022386077331206216,
+      "n_positive": 5,
+      "name": "V6A",
+      "parcel": 152,
+      "raw_alignment_level": 0.08184802949895341,
+      "relative_advantage": -0.002735078348036768,
+      "uncorrected_exact_p": 0.8984375
+    },
+    {
+      "mean_delta": -0.00035320092134452863,
+      "n_positive": 6,
+      "name": "IP1",
+      "parcel": 145,
+      "raw_alignment_level": 0.060421914930088735,
+      "relative_advantage": -0.005845576422945222,
+      "uncorrected_exact_p": 0.859375
+    },
+    {
+      "mean_delta": -0.0004909160278717131,
+      "n_positive": 3,
+      "name": "7PC",
+      "parcel": 47,
+      "raw_alignment_level": 0.03328627388739501,
+      "relative_advantage": -0.014748302244115562,
+      "uncorrected_exact_p": 0.5390625
+    },
+    {
+      "mean_delta": -0.0005448185550814991,
+      "n_positive": 2,
+      "name": "5L",
+      "parcel": 39,
+      "raw_alignment_level": 0.02284519360558803,
+      "relative_advantage": -0.023848279182376208,
+      "uncorrected_exact_p": 0.25
+    },
+    {
+      "mean_delta": -0.0007450665396488429,
+      "n_positive": 4,
+      "name": "VIP",
+      "parcel": 49,
+      "raw_alignment_level": 0.04903088091720509,
+      "relative_advantage": -0.015195862805463011,
+      "uncorrected_exact_p": 0.5625
+    },
+    {
+      "mean_delta": -0.0014678314694806884,
+      "n_positive": 2,
+      "name": "7AL",
+      "parcel": 42,
+      "raw_alignment_level": 0.02741835018892228,
+      "relative_advantage": -0.05353463864042885,
+      "uncorrected_exact_p": 0.21875
+    }
+  ],
+  "primary": {
+    "inside_streams_mean": 0.004602190964863794,
+    "outside_minus_inside_mean": -0.0027799596258256285,
+    "outside_minus_inside_p": 0.0078125,
+    "outside_streams_mean": 0.0018222313390381655
+  },
+  "status": "exploratory"
+}
