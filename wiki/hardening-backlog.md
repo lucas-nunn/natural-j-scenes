@@ -70,6 +70,11 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Open — extensions worth trying
 
+- [~] **IN FLIGHT (launched 2026-08-16 04:32):** brain-side layer sweep with layer 15 added.
+      Root `results/layer_sweep_exploratory_20260816`, layers 8,15,16,23,30, all 8 subjects,
+      ~75 min. `summarize` is deliberately skipped — `validate_analysis_layers` would reject this
+      layer set, correctly — and it is analysed by `scripts/analyze_exploratory_layers.py` with
+      uncorrected p-values, clearly labelled exploratory.
 - [ ] **Brain-side layer sweep, especially layer 15.** Model-side sweep is done and shows the
       4-point profile misses real structure; layer 15 is the semantic peak and has never been run
       against cortex. Needs extraction + searchlight. Highest-value remaining compute job.
