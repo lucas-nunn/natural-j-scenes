@@ -5,6 +5,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **Explain WHY pooling won, without fMRI.** 73.7% of prompts end in the same token ('.'); the
+      endpoint RDM correlates 0.017-0.067 with an MPNet semantic reference vs 0.41-0.58 for pooled,
+      and the two readouts correlate only 0.04-0.15. See [[why-pooling-won]].
 - [x] **Single-source the analysis layer set.** Was hardcoded in 8 places while extraction resolves
       layers at run time. Now `config.ANALYSIS_LAYERS` + `validate_analysis_layers`, enforced in
       `summarize` so a `--layers` run fails loudly instead of quietly shrinking the BH families.
@@ -63,6 +66,10 @@ Each item records why it matters, so a later iteration does not re-derive it.
 - [ ] **Layer sweep.** Only 4 of 31 available lens layers are used. A cheap extraction over more
       layers would turn the 4-point layer profile into a real curve, which is what the depth claim
       needs.
-- [ ] **Pooling variants.** Mean is one choice; last-k mean, or attention-mask-weighted variants,
-      are one-line changes and would show whether the gain is about pooling per se or about
-      averaging away endpoint noise.
+- [ ] **Pooling variants.** Now better motivated: since 73.7% of prompts end in '.', a *last-k*
+      mean (k small) should recover much of the gain if the problem is purely the endpoint, while a
+      content-token-only pool would test whether punctuation is actively harmful. Needs re-extraction
+      (~2 min GPU each) plus a searchlight run to test brain-side.
+- [ ] **Re-read historical caption-only conclusions.** The `plain` final-token numbers
+      (0.003-0.006) are close to a measurement of nothing, not a weak finding. Any earlier claim
+      resting on that condition needs revisiting. See [[why-pooling-won]].

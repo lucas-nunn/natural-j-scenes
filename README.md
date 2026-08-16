@@ -60,6 +60,16 @@ either representation is better.*
   `1e-5 + 1e-5 × max_abs`, recording the worst per-layer error in the manifest.
   A generated `token_mask_audit.json` records every condition's input token IDs,
   attention mask, valid positions, and included special tokens.
+
+  Pooling is not a cosmetic choice. **73.7% of the 6,148 caption prompts end in
+  the same token — a period** — so a single-endpoint readout reads an identical
+  token for most of the dataset. Scored against MPNet sentence embeddings of the
+  same captions, an endpoint readout's RDM correlates 0.017-0.067, while the
+  pooled readout reaches 0.41-0.58, and the two readouts correlate only
+  0.04-0.15 with each other. That 8-23x semantic gap is measured with no access
+  to fMRI data and brackets the brain-side gap, so the readout is justified
+  independently of the result it produces. See
+  [`analyze_readout_semantics.py`](scripts/analyze_readout_semantics.py).
 - **Representational comparison.** For every subject and feature, pairwise
   correlation-distance RDMs are computed without feature normalization.
   Matched NSD searchlights compare these model RDMs with local fMRI-pattern

@@ -1,0 +1,87 @@
+{
+  "n_samples": 64,
+  "rows": [
+    {
+      "final_token_vs_semantic": 0.025284925706542533,
+      "final_token_vs_semantic_std": 0.03431939223132217,
+      "kind": "raw",
+      "layer": 8,
+      "pooled_vs_final_token": 0.09053501833389146,
+      "pooled_vs_semantic": 0.4644002687740065,
+      "pooled_vs_semantic_std": 0.03423963564014874,
+      "ratio": 18.366685121556117
+    },
+    {
+      "final_token_vs_semantic": 0.027932498557444514,
+      "final_token_vs_semantic_std": 0.03616370282710281,
+      "kind": "j",
+      "layer": 8,
+      "pooled_vs_final_token": 0.042531777186306644,
+      "pooled_vs_semantic": 0.5174422574702777,
+      "pooled_vs_semantic_std": 0.033216034519652334,
+      "ratio": 18.524739432318704
+    },
+    {
+      "final_token_vs_semantic": 0.01739223711404692,
+      "final_token_vs_semantic_std": 0.03228170113258323,
+      "kind": "raw",
+      "layer": 16,
+      "pooled_vs_final_token": 0.09524584162738875,
+      "pooled_vs_semantic": 0.4071532759785773,
+      "pooled_vs_semantic_std": 0.03526293774906773,
+      "ratio": 23.41005779237785
+    },
+    {
+      "final_token_vs_semantic": 0.03924838576664561,
+      "final_token_vs_semantic_std": 0.03577355761745843,
+      "kind": "j",
+      "layer": 16,
+      "pooled_vs_final_token": 0.07117197472697653,
+      "pooled_vs_semantic": 0.4876542358585713,
+      "pooled_vs_semantic_std": 0.03335733932641312,
+      "ratio": 12.424822736862561
+    },
+    {
+      "final_token_vs_semantic": 0.023918566216650724,
+      "final_token_vs_semantic_std": 0.0363880769816458,
+      "kind": "raw",
+      "layer": 23,
+      "pooled_vs_final_token": 0.0702853267311829,
+      "pooled_vs_semantic": 0.5352551250534916,
+      "pooled_vs_semantic_std": 0.03517680173837836,
+      "ratio": 22.378227867223828
+    },
+    {
+      "final_token_vs_semantic": 0.033867094899363535,
+      "final_token_vs_semantic_std": 0.03776287695811442,
+      "kind": "j",
+      "layer": 23,
+      "pooled_vs_final_token": 0.092506104556334,
+      "pooled_vs_semantic": 0.5601872113887848,
+      "pooled_vs_semantic_std": 0.03001380373719738,
+      "ratio": 16.540751813918128
+    },
+    {
+      "final_token_vs_semantic": 0.05354088165153893,
+      "final_token_vs_semantic_std": 0.03713141852312664,
+      "kind": "raw",
+      "layer": 30,
+      "pooled_vs_final_token": 0.11269506883165592,
+      "pooled_vs_semantic": 0.5758306470109482,
+      "pooled_vs_semantic_std": 0.03404645411803177,
+      "ratio": 10.754971327492084
+    },
+    {
+      "final_token_vs_semantic": 0.06678354030244449,
+      "final_token_vs_semantic_std": 0.03737216018522256,
+      "kind": "j",
+      "layer": 30,
+      "pooled_vs_final_token": 0.14800492417041083,
+      "pooled_vs_semantic": 0.5522127939183609,
+      "pooled_vs_semantic_std": 0.035423138889051374,
+      "ratio": 8.268696020269955
+    }
+  ],
+  "sample_size": 100,
+  "seed": 0
+}
