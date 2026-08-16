@@ -132,6 +132,16 @@ these four layers, so the early layers carry roughly double the per-subject nois
 and a ~7x worse effect-to-noise ratio. A null there is as consistent with "cannot
 measure it" as with "nothing to measure".
 
+**The obvious alternative was tested and failed.** A model-side sweep of all 31
+fitted layers places the J advantage's peak near layer 15. Layer 15 was then run
+against cortex for the first time: it is not significant even uncorrected
+(Δ = +0.00079, 6/8 subjects, p = 0.281), roughly half the layers 23/30 effect.
+Across the five shared layers, model-side and brain-side profiles correlate at
+Spearman −0.500. Semantic alignment is therefore not a usable stand-in for
+cortical alignment when comparing layers, and no layer outside the predeclared
+set is currently a better candidate. *(Exploratory: no family was predeclared
+over that layer set, so those p-values are uncorrected.)*
+
 A separate result cuts against the mechanistic reading directly: the J-space
 advantage appears where the lens changes representational geometry *least*. The
 warp is real and demonstrably data-aligned — the released lens alters the RDM far
