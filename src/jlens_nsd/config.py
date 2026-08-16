@@ -154,7 +154,14 @@ PROMPT_KINDS = PROMPT_SETS[DEFAULT_PROMPT_SET].kinds
 ANALYSIS_LAYERS = (8, 16, 23, 30)
 
 
-DEFAULT_READOUT_MODE = "final_token"
+#: The single-position readout. This is a *named identity*, not merely the
+#: current default: the historical comparator is by definition a final-token run,
+#: and its filesystem namespace is derived through ``group_name``. Sites that mean
+#: "the historical run" must pass this explicitly rather than relying on
+#: ``DEFAULT_READOUT_MODE``, so that changing the default cannot silently
+#: repoint them into a different namespace.
+FINAL_TOKEN = "final_token"
+DEFAULT_READOUT_MODE = FINAL_TOKEN
 ALL_TOKEN_MEAN = "all_token_mean"
 READOUT_MODES = (DEFAULT_READOUT_MODE, ALL_TOKEN_MEAN)
 

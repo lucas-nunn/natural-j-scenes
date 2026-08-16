@@ -61,3 +61,44 @@ class AnalysisLayerValidationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HistoricalNamespaceStabilityTests(unittest.TestCase):
+    """The historical comparator's namespace must not follow the default.
+
+    ``_load_historical_final_token_scores`` resolves the comparator's group
+    manifest through ``group_name``. If that call inherited
+    ``DEFAULT_READOUT_MODE``, flipping the default to pooled — which the
+    documentation now describes as the method — would silently repoint the
+    lookup at the pooled namespace and either fail to find the comparator or
+    find the wrong one.
+    """
+
+    def test_final_token_namespace_is_the_historical_one(self) -> None:
+        from jlens_nsd.config import DEFAULT_PROMPT_SET, FINAL_TOKEN, group_name
+
+        self.assertEqual(
+            group_name("qwen4b", DEFAULT_PROMPT_SET, FINAL_TOKEN),
+            "jlens_qwen4b_group",
+        )
+
+    def test_pooled_namespace_is_distinct(self) -> None:
+        from jlens_nsd.config import ALL_TOKEN_MEAN, DEFAULT_PROMPT_SET, group_name
+
+        self.assertEqual(
+            group_name("qwen4b", DEFAULT_PROMPT_SET, ALL_TOKEN_MEAN),
+            "jlens_qwen4b__plain_mean_pool_group",
+        )
+
+    def test_namespace_survives_a_changed_default(self) -> None:
+        from unittest.mock import patch
+
+        import jlens_nsd.config as config
+
+        with patch.object(config, "DEFAULT_READOUT_MODE", config.ALL_TOKEN_MEAN):
+            self.assertEqual(
+                config.group_name(
+                    "qwen4b", config.DEFAULT_PROMPT_SET, config.FINAL_TOKEN
+                ),
+                "jlens_qwen4b_group",
+            )

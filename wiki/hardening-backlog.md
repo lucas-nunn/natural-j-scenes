@@ -5,6 +5,11 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 ## Done
 
+- [x] **`readout_mode` default investigated — it was load-bearing.** `_load_historical_final_token_scores`
+      resolved the comparator namespace via `group_name(profile)` with no explicit mode, so flipping
+      the default would have silently repointed it into the pooled namespace. Now pinned to an
+      explicit `config.FINAL_TOKEN`, with a test that survives a patched default. Flipping the
+      default is now safe, and remains a deliberate decision rather than a silent edit.
 - [x] **31-layer depth sweep.** Depth and effective rank are collinear at r=0.971 — this design
       *cannot* separate them, and the partials are unstable. The J advantage is non-monotone
       (negative at layers 0-6, peaks ~l15, negative again at l30). The MPNet proxy disagrees with the
@@ -52,9 +57,9 @@ Each item records why it matters, so a later iteration does not re-derive it.
 
 *(cleared this round: hardcoded layer set, uv.lock, DESIGN.md prompt contradiction, README guardrails)*
 
-- [ ] **`readout_mode` still defaults to `final_token`** while all documentation now says pooling is
-      the method. Doc/code divergence. Changing the default is a behaviour change affecting the
-      historical namespace — needs a decision, not a silent edit.
+- [ ] **Decide whether to flip `DEFAULT_READOUT_MODE` to pooled.** Now *safe* to do (the historical
+      namespace no longer follows it), but still a user-visible behaviour change: a bare
+      `jlens-nsd extract` would switch readout. A decision for Lucas, not a silent edit.
 - [ ] **The 5 model-extra tests skip in any venv without `[model]`.** They now pass when the extra is
       present. Consider a CI-visible marker so a green run cannot be mistaken for full coverage.
 

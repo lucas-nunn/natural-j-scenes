@@ -20,6 +20,7 @@ from .config import (
     ANALYSIS_LAYERS,
     DEFAULT_PROMPT_SET,
     DEFAULT_READOUT_MODE,
+    FINAL_TOKEN,
     N_SAMPLES,
     N_SESSIONS,
     N_SUBJECTS,
@@ -429,7 +430,9 @@ def _load_historical_final_token_scores(
         results_root
         / "searchlight"
         / "serialised_models_correlation"
-        / group_name(profile)
+        # Explicitly final-token: the comparator IS a final-token run, so this
+        # must not follow DEFAULT_READOUT_MODE. See config.FINAL_TOKEN.
+        / group_name(profile, DEFAULT_PROMPT_SET, FINAL_TOKEN)
         / "group_manifest.json"
     )
     for path in (summary_path, scores_path, manifest_path):
